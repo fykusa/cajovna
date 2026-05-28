@@ -7,8 +7,8 @@ export interface UserUpdatePayload { username?: string; password?: string; role?
 
 export const getUsers = (): Promise<User[]> => apiFetch<User[]>('/users')
 export const createUser = (data: UserCreatePayload): Promise<{ id: number }> =>
-  apiFetch('/users', { method: 'POST', body: JSON.stringify(data) })
+  apiFetch<{ id: number }>('/users', { method: 'POST', body: JSON.stringify(data) })
 export const updateUser = (id: number, data: UserUpdatePayload): Promise<void> =>
-  apiFetch(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+  apiFetch<void>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) })
 export const deleteUser = (id: number): Promise<void> =>
-  apiFetch(`/users/${id}`, { method: 'DELETE' })
+  apiFetch<void>(`/users/${id}`, { method: 'DELETE' })

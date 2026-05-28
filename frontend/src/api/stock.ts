@@ -9,4 +9,4 @@ export interface StockUpdatePayload {
 }
 
 export const updateStock = (teaId: number, data: StockUpdatePayload): Promise<void> =>
-  apiFetch(`/stock/${teaId}`, { method: 'PUT', body: JSON.stringify(data) })
+  apiFetch<void>(`/stock/${teaId}`, { method: 'PUT', body: JSON.stringify(data) })

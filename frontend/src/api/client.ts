@@ -29,5 +29,7 @@ export async function apiFetch<T>(
     throw new ApiError(res.status, body.error ?? body.message ?? res.statusText)
   }
 
+  const ct = res.headers?.get('content-type')
+  if (ct !== null && ct !== undefined && !ct.includes('application/json')) return undefined as T
   return res.json() as Promise<T>
 }
