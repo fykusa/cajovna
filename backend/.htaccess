@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Předat Authorization header do PHP
+RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Routování API požadavků
+RewriteRule ^api/auth(/.*)?$    api/auth.php    [QSA,L]
+RewriteRule ^api/users(/.*)?$   api/users.php   [QSA,L]
+RewriteRule ^api/products(/.*)?$ api/products.php [QSA,L]
+RewriteRule ^api/bags(/.*)?$    api/bags.php    [QSA,L]
+RewriteRule ^api/sales(/.*)?$   api/sales.php   [QSA,L]
+RewriteRule ^api/stock(/.*)?$   api/stock.php   [QSA,L]

@@ -1,0 +1,42 @@
+# Cajovna – .gitignore
+
+# Lokální env proměnné
+.env
+
+# phpMyAdmin témata (lokální, nepatří do repozitáře)
+phpMyAdmin_themes/
+
+# DB credentials – NIKDY do gitu!
+backend/config.php
+
+# Node
+node_modules/
+frontend/dist/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hermes
+.hermes/
+
+# Lokální skripty / temp
+*.log
+src/~$*
+
+# Jednorázové skripty (smazat po použití)
+backend/seed.php
+backend/db_reset.php
+backend/setup_admin.php
+backend/caje.csv
+backend/pytliky.csv
+
+# Zdrojová data s interními poznámkami
+_srcfiles_/__notes__.txt
+_srcfiles_/old/

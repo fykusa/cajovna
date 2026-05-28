@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  php:
+    build: ./backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./_srcfiles_:/var/www/srcfiles:ro
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-cajovna}
+      DB_USER: ${DB_USER:-cajovna}
+      DB_PASS: ${DB_PASS:-cajovna}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-cajovna}
+      MYSQL_USER: ${DB_USER:-cajovna}
+      MYSQL_PASSWORD: ${DB_PASS:-cajovna}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASS:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root}
+      PMA_THEME: darkwolf
+    depends_on:
+      - mysql
+    volumes:
+      - ./phpMyAdmin_themes/boodark:/var/www/html/themes/boodark:ro
+
+volumes:
+  mysql_data:
