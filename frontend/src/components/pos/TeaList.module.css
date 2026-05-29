@@ -1,0 +1,8 @@
+.list { list-style: none; overflow-y: auto; height: 100%; }
+.item { display: flex; align-items: baseline; gap: 8px; padding: 10px 16px;
+        cursor: pointer; border-left: 3px solid transparent; }
+.item:hover { background: #333; }
+.active { background: #2a2a3a; border-left-color: #d4a84b; }
+.name { flex: 1; }
+.note { font-size: 0.8rem; color: #aaa; font-style: italic; }
+.price { font-weight: 600; color: #d4a84b; white-space: nowrap; }
