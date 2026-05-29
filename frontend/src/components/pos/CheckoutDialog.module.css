@@ -1,0 +1,16 @@
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+           display: flex; align-items: center; justify-content: center; z-index: 100; }
+.dialog { background: #2a2a2a; border-radius: 8px; padding: 32px;
+          min-width: 380px; max-width: 480px; width: 100%; }
+.title { font-size: 1.4rem; color: #d4a84b; margin-bottom: 20px; }
+.error { color: #f87171; background: #3f1515; padding: 8px; border-radius: 4px; margin-bottom: 12px; }
+.list { list-style: none; margin-bottom: 16px; }
+.row { display: flex; justify-content: space-between; padding: 6px 0;
+       border-bottom: 1px solid #333; }
+.total { font-size: 1.2rem; text-align: right; margin-bottom: 24px; color: #6abf69; }
+.actions { display: flex; gap: 12px; justify-content: flex-end; }
+.cancelBtn { padding: 10px 20px; background: #444; border: none; border-radius: 4px;
+             color: #eee; cursor: pointer; }
+.payBtn { padding: 10px 24px; background: #6abf69; border: none; border-radius: 4px;
+          color: #111; font-weight: 700; cursor: pointer; }
+.payBtn:disabled, .cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
