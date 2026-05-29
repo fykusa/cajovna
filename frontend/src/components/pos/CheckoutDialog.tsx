@@ -65,7 +65,8 @@ export default function CheckoutDialog({ items, onSuccess, onCancel }: Props) {
           {items.map((item) => (
             <li key={item.localId} className={styles.row}>
               <span>{item.tea.name}</span>
-              <span>×{item.quantity}</span>
+              <span className={styles.qty}>×{item.quantity}</span>
+              <span>{item.unitPrice} Kč</span>
             </li>
           ))}
         </ul>
