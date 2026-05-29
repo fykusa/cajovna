@@ -1,0 +1,4 @@
+.list { list-style: none; overflow-y: auto; height: 100%; }
+.item { padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent; }
+.item:hover { background: #333; }
+.active { background: #2a3a2a; border-left-color: #6abf69; color: #6abf69; font-weight: 600; }
