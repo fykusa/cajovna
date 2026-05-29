@@ -2,6 +2,7 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
+import { ApiError } from '../api/client'
 import { useAuthStore } from '../store/authStore'
 import styles from './Login.module.css'
 
@@ -21,8 +22,12 @@ export default function Login() {
       const { user, token } = await login(username, password)
       setAuth(user, token)
       navigate(user.role === 'admin' ? '/admin' : '/pos', { replace: true })
-    } catch (err: any) {
-      setError(err.message ?? 'Chyba přihlášení')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
+      } else {
+        setError('Chyba přihlášení')
+      }
     } finally {
       setLoading(false)
     }

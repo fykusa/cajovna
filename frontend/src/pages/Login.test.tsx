@@ -2,19 +2,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import * as authApi from '../api/auth'
+import type { User } from '../types'
 import Login from './Login'
+
+interface AuthState {
+  user: User | null
+  token: string | null
+  setAuth: (user: User, token: string) => void
+  logout: () => void
+}
+
+const mockSetAuth = vi.fn()
 
 vi.mock('../api/auth', () => ({
   login: vi.fn(),
 }))
 
 vi.mock('../store/authStore', () => ({
-  useAuthStore: (selector: any) =>
+  useAuthStore: (selector: (state: AuthState) => unknown) =>
     selector({ user: null, token: null, setAuth: mockSetAuth, logout: vi.fn() }),
 }))
 
-const mockSetAuth = vi.fn()
-const mockLogin = vi.mocked((await import('../api/auth')).login)
+const mockLogin = vi.mocked(authApi.login)
 
 beforeEach(() => {
   vi.clearAllMocks()
