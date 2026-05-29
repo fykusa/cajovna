@@ -1,0 +1,48 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import POS from './POS'
+
+vi.mock('../api/products', () => ({
+  getCategories: vi.fn().mockResolvedValue([
+    { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
+  ]),
+  getProducts: vi.fn().mockResolvedValue([
+    { id: 10, category_id: 1, name: 'Show Mee', note: null, flag: 'active', origin: null,
+      std_weight_g: 30, std_price_moc: 130, pkg1_weight_g: null, pkg1_price_moc: null,
+      pkg2_weight_g: null, pkg2_price_moc: null,
+      stock_std_pcs: 5, stock_pkg1_pcs: 0, stock_pkg2_pcs: 0, stock_kg: 0 },
+  ]),
+}))
+vi.mock('../api/bags', () => ({
+  getBags: vi.fn().mockResolvedValue([
+    { id: 1, surface_type: 'papír', volume_ml: 100, dimensions: null, price_per_piece: 2.91 },
+  ]),
+}))
+vi.mock('../store/authStore', () => ({
+  useAuthStore: (s: any) => s({ user: { id: 1, username: 'terka', role: 'prodavacka' }, token: 'tok', logout: vi.fn() }),
+}))
+
+describe('POS', () => {
+  it('zobrazí kategorie po načtení', async () => {
+    render(<POS />)
+    expect(await screen.findByText('Bílé')).toBeInTheDocument()
+  })
+
+  it('Enter na kategorii přejde na výběr čaje', async () => {
+    render(<POS />)
+    await screen.findByText('Bílé')
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    })
+    expect(await screen.findByText('Show Mee')).toBeInTheDocument()
+  })
+
+  it('psaní písmene otevře search mód', async () => {
+    render(<POS />)
+    await screen.findByText('Bílé')
+    const user = userEvent.setup()
+    await user.keyboard('s')
+    expect(screen.getByText(/hledám/i)).toBeInTheDocument()
+  })
+})

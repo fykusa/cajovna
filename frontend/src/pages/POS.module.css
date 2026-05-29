@@ -1,0 +1,12 @@
+.layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.header { display: flex; align-items: center; gap: 16px; padding: 8px 16px;
+          background: #222; border-bottom: 1px solid #333; }
+.username { font-weight: 600; color: #d4a84b; }
+.step { flex: 1; text-align: center; color: #666; font-size: 0.85rem; }
+.logoutBtn { padding: 4px 12px; background: none; border: 1px solid #555;
+             border-radius: 4px; color: #aaa; cursor: pointer; }
+.main { display: flex; flex: 1; overflow: hidden; }
+.panel { flex: 1; overflow-y: auto; border-right: 1px solid #333; }
+.cartPanel { width: 320px; overflow: hidden; display: flex; flex-direction: column; }
+.loading { display: flex; align-items: center; justify-content: center; height: 100vh; color: #aaa; }
+.error { display: flex; align-items: center; justify-content: center; height: 100vh; color: #f87171; }
