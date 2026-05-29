@@ -1,5 +1,5 @@
 // frontend/src/router/ProtectedRoute.test.tsx
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
@@ -15,6 +15,11 @@ const mockState: AuthState = { user: null, token: null }
 vi.mock('../store/authStore', () => ({
   useAuthStore: (selector: (state: AuthState) => unknown) => selector(mockState),
 }))
+
+beforeEach(() => {
+  mockState.user = null
+  mockState.token = null
+})
 
 function renderWithRoute(initialPath: string) {
   return render(
