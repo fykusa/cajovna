@@ -1,0 +1,19 @@
+/* frontend/src/components/pos/Cart.module.css */
+.cart { display: flex; flex-direction: column; height: 100%; background: #222; }
+.title { padding: 12px 16px; border-bottom: 1px solid #333; font-size: 1rem; color: #aaa; }
+.empty { padding: 16px; color: #555; font-style: italic; }
+.list { flex: 1; overflow-y: auto; list-style: none; }
+.item { border-bottom: 1px solid #2a2a2a; padding: 8px 12px; }
+.itemMain { display: flex; align-items: center; gap: 8px; }
+.name { flex: 1; font-size: 0.95rem; }
+.qty { color: #aaa; font-size: 0.85rem; }
+.price { font-weight: 600; color: #d4a84b; white-space: nowrap; }
+.remove { background: none; border: none; color: #888; cursor: pointer;
+          font-size: 1.2rem; padding: 0 4px; }
+.remove:hover { color: #f87171; }
+.bag { font-size: 0.8rem; color: #888; margin-top: 2px; }
+.footer { padding: 12px 16px; border-top: 1px solid #333;
+          display: flex; justify-content: space-between; align-items: center; }
+.total { font-size: 1.3rem; color: #6abf69; }
+.checkoutBtn { padding: 8px 16px; background: #6abf69; color: #111;
+               border: none; border-radius: 4px; font-weight: 700; cursor: pointer; }
