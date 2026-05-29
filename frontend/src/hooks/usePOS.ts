@@ -301,8 +301,12 @@ export function usePOS(): { state: POSState } & POSActions {
   const removeFromCart = useCallback((localId: string) => dispatch({ type: 'REMOVE_FROM_CART', localId }), [])
   const clearCart = useCallback(() => dispatch({ type: 'CLEAR_CART' }), [])
   const loadTeasForCategory = useCallback(async (categoryId: number) => {
-    const teas = await getProducts({ category_id: categoryId })
-    dispatch({ type: 'LOAD_TEAS', teas })
+    try {
+      const teas = await getProducts({ category_id: categoryId })
+      dispatch({ type: 'LOAD_TEAS', teas })
+    } catch (e) {
+      dispatch({ type: 'SET_ERROR', message: (e as Error).message })
+    }
   }, [])
 
   return { state, moveUp, moveDown, confirm, setQuantity, startSearch, appendSearch, removeFromCart, clearCart, loadTeasForCategory }
