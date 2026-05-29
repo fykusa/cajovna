@@ -45,6 +45,7 @@ export default function QuantitySelector({ tea, quantity, onChange }: Props) {
           min={1}
           value={raw}
           onChange={handleChange}
+          onBlur={() => { if (parseInt(raw, 10) < 1 || isNaN(parseInt(raw, 10))) setRaw(String(quantity)) }}
           className={styles.input}
           autoFocus
         />

@@ -12,14 +12,14 @@ interface Props {
   onToggleWantBag: () => void
 }
 
-export default function BagSelector({ step, wantBag, materials, materialIndex, volumes, volumeIndex }: Props) {
+export default function BagSelector({ step, wantBag, materials, materialIndex, volumes, volumeIndex, onToggleWantBag }: Props) {
   if (step === 'bag_yn') {
     return (
       <div className={styles.container}>
         <p className={styles.title}>Chce pytlík?</p>
         <ul className={styles.list}>
-          <li className={`${styles.item} ${wantBag ? styles.active : ''}`}>Ano</li>
-          <li className={`${styles.item} ${!wantBag ? styles.active : ''}`}>Ne</li>
+          <li className={`${styles.item} ${wantBag ? styles.active : ''}`} onClick={onToggleWantBag}>Ano</li>
+          <li className={`${styles.item} ${!wantBag ? styles.active : ''}`} onClick={onToggleWantBag}>Ne</li>
         </ul>
       </div>
     )
