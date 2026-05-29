@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import * as authApi from '../api/auth'
+import { ApiError } from '../api/client'
 import type { User } from '../types'
 import Login from './Login'
 
@@ -81,7 +82,6 @@ describe('Login', () => {
 
   it('zobrazí chybovou zprávu při neúspěšném přihlášení', async () => {
     const user = userEvent.setup()
-    const { ApiError } = await import('../api/client')
     mockLogin.mockRejectedValueOnce(new ApiError(401, 'Invalid credentials'))
     renderLogin()
     await user.type(screen.getByPlaceholderText('Uživatelské jméno'), 'x')
@@ -92,7 +92,7 @@ describe('Login', () => {
 
   it('deaktivuje tlačítko během načítání', async () => {
     const user = userEvent.setup()
-    let resolve: (v: any) => void = () => {}
+    let resolve: (v: { token: string; user: User }) => void = () => {}
     mockLogin.mockReturnValueOnce(new Promise((r) => { resolve = r }))
     renderLogin()
     await user.type(screen.getByPlaceholderText('Uživatelské jméno'), 'terka')
