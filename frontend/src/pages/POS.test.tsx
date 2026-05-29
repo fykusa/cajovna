@@ -20,7 +20,8 @@ vi.mock('../api/bags', () => ({
   ]),
 }))
 vi.mock('../store/authStore', () => ({
-  useAuthStore: (s: any) => s({ user: { id: 1, username: 'terka', role: 'prodavacka' }, token: 'tok', logout: vi.fn() }),
+  useAuthStore: (s: (state: { user: { id: number; username: string; role: string } | null; token: string | null; logout: () => void }) => unknown) =>
+    s({ user: { id: 1, username: 'terka', role: 'prodavacka' }, token: 'tok', logout: vi.fn() }),
 }))
 
 describe('POS', () => {

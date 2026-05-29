@@ -12,7 +12,7 @@ import styles from './POS.module.css'
 
 export default function POS() {
   const { state, moveUp, moveDown, confirm, setQuantity,
-          startSearch, appendSearch, removeFromCart, clearCart } = usePOS()
+          startSearch, appendSearch, cancelSearch, removeFromCart, clearCart } = usePOS()
   const logout = useAuthStore((s) => s.logout)
   const user = useAuthStore((s) => s.user)
   const [showCheckout, setShowCheckout] = useState(false)
@@ -27,7 +27,7 @@ export default function POS() {
         confirm()
         break
       case 'Escape':
-        if (state.step === 'search') startSearch('')
+        if (state.step === 'search') cancelSearch()
         break
       case 'Backspace':
         if (state.step === 'search' && state.searchQuery.length > 0) {
@@ -43,7 +43,7 @@ export default function POS() {
           }
         }
     }
-  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch])
+  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch, cancelSearch])
 
   useEffect(() => {
     document.addEventListener('keydown', handleKey)
