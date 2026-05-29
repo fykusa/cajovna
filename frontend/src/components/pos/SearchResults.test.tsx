@@ -11,7 +11,7 @@ const TEA: Tea = { id: 1, category_id: 1, name: 'Bancha', note: null, flag: 'act
 describe('SearchResults', () => {
   it('zobrazí search query a výsledky', () => {
     render(<SearchResults query="ban" results={[TEA]} activeIndex={0} onSelect={vi.fn()} />)
-    expect(screen.getByText(/ban/i)).toBeInTheDocument()
+    expect(screen.getByText(/hledám/i)).toBeInTheDocument()
     expect(screen.getByText('Bancha')).toBeInTheDocument()
   })
 

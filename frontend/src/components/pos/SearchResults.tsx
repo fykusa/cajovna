@@ -11,7 +11,7 @@ interface Props {
 export default function SearchResults({ query, results, activeIndex, onSelect }: Props) {
   return (
     <div className={styles.container}>
-      <p className={styles.query} data-query={query} />
+      <p className={styles.query}>Hledám: <strong>{query}</strong></p>
       {results.length === 0 ? (
         <p className={styles.empty}>Nic nenalezeno</p>
       ) : (
@@ -25,7 +25,9 @@ export default function SearchResults({ query, results, activeIndex, onSelect }:
             >
               <span className={styles.name}>{tea.name}</span>
               <span className={styles.price}>
-                {tea.std_price_moc ?? tea.pkg1_price_moc ?? '—'} Kč
+                {(tea.std_price_moc ?? tea.pkg1_price_moc) != null
+                  ? `${tea.std_price_moc ?? tea.pkg1_price_moc} Kč`
+                  : '—'}
               </span>
             </li>
           ))}
