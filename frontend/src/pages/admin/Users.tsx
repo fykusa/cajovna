@@ -12,12 +12,18 @@ export default function Users() {
   const [form, setForm] = useState<NewUserForm>({ username: '', password: '', role: 'prodavacka' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
   async function load() {
     setLoading(true)
-    const data = await getUsers()
-    setUsers(data)
-    setLoading(false)
+    try {
+      const data = await getUsers()
+      setUsers(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Chyba načítání')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -39,8 +45,13 @@ export default function Users() {
   }
 
   async function handleDelete(id: number) {
-    await deleteUser(id)
-    await load()
+    try {
+      await deleteUser(id)
+      setConfirmDeleteId(null)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Chyba mazání')
+    }
   }
 
   return (
@@ -101,7 +112,14 @@ export default function Users() {
                 <td>{u.username}</td>
                 <td><span className={styles.role}>{u.role}</span></td>
                 <td>
-                  <button onClick={() => handleDelete(u.id)} className={styles.deleteBtn}>Smazat</button>
+                  {confirmDeleteId === u.id ? (
+                    <>
+                      <button onClick={() => handleDelete(u.id)} className={styles.deleteBtn}>Potvrdit</button>
+                      <button onClick={() => setConfirmDeleteId(null)} className={styles.cancelBtn} style={{ marginLeft: 4 }}>Zrušit</button>
+                    </>
+                  ) : (
+                    <button onClick={() => setConfirmDeleteId(u.id)} className={styles.deleteBtn}>Smazat</button>
+                  )}
                 </td>
               </tr>
             ))}

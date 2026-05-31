@@ -43,15 +43,16 @@ describe('Users', () => {
     expect(screen.getByPlaceholderText(/uživatelské jméno/i)).toBeInTheDocument()
   })
 
-  it('zavolá createUser a obnoví seznam po odeslání formuláře', async () => {
+  it('zavolá createUser a zobrazí nového uživatele po odeslání formuláře', async () => {
     vi.mocked(usersApi.createUser).mockResolvedValueOnce({ id: 3 })
+    const user = userEvent.setup()
+    render(<Users />)
+    await screen.findByText('terka')
+    // Nastav refresh mock AŽ po initial load (jinak ho spotřebuje initial load)
     vi.mocked(usersApi.getUsers).mockResolvedValueOnce([
       ...USERS,
       { id: 3, username: 'nova', role: 'prodavacka' as const },
     ])
-    const user = userEvent.setup()
-    render(<Users />)
-    await screen.findByText('terka')
     await user.click(screen.getByRole('button', { name: /přidat/i }))
     await user.type(screen.getByPlaceholderText(/uživatelské jméno/i), 'nova')
     await user.type(screen.getByPlaceholderText(/heslo/i), 'heslo123')
@@ -59,17 +60,20 @@ describe('Users', () => {
     await waitFor(() => expect(vi.mocked(usersApi.createUser)).toHaveBeenCalledWith({
       username: 'nova', password: 'heslo123', role: 'prodavacka',
     }))
+    expect(await screen.findByText('nova')).toBeInTheDocument()
   })
 
-  it('zavolá deleteUser po kliknutí na Smazat', async () => {
+  it('vyžádá potvrzení a zavolá deleteUser', async () => {
     vi.mocked(usersApi.deleteUser).mockResolvedValueOnce(undefined)
     const user = userEvent.setup()
     render(<Users />)
     await screen.findByText('terka')
-    // Nastav refresh mock až po initial load
+    // Nastav refresh mock AŽ po initial load
     vi.mocked(usersApi.getUsers).mockResolvedValueOnce([USERS[1]])
     const deleteButtons = screen.getAllByRole('button', { name: /smazat/i })
     await user.click(deleteButtons[0])
+    // Po prvním kliku se zobrazí "Potvrdit"
+    await user.click(screen.getAllByRole('button', { name: /potvrdit/i })[0])
     await waitFor(() => expect(vi.mocked(usersApi.deleteUser)).toHaveBeenCalledWith(1))
   })
 })
