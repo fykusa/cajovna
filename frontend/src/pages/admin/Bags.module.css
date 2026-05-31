@@ -1,0 +1,10 @@
+.title { font-size: 1.4rem; color: #d4a84b; margin-bottom: 20px; }
+.loading { color: #aaa; font-style: italic; }
+.group { margin-bottom: 28px; }
+.material { font-size: 1rem; color: #6abf69; margin-bottom: 8px;
+            text-transform: capitalize; border-bottom: 1px solid #333; padding-bottom: 4px; }
+.table { width: 100%; border-collapse: collapse; max-width: 500px; }
+.table th { text-align: left; padding: 8px 12px; color: #888; font-size: 0.85rem; }
+.table td { padding: 8px 12px; border-bottom: 1px solid #2a2a2a; }
+.dim { color: #888; font-size: 0.9rem; }
+.price { font-weight: 600; color: #d4a84b; }
