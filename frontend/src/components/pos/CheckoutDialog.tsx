@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CartItem, SalePayload } from '../../types'
+import type { CartItem, SalePayload } from '../../types'
 import { createSale } from '../../api/sales'
 import styles from './CheckoutDialog.module.css'
 

@@ -1,4 +1,4 @@
-import { Category } from '../../types'
+import type { Category } from '../../types'
 import styles from './CategoryList.module.css'
 
 interface Props {

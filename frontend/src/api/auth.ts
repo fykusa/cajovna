@@ -1,6 +1,6 @@
 // frontend/src/api/auth.ts
 import { apiFetch } from './client'
-import { User } from '../types'
+import type { User } from '../types'
 
 export interface LoginResponse {
   token: string

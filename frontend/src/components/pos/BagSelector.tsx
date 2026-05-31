@@ -1,5 +1,5 @@
 // frontend/src/components/pos/BagSelector.tsx
-import { POSStep } from '../../hooks/usePOS'
+import type { POSStep } from '../../hooks/usePOS'
 import styles from './BagSelector.module.css'
 
 interface Props {

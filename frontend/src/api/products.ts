@@ -1,6 +1,6 @@
 // frontend/src/api/products.ts
 import { apiFetch } from './client'
-import { Tea, Category } from '../types'
+import type { Tea, Category } from '../types'
 
 export const getProducts = (params?: { category_id?: number; search?: string }): Promise<Tea[]> => {
   const q = new URLSearchParams()

@@ -1,5 +1,5 @@
 // frontend/src/components/pos/Cart.tsx
-import { CartItem } from '../../types'
+import type { CartItem } from '../../types'
 import styles from './Cart.module.css'
 
 interface Props {

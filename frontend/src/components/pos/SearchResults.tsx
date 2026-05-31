@@ -1,4 +1,4 @@
-import { Tea } from '../../types'
+import type { Tea } from '../../types'
 import styles from './SearchResults.module.css'
 
 interface Props {

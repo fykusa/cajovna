@@ -1,6 +1,6 @@
 // frontend/src/api/users.ts
 import { apiFetch } from './client'
-import { User } from '../types'
+import type { User } from '../types'
 
 export interface UserCreatePayload { username: string; password: string; role: User['role'] }
 export interface UserUpdatePayload { username?: string; password?: string; role?: User['role']; active?: 0 | 1 }

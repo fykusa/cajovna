@@ -1,6 +1,6 @@
 // frontend/src/hooks/usePOS.ts
 import { useReducer, useEffect, useCallback } from 'react'
-import { Category, Tea, Bag, CartItem, ItemType } from '../types'
+import type { Category, Tea, Bag, CartItem, ItemType } from '../types'
 import { getCategories, getProducts } from '../api/products'
 import { getBags } from '../api/bags'
 

@@ -1,6 +1,6 @@
 // frontend/src/api/sales.ts
 import { apiFetch } from './client'
-import { SalePayload, SaleResponse, Sale } from '../types'
+import type { SalePayload, SaleResponse, Sale } from '../types'
 
 export const createSale = (payload: SalePayload): Promise<SaleResponse> =>
   apiFetch<SaleResponse>('/sales', { method: 'POST', body: JSON.stringify(payload) })

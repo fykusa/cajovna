@@ -1,5 +1,9 @@
 // frontend/src/types.ts
 
+// This empty const ensures Vite treats this file as a JS module with real
+// exports rather than a type-only file that gets reduced to `export {}`.
+export const _types_module = true
+
 export interface User {
   id: number
   username: string
