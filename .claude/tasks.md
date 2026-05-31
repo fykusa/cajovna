@@ -2,10 +2,13 @@
 
 ## Čekající
 
-- [x] [2026-05-29] **Fáze 3 — Admin KOMPLETNÍ**: AdminLayout+Dashboard, Users (inline confirm delete), Products+Stock, Bags, Sales. 81 unit testů. Commity: cc684a3→fb36820.
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
 ## Hotovo
+
+- [x] [2026-05-31] **Task 18 — Admin Layout Redesign**: AdminLayout změněno z vertikálního sidebaru na horizontální header. Menu items běží vedle "Čajovna Admin" nahoře. CSS refactor (flexbox layout). TypeScript fixes (import type, removed erasableSyntaxOnly, created vitest.config.ts). Všechny testy: 81/81 pass. Commit: 345d0ed.
+
+- [x] [2026-05-29] **Fáze 3 — Admin KOMPLETNÍ**: AdminLayout+Dashboard, Users (inline confirm delete), Products+Stock, Bags, Sales. 81 unit testů. Commity: cc684a3→fb36820.
 
 - [x] [2026-05-31] **Task 17 — Admin: Správa uživatelů**: Users.tsx (tabulka + add form + delete), Users.module.css, 5 unit testů (5/5 passed). Opraven mock ordering bug v deleteUser testu. Commit: 4143b47.
 
