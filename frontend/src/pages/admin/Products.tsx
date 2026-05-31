@@ -18,6 +18,7 @@ export default function Products() {
   const [search, setSearch] = useState('')
   const [stockEdit, setStockEdit] = useState<StockEdit | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     getProducts().then(setTeas).finally(() => setLoading(false))
@@ -40,22 +41,28 @@ export default function Products() {
   async function saveStock() {
     if (!stockEdit) return
     setSaving(true)
-    await updateStock(stockEdit.teaId, {
-      stock_std_pcs: stockEdit.std,
-      stock_pkg1_pcs: stockEdit.pkg1,
-      stock_pkg2_pcs: stockEdit.pkg2,
-      stock_kg: stockEdit.kg,
-    })
-    setTeas((prev) =>
-      prev.map((t) =>
-        t.id === stockEdit.teaId
-          ? { ...t, stock_std_pcs: stockEdit.std, stock_pkg1_pcs: stockEdit.pkg1,
-              stock_pkg2_pcs: stockEdit.pkg2, stock_kg: stockEdit.kg }
-          : t
+    setSaveError(null)
+    try {
+      await updateStock(stockEdit.teaId, {
+        stock_std_pcs: stockEdit.std,
+        stock_pkg1_pcs: stockEdit.pkg1,
+        stock_pkg2_pcs: stockEdit.pkg2,
+        stock_kg: stockEdit.kg,
+      })
+      setTeas((prev) =>
+        prev.map((t) =>
+          t.id === stockEdit.teaId
+            ? { ...t, stock_std_pcs: stockEdit.std, stock_pkg1_pcs: stockEdit.pkg1,
+                stock_pkg2_pcs: stockEdit.pkg2, stock_kg: stockEdit.kg }
+            : t
+        )
       )
-    )
-    setStockEdit(null)
-    setSaving(false)
+      setStockEdit(null)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Chyba uložení')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -73,6 +80,7 @@ export default function Products() {
       {stockEdit && (
         <div className={styles.stockForm}>
           <h3>Upravit sklad</h3>
+          {saveError && <p style={{ color: '#f87171', width: '100%' }}>{saveError}</p>}
           <label>
             Std ks:
             <input type="number" value={stockEdit.std}
