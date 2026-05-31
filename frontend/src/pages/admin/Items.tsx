@@ -149,9 +149,9 @@ export default function AdminItems() {
     }
   }
 
-  const handleEditorKeyDown = (e: React.KeyboardEvent, tea: Tea, col: ColDef) => {
+  const handleEditorKeyDown = async (e: React.KeyboardEvent, tea: Tea, col: ColDef) => {
     if (e.key === 'Enter') {
-      saveCellValue(tea, col, editValue)
+      await saveCellValue(tea, col, editValue)
       e.preventDefault()
       setTimeout(() => pageRef.current?.focus(), 0)
     }
