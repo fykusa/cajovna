@@ -188,19 +188,15 @@ export default function AdminItems() {
 
       <div className={styles.filterSection}>
         <label className={styles.filterLabel}>Kategorie</label>
-        <div className={styles.filterButtons}>
-          <button
-            className={`${styles.filterBtn}${categoryFilter === null ? ' ' + styles.filterActive : ''}`}
-            onClick={() => setCategoryFilter(null)}
-          >
-            Všechny
-          </button>
-          {categories.map((cat) => (
+        <div className={styles.filterGrid}>
+          {categories.filter((c) => !c.parent_id).map((cat) => (
             <button
               key={cat.id}
               className={`${styles.filterBtn}${categoryFilter === cat.id ? ' ' + styles.filterActive : ''}`}
               onClick={() => setCategoryFilter(categoryFilter === cat.id ? null : cat.id)}
             >
+              <span className={styles.filterId}>{String(cat.id).padStart(2, '0')}</span>
+              {' '}
               {cat.name}
             </button>
           ))}
