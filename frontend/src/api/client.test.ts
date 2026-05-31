@@ -53,6 +53,34 @@ describe('apiFetch', () => {
     ).resolves.toBe(401)
   })
 
+  it('při 401 s existujícím tokenem smaže auth a přesměruje na /login', async () => {
+    localStorage.setItem('token', 'expired')
+    localStorage.setItem('user', '{"id":1}')
+    const assign = vi.fn()
+    vi.stubGlobal('location', { ...window.location, assign })
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'Invalid or expired token' }),
+    })
+    await expect(apiFetch('/protected')).rejects.toBeInstanceOf(ApiError)
+    expect(localStorage.getItem('token')).toBeNull()
+    expect(localStorage.getItem('user')).toBeNull()
+    expect(assign).toHaveBeenCalledWith('/login')
+  })
+
+  it('401 bez tokenu (login) nepřesměrovává', async () => {
+    const assign = vi.fn()
+    vi.stubGlobal('location', { ...window.location, assign })
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'Neplatné přihlašovací údaje' }),
+    })
+    await expect(apiFetch('/auth/login', { method: 'POST' })).rejects.toBeInstanceOf(ApiError)
+    expect(assign).not.toHaveBeenCalled()
+  })
+
   it('předá body jako JSON při POST', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) })
     await apiFetch('/sales', { method: 'POST', body: JSON.stringify({ items: [] }) })

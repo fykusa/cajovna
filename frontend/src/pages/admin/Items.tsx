@@ -134,6 +134,10 @@ export default function AdminItems() {
   function handleKeyDown(e: React.KeyboardEvent) {
     if (!selectedCell) return
 
+    // Během editace buňky navigace neběží — Enter/Escape řeší editor inputu,
+    // šipky musí zůstat default (pohyb kurzoru v textu), žádný skok do jiné buňky.
+    if (editingCell) return
+
     const { row, col } = selectedCell
 
     if (e.key === 'ArrowUp') {
