@@ -184,16 +184,27 @@ export default function AdminItems() {
           <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
           Zobrazit neaktivní
         </label>
-        <select
-          value={categoryFilter ?? ''}
-          onChange={(e) => setCategoryFilter(e.target.value ? parseInt(e.target.value) : null)}
-          className={styles.categoryFilter}
-        >
-          <option value="">Všechny kategorie</option>
+      </div>
+
+      <div className={styles.filterSection}>
+        <label className={styles.filterLabel}>Kategorie</label>
+        <div className={styles.filterButtons}>
+          <button
+            className={`${styles.filterBtn}${categoryFilter === null ? ' ' + styles.filterActive : ''}`}
+            onClick={() => setCategoryFilter(null)}
+          >
+            Všechny
+          </button>
           {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
+            <button
+              key={cat.id}
+              className={`${styles.filterBtn}${categoryFilter === cat.id ? ' ' + styles.filterActive : ''}`}
+              onClick={() => setCategoryFilter(categoryFilter === cat.id ? null : cat.id)}
+            >
+              {cat.name}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
