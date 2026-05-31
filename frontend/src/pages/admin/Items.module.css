@@ -112,7 +112,7 @@
 }
 
 .table th {
-  padding: 10px;
+  padding: 6px 10px;
   text-align: left;
   color: #ccc;
   border-bottom: 1px solid #333;
@@ -122,7 +122,7 @@
 }
 
 .table td {
-  padding: 8px 10px;
+  padding: 4px 10px;
   border-bottom: 1px solid #2a2a2a;
   color: #ccc;
   background: #222;
@@ -137,6 +137,8 @@
 .cellSelected {
   background: #333 !important;
   color: #a8e6a1;
+  outline: 2px solid #d4a84b;
+  outline-offset: -2px;
 }
 
 .cellEditing {
