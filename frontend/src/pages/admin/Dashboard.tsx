@@ -7,19 +7,22 @@ export default function AdminDashboard() {
   const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
 
-  const today = new Date().toISOString().split('T')[0]
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const today = new Date().toISOString().split('T')[0]
     getSales({ from: today + ' 00:00:00', to: today + ' 23:59:59' })
       .then(setSales)
+      .catch((e) => setError(e instanceof Error ? e.message : 'Chyba načítání'))
       .finally(() => setLoading(false))
-  }, [today])
+  }, [])
 
   const total = sales.reduce((s, sale) => s + Number(sale.total_amount), 0)
 
   return (
     <div>
       <h1 style={{ marginBottom: 24, color: '#d4a84b' }}>Přehled — dnes</h1>
+      {error && <p style={{ color: '#f87171' }}>{error}</p>}
       {loading ? (
         <p style={{ color: '#aaa' }}>Načítám…</p>
       ) : (
