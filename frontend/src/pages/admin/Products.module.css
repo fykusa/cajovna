@@ -1,0 +1,26 @@
+.header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.header h1 { font-size: 1.4rem; color: #d4a84b; white-space: nowrap; }
+.search { flex: 1; max-width: 300px; padding: 8px 12px; background: #333;
+          border: 1px solid #555; border-radius: 4px; color: #eee; font-size: 1rem; }
+.stockForm { background: #2a2a2a; padding: 16px; border-radius: 8px; margin-bottom: 20px;
+             display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.stockForm h3 { width: 100%; margin: 0; color: #aaa; font-size: 0.95rem; }
+.stockForm label { display: flex; align-items: center; gap: 8px; color: #ccc; font-size: 0.9rem; }
+.numInput { width: 80px; padding: 6px 8px; background: #333; border: 1px solid #555;
+            border-radius: 4px; color: #eee; }
+.formActions { display: flex; gap: 8px; }
+.saveBtn { padding: 6px 16px; background: #6abf69; color: #111; border: none;
+           border-radius: 4px; font-weight: 600; cursor: pointer; }
+.cancelBtn { padding: 6px 12px; background: #444; color: #eee; border: none;
+             border-radius: 4px; cursor: pointer; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; padding: 10px 12px; color: #888; border-bottom: 1px solid #333; }
+.table td { padding: 8px 12px; border-bottom: 1px solid #2a2a2a; }
+.note { color: #888; font-size: 0.85rem; font-style: italic; }
+.stock { display: flex; gap: 8px; }
+.stock span { background: #2a3a2a; color: #6abf69; padding: 2px 8px;
+              border-radius: 4px; font-size: 0.85rem; }
+.noStock { background: #3a2a2a !important; color: #888 !important; }
+.editBtn { background: none; border: 1px solid #555; color: #aaa; padding: 4px 10px;
+           border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+.loading, .noResults { color: #888; font-style: italic; padding: 16px 0; }
