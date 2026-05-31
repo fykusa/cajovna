@@ -40,6 +40,7 @@ export default function AdminItems() {
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null)
   const [editValue, setEditValue] = useState('')
   const [saving, setSaving] = useState(false)
+  const [success, setSuccess] = useState<string | null>(null)
   const pageRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
@@ -93,6 +94,8 @@ export default function AdminItems() {
 
       setEditingCell(null)
       setError(null)
+      setSuccess('Záznam uložen')
+      setTimeout(() => setSuccess(null), 3000)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
@@ -175,6 +178,7 @@ export default function AdminItems() {
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
+      {success && <p className={styles.success}>{success}</p>}
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>

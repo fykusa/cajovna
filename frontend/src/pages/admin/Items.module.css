@@ -146,3 +146,11 @@
   border-radius: 6px;
   border-left: 3px solid #ff6b6b;
 }
+
+.success {
+  color: #6abf69;
+  padding: 12px;
+  background: #1a3a1a;
+  border-radius: 6px;
+  border-left: 3px solid #6abf69;
+}
