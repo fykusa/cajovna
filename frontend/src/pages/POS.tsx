@@ -18,16 +18,21 @@ export default function POS() {
   const [showCheckout, setShowCheckout] = useState(false)
 
   const handleKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      confirm()
+      return
+    }
+
     if ((e.target as HTMLElement).tagName === 'INPUT') return
 
     switch (e.key) {
       case 'ArrowUp':   e.preventDefault(); moveUp(); break
       case 'ArrowDown': e.preventDefault(); moveDown(); break
-      case 'Enter':
-        confirm()
-        break
       case 'Escape':
         if (state.step === 'search') cancelSearch()
+        break
+      case 'F10':
+        if (state.cart.length > 0) { e.preventDefault(); setShowCheckout(true) }
         break
       case 'Backspace':
         if (state.step === 'search' && state.searchQuery.length > 0) {

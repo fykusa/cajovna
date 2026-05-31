@@ -3,7 +3,7 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, PUT, OPTIONS');
+header('Access-Control-Allow-Methods: GET, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json; charset=utf-8');
 
@@ -33,6 +33,11 @@ if ($method === 'GET' && preg_match('#/api/products/categories$#', $path)) {
 } elseif ($method === 'PUT' && preg_match('#/api/products/(\d+)$#', $path, $m)) {
     requireAdmin();
     updateProduct((int) $m[1]);
+
+// DELETE /api/products/{id} – pouze admin
+} elseif ($method === 'DELETE' && preg_match('#/api/products/(\d+)$#', $path, $m)) {
+    requireAdmin();
+    deleteProduct((int) $m[1]);
 
 } else {
     http_response_code(404);
@@ -101,6 +106,7 @@ function updateProduct(int $id): void {
     $pdo    = getPDO();
 
     $allowed = [
+        'category_id',
         'name', 'note', 'flag', 'origin',
         'std_weight_g', 'std_price_moc', 'std_price_voc', 'std_margin_pct',
         'pkg1_weight_g', 'pkg1_price_moc', 'pkg1_price_voc', 'pkg1_margin_pct',
@@ -133,6 +139,27 @@ function updateProduct(int $id): void {
         return;
     }
 
+    $stmt = $pdo->prepare('SELECT * FROM teas WHERE id = ?');
+    $stmt->execute([$id]);
+    $row = $stmt->fetch();
+
     http_response_code(200);
-    echo json_encode(['message' => 'OK']);
+    echo json_encode($row);
+}
+
+function deleteProduct(int $id): void {
+    $pdo = getPDO();
+    try {
+        $stmt = $pdo->prepare('DELETE FROM teas WHERE id = ?');
+        $stmt->execute([$id]);
+        http_response_code(204);
+    } catch (PDOException $e) {
+        if ($e->getCode() === '23000') {
+            http_response_code(409);
+            echo json_encode(['error' => 'Položka je použita v prodeji, nelze smazat — deaktivujte ji.']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Chyba při mazání']);
+        }
+    }
 }

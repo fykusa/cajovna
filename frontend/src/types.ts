@@ -86,3 +86,18 @@ export interface Sale {
   note: string | null
   created_at: string
 }
+
+export interface SaleItem {
+  id: number
+  item_type: 'std' | 'pkg1' | 'pkg2' | 'custom' | 'bag'
+  weight_g: number | null
+  quantity: number
+  unit_price: number
+  total_price: number
+  note: string | null
+  tea_id: number | null
+  tea_name: string | null
+  category_id: number | null
+  surface_type: string | null
+  volume_ml: number | null
+}

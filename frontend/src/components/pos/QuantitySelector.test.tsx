@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import QuantitySelector from './QuantitySelector'
-import { Tea } from '../../types'
+import type { Tea } from '../../types'
 
 const TEA: Tea = { id: 1, category_id: 1, name: 'Show Mee', note: null, flag: 'active', origin: null,
   std_weight_g: 30, std_price_moc: 130, pkg1_weight_g: 200, pkg1_price_moc: 700,

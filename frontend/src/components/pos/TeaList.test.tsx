@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import TeaList from './TeaList'
-import { Tea } from '../../types'
+import type { Tea } from '../../types'
 
 const TEAS: Tea[] = [
   { id: 1, category_id: 1, name: 'Show Mee', note: null, flag: 'active', origin: null,

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import SearchResults from './SearchResults'
-import { Tea } from '../../types'
+import type { Tea } from '../../types'
 
 const TEA: Tea = { id: 1, category_id: 1, name: 'Bancha', note: null, flag: 'active', origin: null,
   std_weight_g: 50, std_price_moc: 160, pkg1_weight_g: null, pkg1_price_moc: null,

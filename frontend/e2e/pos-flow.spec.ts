@@ -78,9 +78,7 @@ test('kompletní prodej bez pytlíku', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(page.locator('text=Krok: quantity')).toBeVisible({ timeout: 5_000 })
 
-  // Step 3: quantity — QuantitySelector autofocuses an <input>, so keyboard
-  // handler ignores Enter while input is focused. Click the heading to blur it first.
-  await page.locator('text=Krok: quantity').click()
+  // Step 3: quantity — Enter funguje i když je input focusnutý
   await page.keyboard.press('Enter')
   await expect(page.locator('text=Krok: bag_yn')).toBeVisible({ timeout: 5_000 })
 

@@ -1,5 +1,6 @@
 // frontend/src/components/pos/QuantitySelector.tsx
-import { ChangeEvent, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import type { ChangeEvent } from 'react'
 import type { Tea } from '../../types'
 import styles from './QuantitySelector.module.css'
 

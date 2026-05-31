@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CartItem, SalePayload } from '../../types'
 import { createSale } from '../../api/sales'
 import styles from './CheckoutDialog.module.css'
@@ -14,6 +14,16 @@ export default function CheckoutDialog({ items, onSuccess, onCancel }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const total = items.reduce((s, i) => s + i.totalPrice, 0)
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (loading) return
+      if (e.key === 'Enter') { e.preventDefault(); handlePay() }
+      if (e.key === 'Escape') { e.preventDefault(); onCancel() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [loading])
 
   async function handlePay() {
     setLoading(true)

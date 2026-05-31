@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import CategoryList from './CategoryList'
-import { Category } from '../../types'
+import type { Category } from '../../types'
 
 const CATS: Category[] = [
   { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },

@@ -8,7 +8,7 @@ import AdminLayout from '../components/admin/AdminLayout'
 
 const POS = lazy(() => import('../pages/POS'))
 const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'))
-const AdminProducts = lazy(() => import('../pages/admin/Products'))
+const AdminItems = lazy(() => import('../pages/admin/Items'))
 const AdminUsers = lazy(() => import('../pages/admin/Users'))
 const AdminBags = lazy(() => import('../pages/admin/Bags'))
 const AdminSales = lazy(() => import('../pages/admin/Sales'))
@@ -38,7 +38,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
+          <Route path="products" element={<AdminItems />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="bags" element={<AdminBags />} />
           <Route path="sales" element={<AdminSales />} />

@@ -1,0 +1,229 @@
+.page { display: flex; flex-direction: column; height: 100%; gap: 20px; }
+
+.header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.title  { color: #d4a84b; margin: 0; font-size: 1.4rem; }
+
+.periods { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.rangeForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dateInput {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #ccc;
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.dateInput:focus { outline: none; border-color: #d4a84b; }
+.rangeSep { color: #666; }
+.applyBtn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.applyBtn:hover { background: #333; color: #fff; }
+
+.exportBtn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #6abf69;
+  background: #1e2e1e;
+  color: #6abf69;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.exportBtn:hover { background: #243324; }
+.periodBtn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s, color 0.15s;
+}
+.periodBtn:hover  { background: #333; color: #fff; }
+.periodBtn.active { background: #d4a84b; color: #1a1a1a; border-color: #d4a84b; font-weight: 700; }
+
+.stats { display: flex; gap: 16px; flex-wrap: wrap; }
+.stat  {
+  background: #2a2a2a;
+  padding: 16px 24px;
+  border-radius: 8px;
+  min-width: 140px;
+}
+.statLabel { color: #888; font-size: 0.8rem; margin-bottom: 4px; }
+.statValue { font-size: 1.6rem; font-weight: 700; color: #d4a84b; }
+
+.panels {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- Levý panel: seznam prodejů --- */
+.listPanel {
+  background: #222;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.panelTitle {
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #2a2a2a;
+}
+.list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+.listItem {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #2a2a2a;
+  transition: background 0.1s;
+}
+.listItem:hover    { background: #2a2a2a; }
+.listItem.selected { background: #2e2a1e; border-left: 3px solid #d4a84b; }
+.itemTime     { color: #888; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.itemUser     { color: #ccc; font-size: 0.85rem; }
+.itemAmount   { color: #6abf69; font-weight: 600; font-size: 0.9rem; text-align: right; font-variant-numeric: tabular-nums; }
+.empty        { padding: 24px; color: #555; font-style: italic; text-align: center; }
+
+/* --- Pravý panel: detail prodeje --- */
+.detailPanel {
+  background: #222;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.detailEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+  font-style: italic;
+}
+.detailHeader {
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2a2a;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.detailId    { font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+.detailTotal { font-size: 1rem; font-weight: 700; color: #d4a84b; }
+.detailList  {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+.detailRow {
+  display: grid;
+  grid-template-columns: 75px 1fr auto;
+  gap: 12px;
+  padding: 8px 14px;
+  align-items: center;
+  border-bottom: 1px solid #2a2a2a;
+}
+.detailRow:last-child { border-bottom: none; }
+.detailQty   { color: #888; font-size: 0.85rem; font-weight: 600; display: flex; gap: 4px; align-items: center; }
+.detailCode  { color: #555; font-size: 0.75rem; font-weight: 400; font-variant-numeric: tabular-nums; }
+.detailName  { color: #ccc; font-size: 0.9rem; }
+.detailPrices {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.teaPrice   { color: #999; }
+.sep        { color: #555; }
+.bagPrice   { color: #888; }
+.totalPrice { color: #6abf69; font-weight: 600; min-width: 70px; text-align: right; }
+
+.userFilter { display: flex; gap: 8px; flex-wrap: wrap; }
+.userBtn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.userBtn:hover    { border-color: #888; color: #ccc; }
+.userActive       { background: #1e2e1e; border-color: #6abf69; color: #6abf69; }
+.userActive:hover { background: #243324; }
+
+.filterSection {
+  margin-bottom: 12px;
+}
+.filterLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.filterGrid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.filterBtn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.filterId {
+  color: #555;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.filterBtn:hover     { border-color: #666; color: #aaa; }
+.filterBtn:hover .filterId { color: #666; }
+.filterActive        { background: #1e2a1e; border-color: #6abf69; color: #6abf69; }
+.filterActive .filterId { color: #5a9d5a; }
+.filterActive:hover  { background: #243324; }
+
+.loading { color: #666; font-style: italic; padding: 24px; }
+.error   { color: #f87171; padding: 8px 0; }

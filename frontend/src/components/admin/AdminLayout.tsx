@@ -16,28 +16,30 @@ export default function AdminLayout() {
 
   return (
     <div className={styles.layout}>
-      <nav className={styles.sidebar}>
+      <header className={styles.sidebar}>
         <div className={styles.brand}>Čajovna Admin</div>
-        <ul className={styles.nav}>
-          {NAV_ITEMS.map((item) => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `${styles.link} ${isActive ? styles.active : ''}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        <nav>
+          <ul className={styles.nav}>
+            {NAV_ITEMS.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    `${styles.link} ${isActive ? styles.active : ''}`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <div className={styles.footer}>
           <span className={styles.username}>{user?.username}</span>
           <button onClick={logout} className={styles.logoutBtn}>Odhlásit</button>
         </div>
-      </nav>
+      </header>
       <main className={styles.content}>
         <Outlet />
       </main>

@@ -13,5 +13,8 @@ export const getProducts = (params?: { category_id?: number; search?: string }):
 export const getCategories = (): Promise<Category[]> =>
   apiFetch<Category[]>('/products/categories')
 
-export const updateProduct = (id: number, data: Partial<Tea>): Promise<void> =>
-  apiFetch<void>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+export const updateProduct = (id: number, data: Partial<Tea>): Promise<Tea> =>
+  apiFetch<Tea>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+
+export const deleteProduct = (id: number): Promise<void> =>
+  apiFetch<void>(`/products/${id}`, { method: 'DELETE' })

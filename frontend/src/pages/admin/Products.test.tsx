@@ -13,7 +13,9 @@ vi.mock('../../api/stock', () => ({
   updateStock: vi.fn(),
 }))
 
-const TEAS = [
+import type { Tea } from '../../types'
+
+const TEAS: Tea[] = [
   { id: 1, category_id: 1, name: 'Show Mee', note: null, flag: 'active', origin: null,
     std_weight_g: 30, std_price_moc: 130, pkg1_weight_g: null, pkg1_price_moc: null,
     pkg2_weight_g: null, pkg2_price_moc: null,

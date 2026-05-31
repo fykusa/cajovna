@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import * as salesApi from '../../api/sales'
-import { CartItem, Tea } from '../../types'
+import type { CartItem, Tea } from '../../types'
 import CheckoutDialog from './CheckoutDialog'
 
 vi.mock('../../api/sales', () => ({

@@ -26,6 +26,11 @@ if ($method === 'POST' && preg_match('#/api/sales$#', $path)) {
     requireAdmin();
     listSales();
 
+// GET /api/sales/:id/items – položky prodeje (admin only)
+} elseif ($method === 'GET' && preg_match('#/api/sales/(\d+)/items$#', $path, $m)) {
+    requireAdmin();
+    listSaleItems((int) $m[1]);
+
 } else {
     http_response_code(404);
     echo json_encode(['error' => 'Not found']);
@@ -140,28 +145,61 @@ function listSales(): void {
     $pdo    = getPDO();
     $where  = ['1=1'];
     $params = [];
+    $joins  = '';
 
     if (!empty($_GET['from'])) {
-        $where[]  = 'created_at >= ?';
+        $where[]  = 's.created_at >= ?';
         $params[] = $_GET['from'];
     }
     if (!empty($_GET['to'])) {
-        $where[]  = 'created_at <= ?';
+        $where[]  = 's.created_at <= ?';
         $params[] = $_GET['to'];
     }
     if (!empty($_GET['user_id'])) {
-        $where[]  = 'user_id = ?';
+        $where[]  = 's.user_id = ?';
         $params[] = (int) $_GET['user_id'];
     }
 
+    if (!empty($_GET['category_id']) || !empty($_GET['tea_id'])) {
+        $joins .= ' JOIN sale_items si ON si.sale_id = s.id';
+        $joins .= ' LEFT JOIN teas t ON t.id = si.tea_id';
+    }
+
+    if (!empty($_GET['category_id'])) {
+        $where[]  = 't.category_id = ?';
+        $params[] = (int) $_GET['category_id'];
+    }
+
+    if (!empty($_GET['tea_id'])) {
+        $where[]  = 't.id = ?';
+        $params[] = (int) $_GET['tea_id'];
+    }
+
     $stmt = $pdo->prepare(
-        'SELECT s.id, s.user_id, u.username, s.total_amount, s.note, s.created_at
+        'SELECT DISTINCT s.id, s.user_id, u.username, s.total_amount, s.note, s.created_at
          FROM sales s
-         JOIN users u ON u.id = s.user_id
+         JOIN users u ON u.id = s.user_id' . $joins . '
          WHERE ' . implode(' AND ', $where) . '
          ORDER BY s.created_at DESC
          LIMIT 500'
     );
     $stmt->execute($params);
+    echo json_encode($stmt->fetchAll());
+}
+
+function listSaleItems(int $saleId): void {
+    $pdo  = getPDO();
+    $stmt = $pdo->prepare(
+        'SELECT si.id, si.item_type, si.weight_g, si.quantity,
+                si.unit_price, si.total_price, si.note,
+                si.tea_id, t.name AS tea_name, t.category_id,
+                b.surface_type, b.volume_ml
+         FROM sale_items si
+         LEFT JOIN teas t ON t.id = si.tea_id
+         LEFT JOIN bags b ON b.id = si.bag_id
+         WHERE si.sale_id = ?
+         ORDER BY si.id'
+    );
+    $stmt->execute([$saleId]);
     echo json_encode($stmt->fetchAll());
 }
