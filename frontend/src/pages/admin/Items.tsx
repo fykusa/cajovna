@@ -41,6 +41,7 @@ export default function AdminItems() {
   const [editValue, setEditValue] = useState('')
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
+  const [categoryFilter, setCategoryFilter] = useState<number | null>(null)
   const pageRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
@@ -61,9 +62,17 @@ export default function AdminItems() {
     load()
   }, [load])
 
-  const visibleTeas = showInactive
+  const visibleTeas = (showInactive
     ? teas.filter((t) => t.flag !== 'active')
     : teas.filter((t) => t.flag === 'active')
+  ).filter((t) => categoryFilter === null || t.category_id === categoryFilter)
+
+  useEffect(() => {
+    if (visibleTeas.length > 0 && !selectedCell) {
+      setSelectedCell({ row: 0, col: 0 })
+      setTimeout(() => pageRef.current?.focus(), 0)
+    }
+  }, [visibleTeas.length, selectedCell])
 
   const getCategoryName = (catId: number) => categories.find((c) => c.id === catId)?.name || `[${catId}]`
 
@@ -175,6 +184,16 @@ export default function AdminItems() {
           <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
           Zobrazit neaktivní
         </label>
+        <select
+          value={categoryFilter ?? ''}
+          onChange={(e) => setCategoryFilter(e.target.value ? parseInt(e.target.value) : null)}
+          className={styles.categoryFilter}
+        >
+          <option value="">Všechny kategorie</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}

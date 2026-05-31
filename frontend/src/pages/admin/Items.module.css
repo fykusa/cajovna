@@ -33,6 +33,20 @@
   cursor: pointer;
 }
 
+.categoryFilter {
+  padding: 6px 10px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.categoryFilter:hover {
+  border-color: #777;
+}
+
 .tableWrapper {
   flex: 1;
   overflow: auto;
