@@ -84,7 +84,8 @@ export default function AdminItems() {
       // Sklad se šetří přes updateStock
       if (col.key.toString().startsWith('stock_')) {
         const stockKey = col.key as 'stock_std_pcs' | 'stock_pkg1_pcs' | 'stock_pkg2_pcs' | 'stock_kg'
-        await updateStock(tea.id, { [stockKey]: parsedValue })
+        const updated = await updateStock(tea.id, { [stockKey]: parsedValue })
+        setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
       } else {
         const updated = await updateProduct(tea.id, { [col.key]: parsedValue })
         setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))

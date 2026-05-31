@@ -59,6 +59,10 @@ function updateStock(int $teaId): void {
     $pdo->prepare('UPDATE teas SET ' . implode(', ', $fields) . ' WHERE id = ?')
         ->execute($params);
 
+    $stmt = $pdo->prepare('SELECT * FROM teas WHERE id = ?');
+    $stmt->execute([$teaId]);
+    $row = $stmt->fetch();
+
     http_response_code(200);
-    echo json_encode(['message' => 'Sklad aktualizován']);
+    echo json_encode($row);
 }
