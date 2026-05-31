@@ -34,18 +34,10 @@ test('šipka dolů posune zvýraznění na druhou kategorii', async ({ page }) =
   // The step indicator still says category (not yet confirmed)
   await expect(page.locator('text=Krok: category')).toBeVisible()
 
-  // Second item should now have the active class applied
-  // We verify by checking that exactly one item carries the active class
-  // and it is the second one (index 1)
-  const activeItems = list.locator('[class*="active"]')
-  await expect(activeItems).toHaveCount(1)
-  // The active item is NOT the first listitem
   const firstItem = list.getByRole('listitem').first()
   const secondItem = list.getByRole('listitem').nth(1)
-  const firstClass = await firstItem.getAttribute('class')
-  const secondClass = await secondItem.getAttribute('class')
-  expect(firstClass).not.toContain('active')
-  expect(secondClass).toContain('active')
+  await expect(firstItem).not.toHaveClass(/active/)
+  await expect(secondItem).toHaveClass(/active/)
 })
 
 test('Enter vybere kategorii a zobrazí čaje', async ({ page }) => {
