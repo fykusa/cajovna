@@ -4,6 +4,7 @@ import { lazy, Suspense } from 'react'
 import ProtectedRoute from './ProtectedRoute'
 import Login from '../pages/Login'
 import NotAuthorized from '../pages/NotAuthorized'
+import AdminLayout from '../components/admin/AdminLayout'
 
 const POS = lazy(() => import('../pages/POS'))
 const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'))
@@ -14,7 +15,7 @@ const AdminSales = lazy(() => import('../pages/admin/Sales'))
 
 export default function AppRouter() {
   return (
-    <Suspense fallback={<div>Načítám…</div>}>
+    <Suspense fallback={<div style={{ padding: 32, color: '#aaa' }}>Načítám…</div>}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/403" element={<NotAuthorized />} />
@@ -32,42 +33,16 @@ export default function AppRouter() {
           path="/admin"
           element={
             <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
+              <AdminLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/admin/products"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminProducts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminUsers />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/bags"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminBags />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/sales"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminSales />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="bags" element={<AdminBags />} />
+          <Route path="sales" element={<AdminSales />} />
+        </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
