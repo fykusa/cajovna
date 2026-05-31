@@ -76,8 +76,8 @@
 }
 
 .cellSelected {
-  outline: 2px solid #222;
-  outline-offset: -1px;
+  background: #333 !important;
+  color: #a8e6a1;
 }
 
 .cellEditing {
