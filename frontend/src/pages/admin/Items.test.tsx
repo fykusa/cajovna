@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Items from './Items'
 import * as productsApi from '../../api/products'
-import * as stockApi from '../../api/stock'
 import type { Tea, Category } from '../../types'
 
 vi.mock('../../api/products', () => ({
@@ -47,14 +46,27 @@ describe('Items — keyboard navigace během editace', () => {
 
     // Jsme v editaci — input s hodnotou prvního řádku
     const input = screen.getByDisplayValue('Show Mee')
-    const editingTd = input.closest('td')!
-    expect(editingTd.className).toContain('cellSelected')
+    // Buňka pod editovanou (stejný sloupec, druhý řádek)
+    const belowCell = screen.getByText('Bai Mu Dan').closest('td')!
 
-    // Šipka dolů během editace nesmí přesunout výběr na jiný řádek
+    // Šipka dolů během editace nesmí přesunout výběr na řádek pod ním
     await user.keyboard('{ArrowDown}')
-    expect(editingTd.className).toContain('cellSelected')
+    expect(belowCell.className).not.toContain('cellSelected')
 
     // Stále editujeme původní buňku (input nezmizel ani se nepřesunul)
     expect(screen.getByDisplayValue('Show Mee')).toBe(input)
+  })
+
+  it('deaktivovat nastaví flag na discontinued (soft, bez confirm)', async () => {
+    vi.mocked(productsApi.updateProduct).mockResolvedValue({ ...mkTea(1, 'Show Mee'), flag: 'discontinued' })
+    const user = userEvent.setup()
+    render(<Items />)
+    await screen.findByText('Show Mee')
+
+    await user.click(screen.getAllByRole('button', { name: 'deaktivovat' })[0])
+
+    await waitFor(() =>
+      expect(productsApi.updateProduct).toHaveBeenCalledWith(1, { flag: 'discontinued' })
+    )
   })
 })

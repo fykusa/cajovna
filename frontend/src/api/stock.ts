@@ -1,5 +1,6 @@
 // frontend/src/api/stock.ts
 import { apiFetch } from './client'
+import type { Tea } from '../types'
 
 export interface StockUpdatePayload {
   stock_std_pcs?: number
@@ -8,5 +9,5 @@ export interface StockUpdatePayload {
   stock_kg?: number
 }
 
-export const updateStock = (teaId: number, data: StockUpdatePayload) =>
-  apiFetch(`/stock/${teaId}`, { method: 'PUT', body: JSON.stringify(data) })
+export const updateStock = (teaId: number, data: StockUpdatePayload): Promise<Tea> =>
+  apiFetch<Tea>(`/stock/${teaId}`, { method: 'PUT', body: JSON.stringify(data) })

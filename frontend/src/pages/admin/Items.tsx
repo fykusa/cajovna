@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { getProducts, getCategories, updateProduct, deleteProduct } from '../../api/products'
+import { getProducts, getCategories, updateProduct } from '../../api/products'
 import { updateStock } from '../../api/stock'
 import type { Tea, Category } from '../../types'
 import styles from './Items.module.css'
@@ -80,6 +80,11 @@ export default function AdminItems() {
     if (col.key === 'category_name') return getCategoryName(tea.category_id)
     const val = tea[col.key as keyof Tea]
     if (val === null || val === undefined) return ''
+    if (col.type === 'number') {
+      // DECIMAL z DB chodí jako "30.0" / "1.500" → zahoď zbytečné nuly (30, 1.5)
+      const n = parseFloat(String(val))
+      return Number.isNaN(n) ? '' : String(n)
+    }
     return String(val)
   }
 
@@ -112,16 +117,15 @@ export default function AdminItems() {
     }
   }
 
-  async function handleDeleteTea(tea: Tea) {
-    if (!window.confirm(`Smazat čaj "${tea.name}"?`)) return
+  async function handleToggleActive(tea: Tea) {
     setSaving(true)
     try {
-      await deleteProduct(tea.id)
-      setTeas((prev) => prev.filter((t) => t.id !== tea.id))
+      const newFlag = tea.flag === 'active' ? 'discontinued' : 'active'
+      const updated = await updateProduct(tea.id, { flag: newFlag })
+      setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
       setError(null)
     } catch (e) {
-      const errMsg = e instanceof Error ? e.message : 'Chyba'
-      setError(errMsg)
+      setError(e instanceof Error ? e.message : 'Chyba')
     } finally {
       setSaving(false)
     }
@@ -230,7 +234,7 @@ export default function AdminItems() {
                   return (
                     <td
                       key={ci}
-                      className={`${styles.cell} ${isSelected ? styles.cellSelected : ''}`}
+                      className={`${styles.cell} ${isSelected && !isEditing ? styles.cellSelected : ''}`}
                       onClick={() => handleCellClick(ri, ci)}
                     >
                       {isEditing ? (
@@ -251,7 +255,9 @@ export default function AdminItems() {
                         ) : (
                           <input
                             autoFocus
-                            type={col.type === 'number' ? 'number' : 'text'}
+                            type="text"
+                            inputMode={col.type === 'number' ? 'decimal' : undefined}
+                            size={1}
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveCellValue(tea, col, editValue)}
@@ -267,11 +273,11 @@ export default function AdminItems() {
                 })}
                 <td className={styles.actionCell}>
                   <button
-                    className={styles.deleteBtn}
-                    onClick={() => handleDeleteTea(tea)}
+                    className={`${styles.actionBtn} ${tea.flag === 'active' ? styles.actionDeactivate : styles.actionActivate}`}
+                    onClick={() => handleToggleActive(tea)}
                     disabled={saving}
                   >
-                    Smazat
+                    {tea.flag === 'active' ? 'deaktivovat' : 'aktivovat'}
                   </button>
                 </td>
               </tr>

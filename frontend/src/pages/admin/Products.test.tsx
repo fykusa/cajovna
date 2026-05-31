@@ -57,7 +57,7 @@ describe('Products', () => {
   })
 
   it('zavolá updateStock po úpravě skladu', async () => {
-    vi.mocked(stockApi.updateStock).mockResolvedValueOnce(undefined)
+    vi.mocked(stockApi.updateStock).mockResolvedValueOnce(TEAS[0])
     const user = userEvent.setup()
     render(<Products />)
     await screen.findByText('Show Mee')
