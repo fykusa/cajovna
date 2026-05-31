@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Tea } from '../../types'
 import { getProducts } from '../../api/products'
 import { updateStock } from '../../api/stock'
@@ -19,6 +19,7 @@ export default function Products() {
   const [stockEdit, setStockEdit] = useState<StockEdit | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const triggerButtonRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     getProducts().then(setTeas).finally(() => setLoading(false))
@@ -28,7 +29,8 @@ export default function Products() {
     t.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  function openStockEdit(tea: Tea) {
+  function openStockEdit(tea: Tea, buttonEl: HTMLButtonElement) {
+    triggerButtonRef.current = buttonEl
     setStockEdit({
       teaId: tea.id,
       std: tea.stock_std_pcs,
@@ -36,6 +38,11 @@ export default function Products() {
       pkg2: tea.stock_pkg2_pcs,
       kg: Number(tea.stock_kg),
     })
+  }
+
+  function closeStockEdit() {
+    setStockEdit(null)
+    triggerButtonRef.current?.focus()
   }
 
   async function saveStock() {
@@ -57,7 +64,7 @@ export default function Products() {
             : t
         )
       )
-      setStockEdit(null)
+      closeStockEdit()
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Chyba uložení')
     } finally {
@@ -78,7 +85,7 @@ export default function Products() {
       </div>
 
       {stockEdit && (
-        <div className={styles.stockForm}>
+        <div className={styles.stockForm} onKeyDown={(e) => e.key === 'Escape' && closeStockEdit()}>
           <h3>Upravit sklad</h3>
           {saveError && <p style={{ color: '#f87171', width: '100%' }}>{saveError}</p>}
           <label>
@@ -103,11 +110,12 @@ export default function Products() {
             Sypný kg:
             <input type="number" step="0.001" value={stockEdit.kg}
               onChange={(e) => setStockEdit({ ...stockEdit, kg: +e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && saveStock()}
               className={styles.numInput} />
           </label>
           <div className={styles.formActions}>
             <button onClick={saveStock} disabled={saving} className={styles.saveBtn}>Uložit</button>
-            <button onClick={() => setStockEdit(null)} className={styles.cancelBtn}>Zrušit</button>
+            <button onClick={closeStockEdit} className={styles.cancelBtn}>Zrušit</button>
           </div>
         </div>
       )}
@@ -139,7 +147,7 @@ export default function Products() {
                     <span className={styles.noStock}>0</span>}
                 </td>
                 <td>
-                  <button onClick={() => openStockEdit(tea)} className={styles.editBtn}>
+                  <button onClick={(e) => openStockEdit(tea, e.currentTarget)} className={styles.editBtn}>
                     Sklad
                   </button>
                 </td>

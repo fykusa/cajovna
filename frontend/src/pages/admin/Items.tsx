@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { getProducts, getCategories, updateProduct, deleteProduct } from '../../api/products'
 import { updateStock } from '../../api/stock'
 import type { Tea, Category } from '../../types'
@@ -40,6 +40,7 @@ export default function AdminItems() {
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null)
   const [editValue, setEditValue] = useState('')
   const [saving, setSaving] = useState(false)
+  const pageRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -147,10 +148,23 @@ export default function AdminItems() {
     }
   }
 
+  const handleEditorKeyDown = (e: React.KeyboardEvent, tea: Tea, col: ColDef) => {
+    if (e.key === 'Enter') {
+      saveCellValue(tea, col, editValue)
+      e.preventDefault()
+      setTimeout(() => pageRef.current?.focus(), 0)
+    }
+    if (e.key === 'Escape') {
+      setEditingCell(null)
+      e.preventDefault()
+      setTimeout(() => pageRef.current?.focus(), 0)
+    }
+  }
+
   if (loading) return <p className={styles.loading}>Načítám…</p>
 
   return (
-    <div className={styles.page} tabIndex={0} onKeyDown={handleKeyDown}>
+    <div ref={pageRef} className={styles.page} tabIndex={0} onKeyDown={handleKeyDown}>
       <div className={styles.header}>
         <h1 className={styles.title}>Položky</h1>
         <label className={styles.toggle}>
@@ -191,10 +205,7 @@ export default function AdminItems() {
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveCellValue(tea, col, editValue)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') saveCellValue(tea, col, editValue)
-                              if (e.key === 'Escape') setEditingCell(null)
-                            }}
+                            onKeyDown={(e) => handleEditorKeyDown(e, tea, col)}
                             className={styles.cellEditing}
                           >
                             <option value="">(prázdné)</option>
@@ -209,10 +220,7 @@ export default function AdminItems() {
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveCellValue(tea, col, editValue)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') saveCellValue(tea, col, editValue)
-                              if (e.key === 'Escape') setEditingCell(null)
-                            }}
+                            onKeyDown={(e) => handleEditorKeyDown(e, tea, col)}
                             className={styles.cellEditing}
                           />
                         )
