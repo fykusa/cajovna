@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { getProducts, getCategories, updateProduct } from '../../api/products'
+import { getProducts, getCategories, createProduct, updateProduct } from '../../api/products'
 import { updateStock } from '../../api/stock'
 import type { Tea, Category } from '../../types'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
@@ -98,6 +98,25 @@ export default function AdminItems() {
     }
   }
 
+  async function handleAdd() {
+    if (categories.length === 0) {
+      setError('Nejprve vytvořte kategorii')
+      return
+    }
+    setSaving(true)
+    try {
+      const catId = categoryFilter ?? categories[0].id
+      const created = await createProduct({ category_id: catId, name: 'Nový čaj', flag: 'active' })
+      setTeas((prev) => [...prev, created])
+      setShowInactive(false) // nový čaj je aktivní → ať je vidět
+      setError(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Chyba vytváření')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function handleToggleActive(tea: Tea) {
     setSaving(true)
     try {
@@ -126,6 +145,9 @@ export default function AdminItems() {
           />
           Zobrazit neaktivní
         </label>
+        <button className={styles.addBtn} onClick={handleAdd} disabled={saving}>
+          + Přidat
+        </button>
       </div>
 
       <div className={styles.filterSection}>

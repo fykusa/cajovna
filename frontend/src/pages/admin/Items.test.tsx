@@ -8,6 +8,7 @@ import type { Tea, Category } from '../../types'
 vi.mock('../../api/products', () => ({
   getProducts: vi.fn(),
   getCategories: vi.fn(),
+  createProduct: vi.fn(),
   updateProduct: vi.fn(),
   deleteProduct: vi.fn(),
 }))
@@ -68,5 +69,23 @@ describe('Items — keyboard navigace během editace', () => {
     await waitFor(() =>
       expect(productsApi.updateProduct).toHaveBeenCalledWith(1, { flag: 'discontinued' })
     )
+  })
+
+  it('+ Přidat vytvoří nový čaj a připne ho', async () => {
+    vi.mocked(productsApi.createProduct).mockResolvedValue(mkTea(3, 'Nový čaj'))
+    const user = userEvent.setup()
+    render(<Items />)
+    await screen.findByText('Show Mee')
+
+    await user.click(screen.getByRole('button', { name: /přidat/i }))
+
+    await waitFor(() =>
+      expect(productsApi.createProduct).toHaveBeenCalledWith({
+        category_id: 1,
+        name: 'Nový čaj',
+        flag: 'active',
+      })
+    )
+    expect(await screen.findByText('Nový čaj')).toBeInTheDocument()
   })
 })
