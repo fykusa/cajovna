@@ -79,7 +79,7 @@ export default function AdminItems() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let parsed: any = value
       if (col.type === 'number') parsed = value === '' ? null : parseFloat(value)
-      if (col.key === 'category_id') parsed = parseInt(value)
+      if (col.key === 'category_id') parsed = parseInt(value, 10)
 
       if (col.key.startsWith('stock_')) {
         const updated = await updateStock(tea.id, { [col.key]: parsed })
