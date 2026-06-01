@@ -2,6 +2,7 @@
 
 ## Čekající
 
+- [ ] [2026-06-01] **Edit kategorií a pytlíků — manuální ověření**: Větev `feat/edit-kategorie-pytliky` (16 commitů, 100/100 testů, tsc čistý) čeká na smoke test v běžící appce (Kategorie + Pytlíky: edit/přidat/smazat + 409). Po ověření mergnout do master. Spec/plán: `docs/superpowers/{specs,plans}/2026-06-01-edit-kategorie-pytliky*`.
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
 ## Hotovo
