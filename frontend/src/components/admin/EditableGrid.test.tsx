@@ -73,6 +73,21 @@ describe('EditableGrid', () => {
     )
   })
 
+  it('Escape zruší editaci bez uložení', async () => {
+    const onSaveCell = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    setup(onSaveCell)
+    await user.click(screen.getByText('Alfa'))
+    await user.keyboard('{Enter}')
+    const input = screen.getByDisplayValue('Alfa')
+    await user.clear(input)
+    await user.type(input, 'Změna')
+    await user.keyboard('{Escape}')
+    // editace skončila, input zmizel a nic se neuložilo
+    expect(screen.queryByDisplayValue('Změna')).not.toBeInTheDocument()
+    expect(onSaveCell).not.toHaveBeenCalled()
+  })
+
   it('renderRowActions vykreslí akční sloupec', () => {
     render(
       <EditableGrid<Row>

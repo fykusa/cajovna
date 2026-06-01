@@ -71,7 +71,10 @@ export default function EditableGrid<T>({
     closingRef.current = true
     setEditingCell(null)
     try {
-      await onSaveCell(row, col, editValue)
+      // Ukládat jen při skutečné změně — jinak by každý Enter/blur spustil API volání.
+      if (editValue !== editStartValue(row, col)) {
+        await onSaveCell(row, col, editValue)
+      }
     } finally {
       closingRef.current = false
       focusGrid()
@@ -136,7 +139,7 @@ export default function EditableGrid<T>({
         </thead>
         <tbody>
           {rows.map((row, ri) => (
-            <tr key={getRowId(row)} className={rowClassName ? rowClassName(row) : ''}>
+            <tr key={getRowId(row)} className={rowClassName?.(row)}>
               {columns.map((col, ci) => {
                 const isSelected = selectedCell?.row === ri && selectedCell?.col === ci
                 const isEditing = editingCell?.row === ri && editingCell?.col === ci
