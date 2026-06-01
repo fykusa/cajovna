@@ -24,6 +24,19 @@
   font-size: 0.85rem;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  color: #fff;
+}
+
+.sortIndicator {
+  color: #d4a84b;
+}
+
 .table td {
   padding: 1px 10px;
   border-bottom: 1px solid #2a2a2a;

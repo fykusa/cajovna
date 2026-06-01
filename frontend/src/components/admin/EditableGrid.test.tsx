@@ -110,4 +110,46 @@ describe('EditableGrid', () => {
     // žádný input se neobjeví
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
+
+  it('výchozí řazení je podle prvního sloupce (ID) vzestupně', () => {
+    render(
+      <EditableGrid<Row>
+        columns={COLUMNS}
+        rows={[
+          { id: 2, name: 'Beta', qty: 5 },
+          { id: 1, name: 'Alfa', qty: 30 },
+        ]}
+        getRowId={(r) => r.id}
+        onSaveCell={vi.fn().mockResolvedValue(undefined)}
+      />
+    )
+    const dataRows = screen.getAllByRole('row').slice(1) // bez hlavičky
+    expect(dataRows[0]).toHaveTextContent('Alfa') // id 1 první
+    expect(dataRows[1]).toHaveTextContent('Beta')
+  })
+
+  it('klik na hlavičku řadí vzestupně, druhý klik sestupně', async () => {
+    const user = userEvent.setup()
+    setup()
+    // klik na "Počet" → vzestupně podle qty: Beta(5) před Alfa(30)
+    await user.click(screen.getByRole('columnheader', { name: /Počet/ }))
+    let dataRows = screen.getAllByRole('row').slice(1)
+    expect(dataRows[0]).toHaveTextContent('Beta')
+    expect(dataRows[1]).toHaveTextContent('Alfa')
+    // druhý klik → sestupně: Alfa(30) první
+    await user.click(screen.getByRole('columnheader', { name: /Počet/ }))
+    dataRows = screen.getAllByRole('row').slice(1)
+    expect(dataRows[0]).toHaveTextContent('Alfa')
+    expect(dataRows[1]).toHaveTextContent('Beta')
+  })
+
+  it('Ctrl+C zkopíruje text vybrané buňky do schránky', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    setup()
+    await user.click(screen.getByText('Alfa'))
+    await user.keyboard('{Control>}c{/Control}')
+    expect(writeText).toHaveBeenCalledWith('Alfa')
+  })
 })
