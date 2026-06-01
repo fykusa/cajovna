@@ -73,17 +73,18 @@ export default function EditableGrid<T>({
       return String(v)
     }
     return [...rows].sort((a, b) => {
-      if (col.type === 'number') {
-        const av = parseFloat(String(a[col.key] ?? ''))
-        const bv = parseFloat(String(b[col.key] ?? ''))
-        const aNaN = Number.isNaN(av)
-        const bNaN = Number.isNaN(bv)
-        if (aNaN && bNaN) return 0
-        if (aNaN) return 1 // prázdné vždy na konec
-        if (bNaN) return -1
-        return (av - bv) * dir
-      }
-      return text(a).localeCompare(text(b), 'cs') * dir
+      const at = text(a)
+      const bt = text(b)
+      // Prázdné vždy na konec (bez ohledu na směr).
+      if (at === '' && bt === '') return 0
+      if (at === '') return 1
+      if (bt === '') return -1
+      // Číselné hodnoty (ID, ceny, gramáže…) řadit numericky, ne jako text
+      // (jinak by vyšlo 1, 10, 100, 2).
+      const an = Number(at)
+      const bn = Number(bt)
+      if (!Number.isNaN(an) && !Number.isNaN(bn)) return (an - bn) * dir
+      return at.localeCompare(bt, 'cs') * dir
     })
   }, [rows, columns, sortState])
 

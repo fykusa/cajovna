@@ -111,11 +111,12 @@ describe('EditableGrid', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 
-  it('výchozí řazení je podle prvního sloupce (ID) vzestupně', () => {
+  it('výchozí řazení je podle ID číselně vzestupně (1, 2, 10 — ne 1, 10, 2)', () => {
     render(
       <EditableGrid<Row>
         columns={COLUMNS}
         rows={[
+          { id: 10, name: 'Ceta', qty: 5 },
           { id: 2, name: 'Beta', qty: 5 },
           { id: 1, name: 'Alfa', qty: 30 },
         ]}
@@ -124,8 +125,9 @@ describe('EditableGrid', () => {
       />
     )
     const dataRows = screen.getAllByRole('row').slice(1) // bez hlavičky
-    expect(dataRows[0]).toHaveTextContent('Alfa') // id 1 první
-    expect(dataRows[1]).toHaveTextContent('Beta')
+    expect(dataRows[0]).toHaveTextContent('Alfa') // id 1
+    expect(dataRows[1]).toHaveTextContent('Beta') // id 2
+    expect(dataRows[2]).toHaveTextContent('Ceta') // id 10
   })
 
   it('klik na hlavičku řadí vzestupně, druhý klik sestupně', async () => {
