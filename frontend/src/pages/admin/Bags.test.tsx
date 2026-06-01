@@ -90,4 +90,16 @@ describe('Bags', () => {
     await waitFor(() => expect(bagsApi.deleteBag).toHaveBeenCalledWith(1))
     await waitFor(() => expect(screen.queryByText('porcelán')).not.toBeInTheDocument())
   })
+
+  it('409 při mazání zobrazí chybu', async () => {
+    const { ApiError } = await import('../../api/client')
+    vi.mocked(bagsApi.deleteBag).mockRejectedValue(
+      new ApiError(409, 'Pytlík je použit v prodeji, nelze smazat.')
+    )
+    const user = userEvent.setup()
+    render(<Bags />)
+    await screen.findByText('porcelán')
+    await user.click(screen.getAllByRole('button', { name: 'smazat' })[0])
+    expect(await screen.findByText(/použit v prodeji/i)).toBeInTheDocument()
+  })
 })

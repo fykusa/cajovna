@@ -62,7 +62,7 @@ export default function AdminBags() {
       setBags((prev) => [...prev, created])
       setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba')
+      setError(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
       setSaving(false)
     }
