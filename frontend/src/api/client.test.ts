@@ -81,6 +81,18 @@ describe('apiFetch', () => {
     expect(assign).not.toHaveBeenCalled()
   })
 
+  it('204 No Content (DELETE) vrátí undefined a neparsuje prázdné tělo', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 204,
+      headers: { get: () => 'application/json; charset=utf-8' },
+      json: async () => {
+        throw new Error('Unexpected end of JSON input')
+      },
+    })
+    await expect(apiFetch('/categories/1', { method: 'DELETE' })).resolves.toBeUndefined()
+  })
+
   it('předá body jako JSON při POST', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) })
     await apiFetch('/sales', { method: 'POST', body: JSON.stringify({ items: [] }) })

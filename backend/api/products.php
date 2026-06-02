@@ -3,7 +3,7 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json; charset=utf-8');
 
@@ -24,6 +24,11 @@ if ($method === 'GET' && preg_match('#/api/products/categories$#', $path)) {
 // GET /api/products
 } elseif ($method === 'GET' && preg_match('#/api/products$#', $path)) {
     listProducts();
+
+// POST /api/products – pouze admin
+} elseif ($method === 'POST' && preg_match('#/api/products$#', $path)) {
+    requireAdmin();
+    createProduct();
 
 // GET /api/products/{id}
 } elseif ($method === 'GET' && preg_match('#/api/products/(\d+)$#', $path, $m)) {
@@ -99,6 +104,40 @@ function getProduct(int $id): void {
     }
 
     echo json_encode($row);
+}
+
+function createProduct(): void {
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
+
+    if (empty($data['category_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'category_id je povinný']);
+        return;
+    }
+
+    $pdo  = getPDO();
+    try {
+        $stmt = $pdo->prepare('INSERT INTO teas (category_id, name, flag) VALUES (?, ?, ?)');
+        $stmt->execute([
+            (int) $data['category_id'],
+            $data['name'] ?? 'Nový čaj',
+            $data['flag'] ?? 'active',
+        ]);
+    } catch (PDOException $e) {
+        if ($e->getCode() === '23000') {
+            http_response_code(409);
+            echo json_encode(['error' => 'Neplatná kategorie']);
+            return;
+        }
+        throw $e;
+    }
+
+    $id   = (int) $pdo->lastInsertId();
+    $stmt = $pdo->prepare('SELECT * FROM teas WHERE id = ?');
+    $stmt->execute([$id]);
+
+    http_response_code(201);
+    echo json_encode($stmt->fetch());
 }
 
 function updateProduct(int $id): void {

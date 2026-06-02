@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Sales from './Sales'
+import { renderWithToast } from '../../test/renderWithToast'
 import * as salesApi from '../../api/sales'
 
 vi.mock('../../api/sales', () => ({
@@ -21,20 +22,20 @@ beforeEach(() => {
 
 describe('Sales', () => {
   it('zobrazí tabulku prodejů', async () => {
-    render(<Sales />)
+    renderWithToast(<Sales />)
     expect(await screen.findByText('terka')).toBeInTheDocument()
     expect(screen.getByText('boss')).toBeInTheDocument()
   })
 
   it('zobrazí celkovou tržbu', async () => {
-    render(<Sales />)
+    renderWithToast(<Sales />)
     await screen.findByText('terka')
     expect(screen.getByText(/890/)).toBeInTheDocument()
   })
 
   it('filtruje prodeje po kliku na Zobrazit', async () => {
     const user = userEvent.setup()
-    render(<Sales />)
+    renderWithToast(<Sales />)
     await screen.findByText('terka')
     const fromInput = screen.getByLabelText(/od/i)
     await user.clear(fromInput)

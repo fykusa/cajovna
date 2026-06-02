@@ -3,6 +3,7 @@ import { getSales, getSaleItems } from '../../api/sales'
 import { getUsers } from '../../api/users'
 import { getCategories, getProducts } from '../../api/products'
 import type { Sale, SaleItem, User, Category, Tea } from '../../types'
+import { useToast } from '../../components/toast/useToast'
 import styles from './Dashboard.module.css'
 
 type Period = 'month' | 'lastmonth' | 'year'
@@ -71,7 +72,6 @@ export default function AdminDashboard() {
   const [activePeriod, setActivePeriod] = useState<Period | null>('month')
   const [sales, setSales]               = useState<Sale[]>([])
   const [loading, setLoading]           = useState(true)
-  const [error, setError]               = useState<string | null>(null)
   const [selectedId, setSelectedId]     = useState<number | null>(null)
   const [items, setItems]               = useState<SaleItem[]>([])
   const [itemsLoading, setItemsLoading] = useState(false)
@@ -82,9 +82,10 @@ export default function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedTea, setSelectedTea]   = useState<number | null>(null)
 
+  const toast = useToast()
+
   const load = useCallback(async (f: string, t: string, catId?: number | null, teaId?: number | null) => {
     setLoading(true)
-    setError(null)
     setSelectedId(null)
     setItems([])
     try {
@@ -95,11 +96,11 @@ export default function AdminDashboard() {
         tea_id: teaId || undefined,
       }))
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba načítání')
+      toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [toast])
 
   useEffect(() => {
     load(from, to)
@@ -352,8 +353,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-
-      {error && <p className={styles.error}>{error}</p>}
 
       {loading ? (
         <p className={styles.loading}>Načítám…</p>

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import POS from './POS'
+import { renderWithToast } from '../test/renderWithToast'
 
 vi.mock('../api/products', () => ({
   getCategories: vi.fn().mockResolvedValue([
@@ -26,12 +27,12 @@ vi.mock('../store/authStore', () => ({
 
 describe('POS', () => {
   it('zobrazí kategorie po načtení', async () => {
-    render(<POS />)
+    renderWithToast(<POS />)
     expect(await screen.findByText('Bílé')).toBeInTheDocument()
   })
 
   it('Enter na kategorii přejde na výběr čaje', async () => {
-    render(<POS />)
+    renderWithToast(<POS />)
     await screen.findByText('Bílé')
     await act(async () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
@@ -40,7 +41,7 @@ describe('POS', () => {
   })
 
   it('psaní písmene otevře search mód', async () => {
-    render(<POS />)
+    renderWithToast(<POS />)
     await screen.findByText('Bílé')
     const user = userEvent.setup()
     await user.keyboard('s')

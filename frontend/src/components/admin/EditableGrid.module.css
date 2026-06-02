@@ -1,0 +1,81 @@
+.grid {
+  outline: none;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  background: #1a1a1a;
+}
+
+.table th {
+  padding: 6px 10px;
+  text-align: left;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  color: #fff;
+}
+
+.sortIndicator {
+  color: #d4a84b;
+}
+
+.table td {
+  padding: 1px 10px;
+  border-bottom: 1px solid #2a2a2a;
+  color: #ccc;
+  background: #222;
+  line-height: 1.3;
+}
+
+.cell {
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.cellSelected {
+  background: #333 !important;
+  color: #a8e6a1;
+  outline: 1px solid #d4a84b;
+  outline-offset: -1px;
+}
+
+.cellEditing {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 1px 6px;
+  background: #333;
+  border: 1px solid #555;
+  color: #fff;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.cellEditing:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.actionCell {
+  padding: 1px 8px;
+  text-align: center;
+}

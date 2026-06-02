@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Users from './Users'
+import { renderWithToast } from '../../test/renderWithToast'
 import * as usersApi from '../../api/users'
 
 vi.mock('../../api/users', () => ({
@@ -23,13 +24,13 @@ beforeEach(() => {
 
 describe('Users', () => {
   it('zobrazí seznam uživatelů', async () => {
-    render(<Users />)
+    renderWithToast(<Users />)
     expect(await screen.findByText('terka')).toBeInTheDocument()
     expect(screen.getByText('boss')).toBeInTheDocument()
   })
 
   it('zobrazí roli každého uživatele', async () => {
-    render(<Users />)
+    renderWithToast(<Users />)
     await screen.findByText('terka')
     expect(screen.getByText('prodavacka')).toBeInTheDocument()
     expect(screen.getByText('admin')).toBeInTheDocument()
@@ -37,7 +38,7 @@ describe('Users', () => {
 
   it('zobrazí formulář pro nového uživatele po kliku na Přidat', async () => {
     const user = userEvent.setup()
-    render(<Users />)
+    renderWithToast(<Users />)
     await screen.findByText('terka')
     await user.click(screen.getByRole('button', { name: /přidat/i }))
     expect(screen.getByPlaceholderText(/uživatelské jméno/i)).toBeInTheDocument()
@@ -46,7 +47,7 @@ describe('Users', () => {
   it('zavolá createUser a zobrazí nového uživatele po odeslání formuláře', async () => {
     vi.mocked(usersApi.createUser).mockResolvedValueOnce({ id: 3 })
     const user = userEvent.setup()
-    render(<Users />)
+    renderWithToast(<Users />)
     await screen.findByText('terka')
     // Nastav refresh mock AŽ po initial load (jinak ho spotřebuje initial load)
     vi.mocked(usersApi.getUsers).mockResolvedValueOnce([
@@ -66,7 +67,7 @@ describe('Users', () => {
   it('vyžádá potvrzení a zavolá deleteUser', async () => {
     vi.mocked(usersApi.deleteUser).mockResolvedValueOnce(undefined)
     const user = userEvent.setup()
-    render(<Users />)
+    renderWithToast(<Users />)
     await screen.findByText('terka')
     // Nastav refresh mock AŽ po initial load
     vi.mocked(usersApi.getUsers).mockResolvedValueOnce([USERS[1]])

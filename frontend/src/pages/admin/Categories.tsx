@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
-import type { Bag } from '../../types'
-import { getBags, createBag, updateBag, deleteBag } from '../../api/bags'
+import type { Category } from '../../types'
+import { getCategories, createCategory, updateCategory, deleteCategory } from '../../api/categories'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
 import { useToast } from '../../components/toast/useToast'
-import styles from './Bags.module.css'
+import styles from './Categories.module.css'
 
-export default function AdminBags() {
-  const [bags, setBags] = useState<Bag[]>([])
+export default function AdminCategories() {
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
@@ -15,7 +15,7 @@ export default function AdminBags() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      setBags(await getBags())
+      setCategories(await getCategories())
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
@@ -27,22 +27,33 @@ export default function AdminBags() {
     load()
   }, [load])
 
-  const columns: ColDef<Bag>[] = [
+  const getCatName = (id: number | null) =>
+    id === null ? '(žádná)' : categories.find((c) => c.id === id)?.name ?? `[${id}]`
+
+  const parentOptions = categories.map((c) => ({ value: String(c.id), label: c.name }))
+
+  const columns: ColDef<Category>[] = [
     { key: 'id', label: 'ID', type: 'readonly' },
-    { key: 'surface_type', label: 'Materiál', type: 'text' },
-    { key: 'volume_ml', label: 'Objem ml', type: 'number' },
-    { key: 'dimensions', label: 'Rozměry', type: 'text' },
-    { key: 'price_per_piece', label: 'Cena/ks', type: 'number' },
+    { key: 'name', label: 'Název', type: 'text' },
+    {
+      key: 'parent_id',
+      label: 'Nadřazená',
+      type: 'select',
+      options: parentOptions,
+      render: (c) => getCatName(c.parent_id),
+    },
+    { key: 'sort_order', label: 'Pořadí', type: 'number' },
   ]
 
-  async function handleSaveCell(bag: Bag, col: ColDef<Bag>, value: string) {
+  async function handleSaveCell(cat: Category, col: ColDef<Category>, value: string) {
     setSaving(true)
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let parsed: any = value
-      if (col.type === 'number') parsed = value === '' ? null : parseFloat(value)
-      const updated = await updateBag(bag.id, { [col.key]: parsed })
-      setBags((prev) => prev.map((b) => (b.id === bag.id ? updated : b)))
+      if (col.type === 'number') parsed = value === '' ? 0 : parseInt(value, 10)
+      if (col.key === 'parent_id') parsed = value === '' ? null : parseInt(value, 10)
+      const updated = await updateCategory(cat.id, { [col.key]: parsed })
+      setCategories((prev) => prev.map((c) => (c.id === cat.id ? updated : c)))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
@@ -53,13 +64,8 @@ export default function AdminBags() {
   async function handleAdd() {
     setSaving(true)
     try {
-      const created = await createBag({
-        surface_type: 'nový',
-        volume_ml: 0,
-        dimensions: null,
-        price_per_piece: 0,
-      })
-      setBags((prev) => [...prev, created])
+      const created = await createCategory({ name: 'Nová kategorie', parent_id: null, sort_order: 0 })
+      setCategories((prev) => [...prev, created])
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
@@ -67,11 +73,11 @@ export default function AdminBags() {
     }
   }
 
-  async function handleDelete(bag: Bag) {
+  async function handleDelete(cat: Category) {
     setSaving(true)
     try {
-      await deleteBag(bag.id)
-      setBags((prev) => prev.filter((b) => b.id !== bag.id))
+      await deleteCategory(cat.id)
+      setCategories((prev) => prev.filter((c) => c.id !== cat.id))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
@@ -85,22 +91,22 @@ export default function AdminBags() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Pytlíky</h1>
+        <h1 className={styles.title}>Kategorie</h1>
         <button className={styles.addBtn} onClick={handleAdd} disabled={saving}>
           + Přidat
         </button>
       </div>
 
       <div className={styles.tableWrapper}>
-        <EditableGrid<Bag>
+        <EditableGrid<Category>
           columns={columns}
-          rows={bags}
-          getRowId={(b) => b.id}
+          rows={categories}
+          getRowId={(c) => c.id}
           onSaveCell={handleSaveCell}
-          renderRowActions={(bag) =>
-            confirmDeleteId === bag.id ? (
+          renderRowActions={(cat) =>
+            confirmDeleteId === cat.id ? (
               <>
-                <button className={styles.deleteBtn} onClick={() => handleDelete(bag)} disabled={saving}>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(cat)} disabled={saving}>
                   Potvrdit
                 </button>
                 <button
@@ -114,7 +120,7 @@ export default function AdminBags() {
             ) : (
               <button
                 className={styles.deleteBtn}
-                onClick={() => setConfirmDeleteId(bag.id)}
+                onClick={() => setConfirmDeleteId(cat.id)}
                 disabled={saving}
               >
                 smazat

@@ -8,6 +8,7 @@ import QuantitySelector from '../components/pos/QuantitySelector'
 import BagSelector from '../components/pos/BagSelector'
 import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
+import { useToast } from '../components/toast/useToast'
 import styles from './POS.module.css'
 
 export default function POS() {
@@ -16,6 +17,7 @@ export default function POS() {
   const logout = useAuthStore((s) => s.logout)
   const user = useAuthStore((s) => s.user)
   const [showCheckout, setShowCheckout] = useState(false)
+  const toast = useToast()
 
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -137,6 +139,7 @@ export default function POS() {
           onSuccess={() => {
             clearCart()
             setShowCheckout(false)
+            toast.success('Prodej uložen')
           }}
           onCancel={() => setShowCheckout(false)}
         />
