@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { User } from '../../types'
 import { getUsers, createUser, deleteUser } from '../../api/users'
+import { useToast } from '../../components/toast/useToast'
 import styles from './Users.module.css'
 
 interface NewUserForm { username: string; password: string; role: User['role'] }
@@ -13,6 +14,7 @@ export default function Users() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+  const toast = useToast()
 
   async function load() {
     setLoading(true)
@@ -50,7 +52,7 @@ export default function Users() {
       setConfirmDeleteId(null)
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Chyba mazání')
+      toast.error(err instanceof Error ? err.message : 'Chyba mazání')
     }
   }
 
