@@ -2,7 +2,8 @@
 
 ## Čekající
 
-- [ ] [2026-06-01] **Edit kategorií a pytlíků — manuální ověření**: Větev `feat/edit-kategorie-pytliky` (16 commitů, 100/100 testů, tsc čistý) čeká na smoke test v běžící appce (Kategorie + Pytlíky: edit/přidat/smazat + 409). Po ověření mergnout do master. Spec/plán: `docs/superpowers/{specs,plans}/2026-06-01-edit-kategorie-pytliky*`.
+- [ ] [2026-06-01] **Edit kategorií a pytlíků — manuální ověření**: Větev `feat/edit-kategorie-pytliky` (18+ commitů, 104/104 testů, tsc čistý) čeká na smoke test v běžící appce (Kategorie + Pytlíky: edit/přidat/smazat + 409; sortování sloupců + Ctrl+C kopírování v gridu; „+ Přidat" zelené vpravo na všech sekcích). Po ověření mergnout do master. Spec/plán: `docs/superpowers/{specs,plans}/2026-06-01-edit-kategorie-pytliky*`.
+- [ ] [2026-06-02] **Konzistentní deaktivace napříč sekcemi**: Sjednotit chování — položku navázanou v transakcích (prodejích) **nemazat natvrdo, ale deaktivovat**; nepoužitou lze smazat. Každá sekce má mít filtr „zobrazit neaktivní" + reaktivaci (po vzoru Čajů). Model: **smazat když není v prodejích, jinak deaktivovat**. Stav: Čaje = hotový vzor (flag + filtr + reaktivace). Uživatelé = backend už soft-deletuje (`active=0`), chybí UI filtr/reaktivace/indikace + relabel. Kategorie + Pytlíky = nemají `active` sloupec → **nutná DB migrace** (přidat `active`) + backend (delete zkusí hard, při FK 23000 deaktivuje; list s filtrem) + UI (toggle „neaktivní" + deaktivovat/aktivovat akce). Zvážit vytažení „showInactive" patternu do sdílené vrstvy. Udělat jako samostatnou featuru: brainstorm → spec → plán → subagenti.
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
 ## Hotovo
