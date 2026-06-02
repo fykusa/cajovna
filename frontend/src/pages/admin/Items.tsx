@@ -18,6 +18,7 @@ export default function AdminItems() {
   const [showInactive, setShowInactive] = useState(false)
   const [saving, setSaving] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null)
+  const [nameFilter, setNameFilter] = useState('')
   const toast = useToast()
 
   const load = useCallback(async () => {
@@ -37,10 +38,14 @@ export default function AdminItems() {
     load()
   }, [load])
 
+  const nameQuery = nameFilter.trim().toLowerCase()
   const visibleTeas = (showInactive
     ? teas.filter((t) => t.flag !== 'active')
     : teas.filter((t) => t.flag === 'active')
-  ).filter((t) => categoryFilter === null || t.category_id === categoryFilter)
+  )
+    .filter((t) => categoryFilter === null || t.category_id === categoryFilter)
+    // Filtr podle jména – substring kdekoli (jako SQL LIKE %…%), bez diakr. citlivosti na velikost.
+    .filter((t) => nameQuery === '' || t.name.toLowerCase().includes(nameQuery))
 
   const getCategoryName = (catId: number) =>
     categories.find((c) => c.id === catId)?.name || `[${catId}]`
@@ -139,8 +144,15 @@ export default function AdminItems() {
             checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
           />
-          Zobrazit neaktivní
+          Zobrazit jen neaktivní
         </label>
+        <input
+          type="text"
+          className={styles.nameFilter}
+          placeholder="Hledat podle názvu…"
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+        />
         <button className={styles.addBtn} onClick={handleAdd} disabled={saving}>
           + Přidat
         </button>

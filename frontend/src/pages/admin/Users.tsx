@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import type { User } from '../../types'
 import { getUsers, createUser, deleteUser } from '../../api/users'
+import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
 import { useToast } from '../../components/toast/useToast'
 import styles from './Users.module.css'
 
@@ -16,19 +17,27 @@ export default function Users() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const toast = useToast()
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await getUsers()
-      setUsers(data)
+      setUsers(await getUsers())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Chyba načítání')
+      toast.error(err instanceof Error ? err.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [load])
+
+  const columns: ColDef<User>[] = [
+    { key: 'id', label: 'ID', type: 'readonly' },
+    { key: 'username', label: 'Jméno', type: 'readonly' },
+    { key: 'role', label: 'Role', type: 'readonly' },
+  ]
+
+  // Uživatelé se v gridu needitují (jen vytvoření + smazání).
+  async function handleSaveCell() {}
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -47,19 +56,25 @@ export default function Users() {
   }
 
   async function handleDelete(id: number) {
+    setSaving(true)
     try {
       await deleteUser(id)
-      setConfirmDeleteId(null)
-      await load()
+      setUsers((prev) => prev.filter((u) => u.id !== id))
+      toast.success('Uživatel smazán')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Chyba mazání')
+    } finally {
+      setSaving(false)
+      setConfirmDeleteId(null)
     }
   }
 
+  if (loading) return <p className={styles.loading}>Načítám…</p>
+
   return (
-    <div>
+    <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Uživatelé</h1>
+        <h1 className={styles.title}>Uživatelé</h1>
         <button onClick={() => setShowForm(true)} className={styles.addBtn}>+ Přidat</button>
       </div>
 
@@ -92,42 +107,43 @@ export default function Users() {
           </select>
           <div className={styles.formActions}>
             <button type="submit" disabled={saving} className={styles.saveBtn}>Uložit</button>
-            <button type="button" onClick={() => setShowForm(false)} className={styles.cancelBtn}>Zrušit</button>
+            <button type="button" onClick={() => setShowForm(false)} className={styles.formCancelBtn}>Zrušit</button>
           </div>
         </form>
       )}
 
-      {loading ? (
-        <p className={styles.loading}>Načítám…</p>
-      ) : (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Jméno</th>
-              <th>Role</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td>{u.username}</td>
-                <td><span className={styles.role}>{u.role}</span></td>
-                <td>
-                  {confirmDeleteId === u.id ? (
-                    <>
-                      <button onClick={() => handleDelete(u.id)} className={styles.deleteBtn}>Potvrdit</button>
-                      <button onClick={() => setConfirmDeleteId(null)} className={styles.cancelBtn} style={{ marginLeft: 4 }}>Zrušit</button>
-                    </>
-                  ) : (
-                    <button onClick={() => setConfirmDeleteId(u.id)} className={styles.deleteBtn}>Smazat</button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div className={styles.tableWrapper}>
+        <EditableGrid<User>
+          columns={columns}
+          rows={users}
+          getRowId={(u) => u.id}
+          onSaveCell={handleSaveCell}
+          renderRowActions={(u) =>
+            confirmDeleteId === u.id ? (
+              <>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(u.id)} disabled={saving}>
+                  Potvrdit
+                </button>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => setConfirmDeleteId(null)}
+                  disabled={saving}
+                >
+                  Zrušit
+                </button>
+              </>
+            ) : (
+              <button
+                className={styles.deleteBtn}
+                onClick={() => setConfirmDeleteId(u.id)}
+                disabled={saving}
+              >
+                smazat
+              </button>
+            )
+          }
+        />
+      </div>
     </div>
   )
 }

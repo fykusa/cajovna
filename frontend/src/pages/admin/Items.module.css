@@ -33,6 +33,25 @@
   cursor: pointer;
 }
 
+.nameFilter {
+  padding: 6px 10px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #eee;
+  font-size: 0.9rem;
+  min-width: 220px;
+}
+
+.nameFilter:focus {
+  outline: none;
+  border-color: #d4a84b;
+}
+
+.nameFilter::placeholder {
+  color: #777;
+}
+
 .addBtn {
   padding: 8px 16px;
   background: #6abf69;
