@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Categories from './Categories'
+import { renderWithToast } from '../../test/renderWithToast'
 import * as categoriesApi from '../../api/categories'
 import type { Category } from '../../types'
 
@@ -24,7 +25,7 @@ beforeEach(() => {
 
 describe('Categories', () => {
   it('zobrazí seznam kategorií', async () => {
-    render(<Categories />)
+    renderWithToast(<Categories />)
     expect(await screen.findByText('Bílé')).toBeInTheDocument()
     expect(screen.getByText('Zelené')).toBeInTheDocument()
   })
@@ -37,7 +38,7 @@ describe('Categories', () => {
       sort_order: 0,
     })
     const user = userEvent.setup()
-    render(<Categories />)
+    renderWithToast(<Categories />)
     await screen.findByText('Bílé')
     await user.click(screen.getByRole('button', { name: /přidat/i }))
     await waitFor(() =>
@@ -58,7 +59,7 @@ describe('Categories', () => {
       sort_order: 1,
     })
     const user = userEvent.setup()
-    render(<Categories />)
+    renderWithToast(<Categories />)
     await screen.findByText('Bílé')
     await user.click(screen.getByText('Bílé'))
     await user.keyboard('{Enter}')
@@ -74,7 +75,7 @@ describe('Categories', () => {
   it('smazání zavolá deleteCategory a odebere řádek', async () => {
     vi.mocked(categoriesApi.deleteCategory).mockResolvedValue(undefined)
     const user = userEvent.setup()
-    render(<Categories />)
+    renderWithToast(<Categories />)
     await screen.findByText('Bílé')
     const deleteButtons = screen.getAllByRole('button', { name: 'smazat' })
     await user.click(deleteButtons[0])
@@ -88,7 +89,7 @@ describe('Categories', () => {
       new ApiError(409, 'Kategorie je použita u čajů, nelze smazat.')
     )
     const user = userEvent.setup()
-    render(<Categories />)
+    renderWithToast(<Categories />)
     await screen.findByText('Bílé')
     await user.click(screen.getAllByRole('button', { name: 'smazat' })[0])
     expect(await screen.findByText(/použita u čajů/i)).toBeInTheDocument()

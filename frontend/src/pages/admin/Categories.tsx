@@ -2,25 +2,25 @@ import { useEffect, useState, useCallback } from 'react'
 import type { Category } from '../../types'
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../../api/categories'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
+import { useToast } from '../../components/toast/useToast'
 import styles from './Categories.module.css'
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
       setCategories(await getCategories())
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba načítání')
+      toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [toast])
 
   useEffect(() => {
     load()
@@ -53,9 +53,8 @@ export default function AdminCategories() {
       if (col.key === 'parent_id') parsed = value === '' ? null : parseInt(value, 10)
       const updated = await updateCategory(cat.id, { [col.key]: parsed })
       setCategories((prev) => prev.map((c) => (c.id === cat.id ? updated : c)))
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba uložení')
+      toast.error(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
       setSaving(false)
     }
@@ -66,9 +65,8 @@ export default function AdminCategories() {
     try {
       const created = await createCategory({ name: 'Nová kategorie', parent_id: null, sort_order: 0 })
       setCategories((prev) => [...prev, created])
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba vytváření')
+      toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
       setSaving(false)
     }
@@ -79,9 +77,8 @@ export default function AdminCategories() {
     try {
       await deleteCategory(cat.id)
       setCategories((prev) => prev.filter((c) => c.id !== cat.id))
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba mazání')
+      toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
       setSaving(false)
     }
@@ -97,8 +94,6 @@ export default function AdminCategories() {
           + Přidat
         </button>
       </div>
-
-      {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.tableWrapper}>
         <EditableGrid<Category>
