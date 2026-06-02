@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Bags from './Bags'
+import { renderWithToast } from '../../test/renderWithToast'
 import * as bagsApi from '../../api/bags'
 import type { Bag } from '../../types'
 
@@ -24,13 +25,13 @@ beforeEach(() => {
 
 describe('Bags', () => {
   it('zobrazí seznam pytlíků', async () => {
-    render(<Bags />)
+    renderWithToast(<Bags />)
     expect(await screen.findByText('porcelán')).toBeInTheDocument()
     expect(screen.getByText('sklo')).toBeInTheDocument()
   })
 
   it('cena se zobrazí bez zbytečných nul (20, ne 20.00)', async () => {
-    render(<Bags />)
+    renderWithToast(<Bags />)
     await screen.findByText('porcelán')
     expect(screen.getByText('20')).toBeInTheDocument()
     expect(screen.getByText('12.5')).toBeInTheDocument()
@@ -45,7 +46,7 @@ describe('Bags', () => {
       price_per_piece: 0,
     })
     const user = userEvent.setup()
-    render(<Bags />)
+    renderWithToast(<Bags />)
     await screen.findByText('porcelán')
     await user.click(screen.getByRole('button', { name: /přidat/i }))
     await waitFor(() =>
@@ -68,7 +69,7 @@ describe('Bags', () => {
       price_per_piece: 15,
     })
     const user = userEvent.setup()
-    render(<Bags />)
+    renderWithToast(<Bags />)
     await screen.findByText('porcelán')
     await user.click(screen.getByText('12.5'))
     await user.keyboard('{Enter}')
@@ -84,7 +85,7 @@ describe('Bags', () => {
   it('smazání zavolá deleteBag a odebere řádek', async () => {
     vi.mocked(bagsApi.deleteBag).mockResolvedValue(undefined)
     const user = userEvent.setup()
-    render(<Bags />)
+    renderWithToast(<Bags />)
     await screen.findByText('porcelán')
     await user.click(screen.getAllByRole('button', { name: 'smazat' })[0])
     await waitFor(() => expect(bagsApi.deleteBag).toHaveBeenCalledWith(1))
@@ -97,7 +98,7 @@ describe('Bags', () => {
       new ApiError(409, 'Pytlík je použit v prodeji, nelze smazat.')
     )
     const user = userEvent.setup()
-    render(<Bags />)
+    renderWithToast(<Bags />)
     await screen.findByText('porcelán')
     await user.click(screen.getAllByRole('button', { name: 'smazat' })[0])
     expect(await screen.findByText(/použit v prodeji/i)).toBeInTheDocument()

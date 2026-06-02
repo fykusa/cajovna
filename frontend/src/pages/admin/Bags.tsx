@@ -2,25 +2,25 @@ import { useEffect, useState, useCallback } from 'react'
 import type { Bag } from '../../types'
 import { getBags, createBag, updateBag, deleteBag } from '../../api/bags'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
+import { useToast } from '../../components/toast/useToast'
 import styles from './Bags.module.css'
 
 export default function AdminBags() {
   const [bags, setBags] = useState<Bag[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
       setBags(await getBags())
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba načítání')
+      toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [toast])
 
   useEffect(() => {
     load()
@@ -42,9 +42,8 @@ export default function AdminBags() {
       if (col.type === 'number') parsed = value === '' ? null : parseFloat(value)
       const updated = await updateBag(bag.id, { [col.key]: parsed })
       setBags((prev) => prev.map((b) => (b.id === bag.id ? updated : b)))
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba uložení')
+      toast.error(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
       setSaving(false)
     }
@@ -60,9 +59,8 @@ export default function AdminBags() {
         price_per_piece: 0,
       })
       setBags((prev) => [...prev, created])
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba vytváření')
+      toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
       setSaving(false)
     }
@@ -73,9 +71,8 @@ export default function AdminBags() {
     try {
       await deleteBag(bag.id)
       setBags((prev) => prev.filter((b) => b.id !== bag.id))
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba mazání')
+      toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
       setSaving(false)
     }
@@ -91,8 +88,6 @@ export default function AdminBags() {
           + Přidat
         </button>
       </div>
-
-      {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.tableWrapper}>
         <EditableGrid<Bag>
