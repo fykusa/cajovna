@@ -4,11 +4,11 @@ import styles from './AdminLayout.module.css'
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Přehled', end: true },
-  { to: '/admin/products', label: 'Čaje', end: false },
-  { to: '/admin/categories', label: 'Kategorie', end: false },
-  { to: '/admin/users', label: 'Uživatelé', end: false },
-  { to: '/admin/bags', label: 'Pytlíky', end: false },
   { to: '/admin/sales', label: 'Tržby', end: false },
+  { to: '/admin/categories', label: 'Kategorie', end: false },
+  { to: '/admin/products', label: 'Čaje', end: false },
+  { to: '/admin/bags', label: 'Pytlíky', end: false },
+  { to: '/admin/users', label: 'Uživatelé', end: false },
 ]
 
 export default function AdminLayout() {
