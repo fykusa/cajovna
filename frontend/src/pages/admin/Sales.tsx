@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Sale } from '../../types'
 import { getSales } from '../../api/sales'
+import { useToast } from '../../components/toast/useToast'
 import styles from './Sales.module.css'
 
 export default function Sales() {
@@ -9,16 +10,15 @@ export default function Sales() {
   const [to, setTo] = useState(today)
   const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const toast = useToast()
 
   async function load() {
     setLoading(true)
-    setError(null)
     try {
       const data = await getSales({ from: from + ' 00:00:00', to: to + ' 23:59:59' })
       setSales(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Chyba načítání')
+      toast.error(err instanceof Error ? err.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
@@ -49,7 +49,6 @@ export default function Sales() {
         <button type="submit" className={styles.filterBtn}>Zobrazit</button>
       </form>
 
-      {error && <p style={{ color: '#f87171' }}>{error}</p>}
 
       {loading ? (
         <p className={styles.loading}>Načítám…</p>
