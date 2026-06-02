@@ -37,6 +37,9 @@ export async function apiFetch<T>(
     throw new ApiError(res.status, body.error ?? body.message ?? res.statusText)
   }
 
+  // 204 No Content (typicky DELETE) má prázdné tělo — neparsovat JSON.
+  if (res.status === 204) return undefined as T
+
   const ct = res.headers?.get('content-type')
   if (ct !== null && ct !== undefined && !ct.includes('application/json')) return undefined as T
   return res.json() as Promise<T>
