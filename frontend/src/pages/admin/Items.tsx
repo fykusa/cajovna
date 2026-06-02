@@ -31,7 +31,7 @@ export default function AdminItems() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [toast])
 
   useEffect(() => {
     load()
