@@ -9,6 +9,7 @@ export default function AdminBags() {
   const [bags, setBags] = useState<Bag[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const toast = useToast()
 
   const load = useCallback(async () => {
@@ -75,6 +76,7 @@ export default function AdminBags() {
       toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
       setSaving(false)
+      setConfirmDeleteId(null)
     }
   }
 
@@ -95,11 +97,30 @@ export default function AdminBags() {
           rows={bags}
           getRowId={(b) => b.id}
           onSaveCell={handleSaveCell}
-          renderRowActions={(bag) => (
-            <button className={styles.deleteBtn} onClick={() => handleDelete(bag)} disabled={saving}>
-              smazat
-            </button>
-          )}
+          renderRowActions={(bag) =>
+            confirmDeleteId === bag.id ? (
+              <>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(bag)} disabled={saving}>
+                  Potvrdit
+                </button>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => setConfirmDeleteId(null)}
+                  disabled={saving}
+                >
+                  Zrušit
+                </button>
+              </>
+            ) : (
+              <button
+                className={styles.deleteBtn}
+                onClick={() => setConfirmDeleteId(bag.id)}
+                disabled={saving}
+              >
+                smazat
+              </button>
+            )
+          }
         />
       </div>
     </div>

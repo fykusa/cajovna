@@ -9,6 +9,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const toast = useToast()
 
   const load = useCallback(async () => {
@@ -81,6 +82,7 @@ export default function AdminCategories() {
       toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
       setSaving(false)
+      setConfirmDeleteId(null)
     }
   }
 
@@ -101,11 +103,30 @@ export default function AdminCategories() {
           rows={categories}
           getRowId={(c) => c.id}
           onSaveCell={handleSaveCell}
-          renderRowActions={(cat) => (
-            <button className={styles.deleteBtn} onClick={() => handleDelete(cat)} disabled={saving}>
-              smazat
-            </button>
-          )}
+          renderRowActions={(cat) =>
+            confirmDeleteId === cat.id ? (
+              <>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(cat)} disabled={saving}>
+                  Potvrdit
+                </button>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => setConfirmDeleteId(null)}
+                  disabled={saving}
+                >
+                  Zrušit
+                </button>
+              </>
+            ) : (
+              <button
+                className={styles.deleteBtn}
+                onClick={() => setConfirmDeleteId(cat.id)}
+                disabled={saving}
+              >
+                smazat
+              </button>
+            )
+          }
         />
       </div>
     </div>
