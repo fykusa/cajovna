@@ -34,7 +34,10 @@ if ($method === 'GET' && preg_match('#/api/bags$#', $path)) {
 }
 
 function bagColumns(): string {
-    return 'id, surface_type, volume_ml, dimensions, price_per_piece';
+    return 'id, surface_type, volume_ml, dimensions, price_per_piece, '
+        . 'var1_qty, var1_price, var1_margin_pct, '
+        . 'var2_qty, var2_price, var2_margin_pct, '
+        . 'var3_qty, var3_price, var3_margin_pct, supplier_url';
 }
 
 function listBags(): void {
@@ -66,7 +69,12 @@ function createBag(): void {
 function updateBag(int $id): void {
     $data    = json_decode(file_get_contents('php://input'), true) ?? [];
     $pdo     = getPDO();
-    $allowed = ['surface_type', 'volume_ml', 'dimensions', 'price_per_piece'];
+    $allowed = [
+        'surface_type', 'volume_ml', 'dimensions', 'price_per_piece',
+        'var1_qty', 'var1_price', 'var1_margin_pct',
+        'var2_qty', 'var2_price', 'var2_margin_pct',
+        'var3_qty', 'var3_price', 'var3_margin_pct', 'supplier_url',
+    ];
     $fields  = [];
     $params  = [];
     foreach ($allowed as $col) {

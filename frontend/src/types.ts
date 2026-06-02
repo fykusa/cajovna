@@ -42,6 +42,17 @@ export interface Bag {
   volume_ml: number
   dimensions: string | null
   price_per_piece: number
+  // Nákupní varianty (volitelné – plní se až editací v adminu)
+  var1_qty?: number | null
+  var1_price?: number | null
+  var1_margin_pct?: number | null
+  var2_qty?: number | null
+  var2_price?: number | null
+  var2_margin_pct?: number | null
+  var3_qty?: number | null
+  var3_price?: number | null
+  var3_margin_pct?: number | null
+  supplier_url?: string | null
 }
 
 export type ItemType = 'std' | 'pkg1' | 'pkg2' | 'custom'

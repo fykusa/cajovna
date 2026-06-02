@@ -33,6 +33,16 @@ export default function AdminBags() {
     { key: 'volume_ml', label: 'Objem ml', type: 'number' },
     { key: 'dimensions', label: 'Rozměry', type: 'text' },
     { key: 'price_per_piece', label: 'Cena/ks', type: 'number' },
+    { key: 'var1_qty', label: 'V1 ks', type: 'number' },
+    { key: 'var1_price', label: 'V1 cena', type: 'number' },
+    { key: 'var1_margin_pct', label: 'V1 marže %', type: 'number' },
+    { key: 'var2_qty', label: 'V2 ks', type: 'number' },
+    { key: 'var2_price', label: 'V2 cena', type: 'number' },
+    { key: 'var2_margin_pct', label: 'V2 marže %', type: 'number' },
+    { key: 'var3_qty', label: 'V3 ks', type: 'number' },
+    { key: 'var3_price', label: 'V3 cena', type: 'number' },
+    { key: 'var3_margin_pct', label: 'V3 marže %', type: 'number' },
+    { key: 'supplier_url', label: 'Dodavatel URL', type: 'text' },
   ]
 
   async function handleSaveCell(bag: Bag, col: ColDef<Bag>, value: string) {
@@ -72,6 +82,7 @@ export default function AdminBags() {
     try {
       await deleteBag(bag.id)
       setBags((prev) => prev.filter((b) => b.id !== bag.id))
+      toast.success('Pytlík smazán')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
