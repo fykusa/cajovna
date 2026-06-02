@@ -119,6 +119,7 @@ export default function AdminItems() {
       const newFlag = tea.flag === 'active' ? 'discontinued' : 'active'
       const updated = await updateProduct(tea.id, { flag: newFlag })
       setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
+      toast.success(newFlag === 'active' ? 'Čaj aktivován' : 'Čaj deaktivován')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba')
     } finally {

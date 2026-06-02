@@ -78,6 +78,7 @@ export default function AdminCategories() {
     try {
       await deleteCategory(cat.id)
       setCategories((prev) => prev.filter((c) => c.id !== cat.id))
+      toast.success('Kategorie smazána')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba mazání')
     } finally {
