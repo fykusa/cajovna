@@ -3,6 +3,7 @@ import { getProducts, getCategories, createProduct, updateProduct } from '../../
 import { updateStock } from '../../api/stock'
 import type { Tea, Category } from '../../types'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
+import { useToast } from '../../components/toast/useToast'
 import styles from './Items.module.css'
 
 const FLAG_OPTIONS = ['active', 'discontinued', 'no_insert', 'eshop_only', 'trial'].map((f) => ({
@@ -14,11 +15,10 @@ export default function AdminItems() {
   const [teas, setTeas] = useState<Tea[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [showInactive, setShowInactive] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [success, setSuccess] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null)
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -26,9 +26,8 @@ export default function AdminItems() {
       const [allTeas, cats] = await Promise.all([getProducts(), getCategories()])
       setTeas(allTeas)
       setCategories(cats)
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba načítání')
+      toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
@@ -88,11 +87,9 @@ export default function AdminItems() {
         const updated = await updateProduct(tea.id, { [col.key]: parsed })
         setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
       }
-      setError(null)
-      setSuccess('Záznam uložen')
-      setTimeout(() => setSuccess(null), 3000)
+      toast.success('Záznam uložen')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba uložení')
+      toast.error(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
       setSaving(false)
     }
@@ -100,7 +97,7 @@ export default function AdminItems() {
 
   async function handleAdd() {
     if (categories.length === 0) {
-      setError('Nejprve vytvořte kategorii')
+      toast.error('Nejprve vytvořte kategorii')
       return
     }
     setSaving(true)
@@ -109,9 +106,8 @@ export default function AdminItems() {
       const created = await createProduct({ category_id: catId, name: 'Nový čaj', flag: 'active' })
       setTeas((prev) => [...prev, created])
       setShowInactive(false) // nový čaj je aktivní → ať je vidět
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba vytváření')
+      toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
       setSaving(false)
     }
@@ -123,9 +119,8 @@ export default function AdminItems() {
       const newFlag = tea.flag === 'active' ? 'discontinued' : 'active'
       const updated = await updateProduct(tea.id, { flag: newFlag })
       setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
-      setError(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Chyba')
+      toast.error(e instanceof Error ? e.message : 'Chyba')
     } finally {
       setSaving(false)
     }
@@ -168,8 +163,6 @@ export default function AdminItems() {
         </div>
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
-      {success && <p className={styles.success}>{success}</p>}
 
       <div className={styles.tableWrapper}>
         <EditableGrid<Tea>

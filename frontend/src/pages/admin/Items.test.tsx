@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Items from './Items'
+import { renderWithToast } from '../../test/renderWithToast'
 import * as productsApi from '../../api/products'
 import type { Tea, Category } from '../../types'
 
@@ -38,7 +39,7 @@ beforeEach(() => {
 describe('Items — keyboard navigace během editace', () => {
   it('šipky během editace nepřesouvají výběr do jiné buňky', async () => {
     const user = userEvent.setup()
-    render(<Items />)
+    renderWithToast(<Items />)
 
     // Vyber buňku "Název" prvního řádku a vstup do editace
     const nameCell = await screen.findByText('Show Mee')
@@ -61,7 +62,7 @@ describe('Items — keyboard navigace během editace', () => {
   it('deaktivovat nastaví flag na discontinued (soft, bez confirm)', async () => {
     vi.mocked(productsApi.updateProduct).mockResolvedValue({ ...mkTea(1, 'Show Mee'), flag: 'discontinued' })
     const user = userEvent.setup()
-    render(<Items />)
+    renderWithToast(<Items />)
     await screen.findByText('Show Mee')
 
     await user.click(screen.getAllByRole('button', { name: 'deaktivovat' })[0])
@@ -74,7 +75,7 @@ describe('Items — keyboard navigace během editace', () => {
   it('+ Přidat vytvoří nový čaj a připne ho', async () => {
     vi.mocked(productsApi.createProduct).mockResolvedValue(mkTea(3, 'Nový čaj'))
     const user = userEvent.setup()
-    render(<Items />)
+    renderWithToast(<Items />)
     await screen.findByText('Show Mee')
 
     await user.click(screen.getByRole('button', { name: /přidat/i }))
