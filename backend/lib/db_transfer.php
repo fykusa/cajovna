@@ -190,9 +190,11 @@ function dbtImportTables(PDO $pdo, string $dir, array $tables): array {
 
     // TRANSAKCE
     $imported = [];
-    $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
     $pdo->beginTransaction();
     try {
+        // FK_CHECKS je session var (nerolbackuje se) → vypnout až uvnitř try,
+        // aby případná výjimka z beginTransaction nenechala checks vypnuté.
+        $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
         foreach (array_reverse($tables) as $table) {
             $pdo->exec('DELETE FROM `' . $table . '`');
         }
@@ -228,7 +230,10 @@ function dbtImportZip(PDO $pdo, string $zipPath, array $groups): array {
         throw new RuntimeException('Soubor není platný ZIP archiv.');
     }
     $dir = sys_get_temp_dir() . '/dbt_' . uniqid();
-    mkdir($dir);
+    if (!mkdir($dir, 0700)) {
+        $zip->close();
+        throw new RuntimeException('Nelze vytvořit dočasný adresář.');
+    }
     $zip->extractTo($dir);
     $zip->close();
 
