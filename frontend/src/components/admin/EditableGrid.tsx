@@ -278,7 +278,7 @@ export default function EditableGrid<T>({
     // pojmout i širší stav potvrzení mazání („Potvrdit  Zrušit").
     if (renderRowActions && widths.length > 0) {
       const last = widths.length - 1
-      widths[last] = Math.max(widths[last], 105)
+      widths[last] = Math.max(widths[last], 120)
     }
     setColWidths(widths)
   }, [colWidths, sortedRows.length, renderRowActions])
