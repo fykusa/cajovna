@@ -43,7 +43,7 @@ if ($method === 'GET' && preg_match('#/api/users$#', $path)) {
 
 function listUsers(): void {
     $rows = getPDO()
-        ->query('SELECT id, username, role, active, created_at FROM users ORDER BY username')
+        ->query('SELECT id, username, role, active, created_at, password_changed_at FROM users ORDER BY username')
         ->fetchAll();
     echo json_encode($rows);
 }
@@ -71,7 +71,7 @@ function createUser(): void {
 
     try {
         $stmt = $pdo->prepare(
-            'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)'
+            'INSERT INTO users (username, password_hash, role, password_changed_at) VALUES (?, ?, ?, NOW())'
         );
         $stmt->execute([$username, $hash, $role]);
         http_response_code(201);
@@ -109,6 +109,7 @@ function updateUser(int $id): void {
     if (isset($data['password']) && strlen($data['password']) >= 6) {
         $fields[] = 'password_hash = ?';
         $params[]  = password_hash($data['password'], PASSWORD_BCRYPT);
+        $fields[] = 'password_changed_at = NOW()';
     }
     if (isset($data['role']) && in_array($data['role'], ['prodavacka', 'admin'], true)) {
         $fields[] = 'role = ?';

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role`          ENUM('prodavacka','admin') NOT NULL DEFAULT 'prodavacka',
   `active`        TINYINT      NOT NULL DEFAULT 1,
   `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `password_changed_at` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_users_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

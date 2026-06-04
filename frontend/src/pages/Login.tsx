@@ -2,9 +2,10 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../api/auth'
+import { login, changePassword } from '../api/auth'
 import { ApiError } from '../api/client'
 import { useAuthStore } from '../store/authStore'
+import Modal from '../components/Modal'
 import styles from './Login.module.css'
 
 export default function Login() {
@@ -12,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showChange, setShowChange] = useState(false)
   const setAuth = useAuthStore((s) => s.setAuth)
   const navigate = useNavigate()
 
@@ -63,7 +65,85 @@ export default function Login() {
         <button type="submit" disabled={loading} className={styles.button}>
           {loading ? 'Přihlašování…' : 'Přihlásit'}
         </button>
+        <button type="button" className={styles.linkBtn} onClick={() => setShowChange(true)}>
+          Změnit heslo
+        </button>
       </form>
+
+      {showChange && <ChangePasswordModal onClose={() => setShowChange(false)} />}
     </div>
+  )
+}
+
+function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+  const [username, setUsername] = useState('')
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+    try {
+      await changePassword(username, oldPassword, newPassword)
+      setDone(true)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Chyba změny hesla')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal title="Změna hesla" onClose={onClose}>
+      {done ? (
+        <div className={styles.changeForm}>
+          <p className={styles.success}>Heslo bylo změněno. Nyní se můžete přihlásit.</p>
+          <button type="button" className={styles.button} onClick={onClose}>Zavřít</button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className={styles.changeForm}>
+          {error && <p role="alert" className={styles.error}>{error}</p>}
+          <input
+            type="text"
+            placeholder="Uživatelské jméno"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className={styles.input}
+            required
+            autoFocus
+            autoComplete="username"
+          />
+          <input
+            type="password"
+            placeholder="Stávající heslo"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            className={styles.input}
+            required
+            autoComplete="current-password"
+          />
+          <input
+            type="password"
+            placeholder="Nové heslo (min. 6 znaků)"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className={styles.input}
+            required
+            minLength={6}
+            autoComplete="new-password"
+          />
+          <div className={styles.changeActions}>
+            <button type="submit" disabled={loading} className={styles.button}>
+              {loading ? 'Ukládám…' : 'Změnit heslo'}
+            </button>
+            <button type="button" onClick={onClose} className={styles.cancelBtn}>Zrušit</button>
+          </div>
+        </form>
+      )}
+    </Modal>
   )
 }

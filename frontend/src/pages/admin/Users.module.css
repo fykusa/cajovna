@@ -38,14 +38,10 @@
   cursor: not-allowed;
 }
 
-.form {
-  background: #2a2a2a;
-  padding: 20px;
-  border-radius: 8px;
+.modalForm {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
+  gap: 12px;
 }
 
 .error {
@@ -91,6 +87,27 @@
   overflow: auto;
   border-radius: 8px;
   background: #222;
+}
+
+.actionBtn {
+  padding: 0;
+  margin-right: 12px;
+  background: none;
+  border: none;
+  color: #8aa0c0;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.actionBtn:hover:not(:disabled) {
+  color: #aac0e0;
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .deleteBtn {

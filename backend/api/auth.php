@@ -20,6 +20,8 @@ $path = rtrim($path, '/');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#/api/auth/login$#', $path)) {
     handleLogin();
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#/api/auth/change-password$#', $path)) {
+    handleChangePassword();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#/api/auth/logout$#', $path)) {
     handleLogout();
 } else {
@@ -75,6 +77,41 @@ function handleLogin(): void {
             'role'     => $user['role'],
         ],
     ]);
+}
+
+/**
+ * Self-service změna vlastního hesla z přihlašovací stránky.
+ * Neautentizované (uživatel ještě není přihlášen), ale ověřuje staré heslo.
+ */
+function handleChangePassword(): void {
+    $data        = json_decode(file_get_contents('php://input'), true);
+    $username    = trim($data['username'] ?? '');
+    $oldPassword = $data['old_password'] ?? '';
+    $newPassword = $data['new_password'] ?? '';
+
+    if ($username === '' || $oldPassword === '' || strlen($newPassword) < 6) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Vyplňte jméno, staré heslo a nové heslo (min. 6 znaků)']);
+        return;
+    }
+
+    $pdo  = getPDO();
+    $stmt = $pdo->prepare('SELECT id, password_hash, active FROM users WHERE username = ? LIMIT 1');
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if (!$user || !$user['active'] || !password_verify($oldPassword, $user['password_hash'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Nesprávné jméno nebo staré heslo']);
+        return;
+    }
+
+    $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+    $pdo->prepare('UPDATE users SET password_hash = ?, password_changed_at = NOW() WHERE id = ?')
+        ->execute([$hash, $user['id']]);
+
+    http_response_code(200);
+    echo json_encode(['message' => 'Heslo změněno']);
 }
 
 function handleLogout(): void {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import * as authApi from '../api/auth'
@@ -18,6 +18,7 @@ const mockSetAuth = vi.fn()
 
 vi.mock('../api/auth', () => ({
   login: vi.fn(),
+  changePassword: vi.fn(),
 }))
 
 vi.mock('../store/authStore', () => ({
@@ -26,6 +27,7 @@ vi.mock('../store/authStore', () => ({
 }))
 
 const mockLogin = vi.mocked(authApi.login)
+const mockChangePassword = vi.mocked(authApi.changePassword)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -98,7 +100,23 @@ describe('Login', () => {
     await user.type(screen.getByPlaceholderText('Uživatelské jméno'), 'terka')
     await user.type(screen.getByPlaceholderText('Heslo'), 'heslo')
     await user.click(screen.getByRole('button', { name: 'Přihlásit' }))
-    expect(screen.getByRole('button')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Přihlašování…' })).toBeDisabled()
     resolve({ token: 't', user: { id: 1, username: 'terka', role: 'prodavacka' } })
+  })
+
+  it('umožní změnu hesla přes modal a zavolá changePassword', async () => {
+    const user = userEvent.setup()
+    mockChangePassword.mockResolvedValueOnce({ message: 'Heslo změněno' })
+    renderLogin()
+    await user.click(screen.getByRole('button', { name: 'Změnit heslo' }))
+    const dialog = screen.getByRole('dialog')
+    await user.type(within(dialog).getByPlaceholderText('Uživatelské jméno'), 'terka')
+    await user.type(within(dialog).getByPlaceholderText('Stávající heslo'), 'stare123')
+    await user.type(within(dialog).getByPlaceholderText(/Nové heslo/), 'nove123')
+    await user.click(within(dialog).getByRole('button', { name: 'Změnit heslo' }))
+    await waitFor(() =>
+      expect(mockChangePassword).toHaveBeenCalledWith('terka', 'stare123', 'nove123')
+    )
+    expect(await screen.findByText(/Heslo bylo změněno/)).toBeInTheDocument()
   })
 })

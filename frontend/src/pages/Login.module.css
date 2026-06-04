@@ -61,3 +61,50 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.linkBtn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+.linkBtn:hover {
+  color: #ccc;
+}
+
+.changeForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.changeActions {
+  display: flex;
+  gap: 10px;
+}
+
+.changeActions .button {
+  flex: 1;
+}
+
+.cancelBtn {
+  padding: 12px 18px;
+  background: #444;
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.success {
+  color: #a8e6a1;
+  font-size: 0.95rem;
+  padding: 8px;
+  background: #1a3a1a;
+  border-radius: 4px;
+}

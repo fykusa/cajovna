@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Users from './Users'
 import { renderWithToast } from '../../test/renderWithToast'
@@ -62,6 +62,29 @@ describe('Users', () => {
       username: 'nova', password: 'heslo123', role: 'prodavacka',
     }))
     expect(await screen.findByText('nova')).toBeInTheDocument()
+  })
+
+  it('zobrazí čas poslední změny hesla', async () => {
+    vi.mocked(usersApi.getUsers).mockResolvedValue([
+      { id: 1, username: 'terka', role: 'prodavacka', password_changed_at: '2026-06-04 14:32:00' },
+    ])
+    renderWithToast(<Users />)
+    expect(await screen.findByText(/04\.06\.2026/)).toBeInTheDocument()
+  })
+
+  it('umožní adminovi resetovat heslo přes modal', async () => {
+    vi.mocked(usersApi.updateUser).mockResolvedValueOnce(undefined)
+    const user = userEvent.setup()
+    renderWithToast(<Users />)
+    await screen.findByText('terka')
+    vi.mocked(usersApi.getUsers).mockResolvedValueOnce(USERS) // reload po změně
+    await user.click(screen.getAllByRole('button', { name: 'heslo' })[0])
+    const dialog = screen.getByRole('dialog')
+    await user.type(within(dialog).getByPlaceholderText(/Nové heslo/), 'nove123')
+    await user.click(within(dialog).getByRole('button', { name: 'Uložit' }))
+    await waitFor(() =>
+      expect(vi.mocked(usersApi.updateUser)).toHaveBeenCalledWith(1, { password: 'nove123' })
+    )
   })
 
   it('vyžádá potvrzení a zavolá deleteUser', async () => {

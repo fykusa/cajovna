@@ -8,6 +8,9 @@ export interface User {
   id: number
   username: string
   role: 'prodavacka' | 'admin'
+  active?: 0 | 1
+  created_at?: string
+  password_changed_at?: string | null
 }
 
 export interface Category {
