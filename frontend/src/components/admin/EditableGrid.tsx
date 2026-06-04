@@ -140,13 +140,18 @@ function RowInner<T>(p: RowProps<T>) {
             onDoubleClick={() => p.onStartEdit(p.rowIndex, ci)}
           >
             {isEditing ? (
-              <CellEditor
-                initialValue={editStart(p.row, col)}
-                type={col.type}
-                options={col.options}
-                onCommit={p.onEditCommit}
-                onCancel={p.onEditCancel}
-              />
+              <>
+                {/* Neviditelná rozpěra drží původní rozměr buňky; editor leží
+                    přes ni absolutně → editace nezmění šířku ani výšku sloupce. */}
+                <span className={styles.editSizer}>{cellText(p.row, col) || ' '}</span>
+                <CellEditor
+                  initialValue={editStart(p.row, col)}
+                  type={col.type}
+                  options={col.options}
+                  onCommit={p.onEditCommit}
+                  onCancel={p.onEditCancel}
+                />
+              </>
             ) : (
               cellText(p.row, col)
             )}
