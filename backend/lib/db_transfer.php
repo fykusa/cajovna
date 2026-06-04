@@ -57,3 +57,47 @@ function dbtParseCsv(string $csv): array {
     fclose($fh);
     return [$header ?: [], $rows];
 }
+
+// Názvy sloupců tabulky v pořadí dle schématu (přežije přidání sloupce).
+function dbtColumns(PDO $pdo, string $table): array {
+    $stmt = $pdo->prepare(
+        'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+         ORDER BY ORDINAL_POSITION'
+    );
+    $stmt->execute([$table]);
+    return array_column($stmt->fetchAll(), 'COLUMN_NAME');
+}
+
+// CSV jedné tabulky z DB (řazeno dle id pro determinismus). Vrací [csv, count].
+function dbtTableCsv(PDO $pdo, string $table): array {
+    $cols = dbtColumns($pdo, $table);
+    $rows = $pdo->query('SELECT * FROM `' . $table . '` ORDER BY `id`')->fetchAll();
+    return [dbtRowsToCsv($cols, $rows), count($rows)];
+}
+
+// Vytvoří ZIP se všemi tabulkami + manifest.json. Vrací manifest pole.
+function dbtExportZip(PDO $pdo, string $zipPath): array {
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException('Nelze vytvořit ZIP soubor.');
+    }
+    $counts = [];
+    foreach (DBT_TABLES as $table) {
+        [$csv, $n] = dbtTableCsv($pdo, $table);
+        $zip->addFromString($table . '.csv', $csv);
+        $counts[$table] = $n;
+    }
+    $manifest = [
+        'format_version' => 1,
+        'exported_at'    => date('Y-m-d H:i:s'),
+        'db_name'        => $pdo->query('SELECT DATABASE()')->fetchColumn(),
+        'row_counts'     => $counts,
+    ];
+    $zip->addFromString(
+        'manifest.json',
+        json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
+    $zip->close();
+    return $manifest;
+}

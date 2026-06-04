@@ -1,7 +1,8 @@
 FROM php:7.4-apache
 
 # Potřebné PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN apt-get update && apt-get install -y libzip-dev && rm -rf /var/lib/apt/lists/*
+RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 
 # Zapnout mod_rewrite pro Apache (potřeba pro API routing)
 RUN a2enmod rewrite
