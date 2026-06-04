@@ -1,4 +1,3 @@
-import { useAuthStore } from '../store/authStore'
 import { ApiError } from './client'
 
 export interface ImportResult {
@@ -6,7 +5,8 @@ export interface ImportResult {
 }
 
 function authHeader(): Record<string, string> {
-  const token = useAuthStore.getState().token
+  // Stejný zdroj tokenu jako apiFetch (client.ts) — localStorage.
+  const token = localStorage.getItem('token')
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
