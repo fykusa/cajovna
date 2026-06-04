@@ -82,22 +82,26 @@ function dbtExportZip(PDO $pdo, string $zipPath): array {
     if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
         throw new RuntimeException('Nelze vytvořit ZIP soubor.');
     }
-    $counts = [];
-    foreach (DBT_TABLES as $table) {
-        [$csv, $n] = dbtTableCsv($pdo, $table);
-        $zip->addFromString($table . '.csv', $csv);
-        $counts[$table] = $n;
+    try {
+        $counts = [];
+        foreach (DBT_TABLES as $table) {
+            [$csv, $n] = dbtTableCsv($pdo, $table);
+            $zip->addFromString($table . '.csv', $csv);
+            $counts[$table] = $n;
+        }
+        $manifest = [
+            'format_version' => 1,
+            'exported_at'    => date('Y-m-d H:i:s'),
+            'db_name'        => $pdo->query('SELECT DATABASE()')->fetchColumn(),
+            'row_counts'     => $counts,
+        ];
+        $zip->addFromString(
+            'manifest.json',
+            json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+    } finally {
+        // ZIP vždy uzavřít, ať se při chybě uprostřed nenechá otevřený handle.
+        $zip->close();
     }
-    $manifest = [
-        'format_version' => 1,
-        'exported_at'    => date('Y-m-d H:i:s'),
-        'db_name'        => $pdo->query('SELECT DATABASE()')->fetchColumn(),
-        'row_counts'     => $counts,
-    ];
-    $zip->addFromString(
-        'manifest.json',
-        json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-    );
-    $zip->close();
     return $manifest;
 }
