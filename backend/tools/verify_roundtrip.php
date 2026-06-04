@@ -9,6 +9,11 @@ if (!$verifyDb) {
     fwrite(STDERR, "Použití: verify_roundtrip.php <verify_db_name>\n");
     exit(2);
 }
+// Název DB se interpoluje do DDL → povol jen bezpečné znaky.
+if (!preg_match('/^\w+$/', $verifyDb)) {
+    fwrite(STDERR, "Neplatný název DB (jen písmena, číslice, _).\n");
+    exit(2);
+}
 
 $src = getPDO();
 $srcDbName = $src->query('SELECT DATABASE()')->fetchColumn();
@@ -43,9 +48,12 @@ $z = new ZipArchive();
 $z->open($zip);
 $z->extractTo($dir);
 $z->close();
-dbtImportTables($verify, $dir, DBT_TABLES);
-dbtCleanup($dir);
-unlink($zip);
+try {
+    dbtImportTables($verify, $dir, DBT_TABLES);
+} finally {
+    dbtCleanup($dir);
+    @unlink($zip);
+}
 
 // 3) porovnání tabulek řádek po řádku
 $diffs = 0;
