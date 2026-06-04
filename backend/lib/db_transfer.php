@@ -105,3 +105,136 @@ function dbtExportZip(PDO $pdo, string $zipPath): array {
     }
     return $manifest;
 }
+
+function dbtCleanup(string $dir): void {
+    if (!is_dir($dir)) return;
+    foreach (scandir($dir) as $f) {
+        if ($f === '.' || $f === '..') continue;
+        unlink($dir . '/' . $f);
+    }
+    rmdir($dir);
+}
+
+// Vloží řádky (poziční pole dle $header) do tabulky. \N → NULL, explicitní id.
+function dbtInsertRows(PDO $pdo, string $table, array $header, array $rows): int {
+    if (empty($rows)) return 0;
+    $colList = '`' . implode('`,`', $header) . '`';
+    $ph = '(' . implode(',', array_fill(0, count($header), '?')) . ')';
+    $stmt = $pdo->prepare("INSERT INTO `$table` ($colList) VALUES $ph");
+    foreach ($rows as $row) {
+        $stmt->execute(array_map('dbtDecode', $row));
+    }
+    return count($rows);
+}
+
+// Ověří, že žádná FK vazba není osiřelá. Při nálezu vyhodí výjimku.
+function dbtCheckIntegrity(PDO $pdo): void {
+    // [dítě, fk sloupec, rodič, pk, nullable]
+    $checks = [
+        ['teas',           'category_id', 'tea_categories', 'id', false],
+        ['sale_items',     'tea_id',      'teas',           'id', true],
+        ['sale_items',     'bag_id',      'bags',           'id', true],
+        ['sale_items',     'sale_id',     'sales',          'id', false],
+        ['sales',          'user_id',     'users',          'id', false],
+        ['tea_categories', 'parent_id',   'tea_categories', 'id', true],
+    ];
+    foreach ($checks as [$child, $fk, $parent, $pk, $nullable]) {
+        $nullClause = $nullable ? "c.`$fk` IS NOT NULL AND " : '';
+        $sql = "SELECT c.`$fk` FROM `$child` c
+                LEFT JOIN `$parent` p ON c.`$fk` = p.`$pk`
+                WHERE {$nullClause}p.`$pk` IS NULL LIMIT 1";
+        $orphan = $pdo->query($sql)->fetchColumn();
+        if ($orphan !== false) {
+            throw new RuntimeException(
+                "Narušená integrita: `$child` odkazuje na neexistující `$fk` $orphan."
+            );
+        }
+    }
+}
+
+// Import konkrétního seznamu tabulek z rozbaleného adresáře. Sdílí HTTP i CLI.
+function dbtImportTables(PDO $pdo, string $dir, array $tables): array {
+    // seřaď dle kanonického pořadí
+    $tables = array_values(array_filter(DBT_TABLES, fn($t) => in_array($t, $tables, true)));
+    if (empty($tables)) {
+        throw new RuntimeException('Nevybrána žádná data k importu.');
+    }
+
+    $manifestPath = $dir . '/manifest.json';
+    if (!is_file($manifestPath)) {
+        throw new RuntimeException('V archivu chybí manifest.json.');
+    }
+    $manifest = json_decode(file_get_contents($manifestPath), true);
+    if (!is_array($manifest)) {
+        throw new RuntimeException('Neplatný manifest.json.');
+    }
+
+    // VALIDACE (před jakýmkoli zápisem)
+    $parsed = [];
+    foreach ($tables as $table) {
+        $csvPath = $dir . '/' . $table . '.csv';
+        if (!is_file($csvPath)) {
+            throw new RuntimeException("V archivu chybí $table.csv.");
+        }
+        [$header, $rows] = dbtParseCsv(file_get_contents($csvPath));
+        $dbCols = dbtColumns($pdo, $table);
+        if (array_diff($header, $dbCols) || array_diff($dbCols, $header)) {
+            throw new RuntimeException("Sloupce v $table.csv neodpovídají databázi.");
+        }
+        $expected = $manifest['row_counts'][$table] ?? null;
+        if ($expected !== null && count($rows) !== (int) $expected) {
+            throw new RuntimeException("$table.csv: počet řádků nesedí s manifestem.");
+        }
+        $parsed[$table] = [$header, $rows];
+    }
+
+    // TRANSAKCE
+    $imported = [];
+    $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+    $pdo->beginTransaction();
+    try {
+        foreach (array_reverse($tables) as $table) {
+            $pdo->exec('DELETE FROM `' . $table . '`');
+        }
+        foreach ($tables as $table) {
+            [$header, $rows] = $parsed[$table];
+            $imported[$table] = dbtInsertRows($pdo, $table, $header, $rows);
+        }
+        dbtCheckIntegrity($pdo);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    } finally {
+        $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+    }
+    return $imported;
+}
+
+// Import z nahraného ZIPu podle vybraných skupin (users se ignoruje).
+function dbtImportZip(PDO $pdo, string $zipPath, array $groups): array {
+    $tables = [];
+    foreach ($groups as $g) {
+        foreach (DBT_GROUPS[$g] ?? [] as $t) {
+            $tables[] = $t;
+        }
+    }
+    if (empty($tables)) {
+        throw new RuntimeException('Nevybrána žádná data k importu.');
+    }
+
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath) !== true) {
+        throw new RuntimeException('Soubor není platný ZIP archiv.');
+    }
+    $dir = sys_get_temp_dir() . '/dbt_' . uniqid();
+    mkdir($dir);
+    $zip->extractTo($dir);
+    $zip->close();
+
+    try {
+        return dbtImportTables($pdo, $dir, $tables);
+    } finally {
+        dbtCleanup($dir);
+    }
+}
