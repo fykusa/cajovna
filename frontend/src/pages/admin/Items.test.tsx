@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Items from './Items'
 import { renderWithToast } from '../../test/renderWithToast'
@@ -87,18 +87,22 @@ describe('Items — keyboard navigace během editace', () => {
     await waitFor(() => expect(productsApi.deleteProduct).toHaveBeenCalledWith(1))
   })
 
-  it('+ Přidat vytvoří nový čaj a připne ho', async () => {
+  it('+ Přidat otevře modal a vytvoří nový čaj', async () => {
     vi.mocked(productsApi.createProduct).mockResolvedValue(mkTea(3, 'Nový čaj'))
     const user = userEvent.setup()
     renderWithToast(<Items />)
     await screen.findByText('Show Mee')
 
     await user.click(screen.getByRole('button', { name: /přidat/i }))
+    const dialog = screen.getByRole('dialog')
+    await user.type(within(dialog).getAllByRole('textbox')[0], 'Nový čaj') // název
+    await user.click(within(dialog).getByRole('button', { name: 'Vytvořit' }))
 
     await waitFor(() =>
       expect(productsApi.createProduct).toHaveBeenCalledWith({
         category_id: 1,
         name: 'Nový čaj',
+        note: null,
         flag: 'active',
       })
     )

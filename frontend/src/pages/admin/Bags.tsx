@@ -2,8 +2,10 @@ import { useEffect, useState, useCallback } from 'react'
 import type { Bag } from '../../types'
 import { getBags, createBag, updateBag, deleteBag } from '../../api/bags'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
+import Modal from '../../components/Modal'
 import { useToast } from '../../components/toast/useToast'
 import styles from './Bags.module.css'
+import modal from '../../components/Modal.module.css'
 
 export default function AdminBags() {
   const [bags, setBags] = useState<Bag[]>([])
@@ -11,6 +13,8 @@ export default function AdminBags() {
   const [saving, setSaving] = useState(false)
   const [showInactive, setShowInactive] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [addForm, setAddForm] = useState({ surface_type: '', volume_ml: 0 })
   const toast = useToast()
 
   const visibleBags = bags.filter((b) =>
@@ -65,17 +69,25 @@ export default function AdminBags() {
     }
   }
 
-  async function handleAdd() {
+  function openAdd() {
+    setAddForm({ surface_type: '', volume_ml: 0 })
+    setShowAdd(true)
+  }
+
+  async function handleAddSubmit(e: React.FormEvent) {
+    e.preventDefault()
     setSaving(true)
     try {
       const created = await createBag({
-        surface_type: 'nový',
-        volume_ml: 0,
+        surface_type: addForm.surface_type,
+        volume_ml: addForm.volume_ml,
         dimensions: null,
         price_per_piece: 0,
       })
       setBags((prev) => [...prev, created])
       setShowInactive(false)
+      setShowAdd(false)
+      toast.success('Pytlík vytvořen')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
@@ -125,7 +137,7 @@ export default function AdminBags() {
           />
           Zobrazit jen neaktivní
         </label>
-        <button className={styles.addBtn} onClick={handleAdd} disabled={saving}>
+        <button className={styles.addBtn} onClick={openAdd} disabled={saving}>
           + Přidat
         </button>
       </div>
@@ -179,6 +191,36 @@ export default function AdminBags() {
         <p className={styles.loading}>
           {showInactive ? 'Žádné neaktivní pytlíky.' : 'Žádné aktivní pytlíky.'}
         </p>
+      )}
+
+      {showAdd && (
+        <Modal title="Nový pytlík" onClose={() => setShowAdd(false)}>
+          <form onSubmit={handleAddSubmit} className={modal.form}>
+            <div className={modal.field}>
+              <label className={modal.label}>Materiál</label>
+              <input
+                className={modal.input}
+                value={addForm.surface_type}
+                onChange={(e) => setAddForm({ ...addForm, surface_type: e.target.value })}
+                required
+                autoFocus
+              />
+            </div>
+            <div className={modal.field}>
+              <label className={modal.label}>Objem (ml)</label>
+              <input
+                type="number"
+                className={modal.input}
+                value={addForm.volume_ml}
+                onChange={(e) => setAddForm({ ...addForm, volume_ml: Number(e.target.value) })}
+              />
+            </div>
+            <div className={modal.actions}>
+              <button type="submit" className={modal.submitBtn} disabled={saving}>Vytvořit</button>
+              <button type="button" className={modal.cancelBtn} onClick={() => setShowAdd(false)}>Zrušit</button>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   )

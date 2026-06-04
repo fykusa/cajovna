@@ -3,8 +3,10 @@ import { getProducts, getCategories, createProduct, updateProduct, deleteProduct
 import { updateStock } from '../../api/stock'
 import type { Tea, Category } from '../../types'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
+import Modal from '../../components/Modal'
 import { useToast } from '../../components/toast/useToast'
 import styles from './Items.module.css'
+import modal from '../../components/Modal.module.css'
 
 const FLAG_OPTIONS = ['active', 'discontinued', 'no_insert', 'eshop_only', 'trial'].map((f) => ({
   value: f,
@@ -20,6 +22,8 @@ export default function AdminItems() {
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null)
   const [nameFilter, setNameFilter] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [addForm, setAddForm] = useState({ category_id: 0, name: '', note: '' })
   const toast = useToast()
 
   const load = useCallback(async () => {
@@ -101,17 +105,29 @@ export default function AdminItems() {
     }
   }
 
-  async function handleAdd() {
+  function openAdd() {
     if (categories.length === 0) {
       toast.error('Nejprve vytvořte kategorii')
       return
     }
+    setAddForm({ category_id: categoryFilter ?? categories[0].id, name: '', note: '' })
+    setShowAdd(true)
+  }
+
+  async function handleAddSubmit(e: React.FormEvent) {
+    e.preventDefault()
     setSaving(true)
     try {
-      const catId = categoryFilter ?? categories[0].id
-      const created = await createProduct({ category_id: catId, name: 'Nový čaj', flag: 'active' })
+      const created = await createProduct({
+        category_id: addForm.category_id,
+        name: addForm.name,
+        note: addForm.note || null,
+        flag: 'active',
+      })
       setTeas((prev) => [...prev, created])
       setShowInactive(false) // nový čaj je aktivní → ať je vidět
+      setShowAdd(false)
+      toast.success('Čaj vytvořen')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
     } finally {
@@ -168,7 +184,7 @@ export default function AdminItems() {
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
         />
-        <button className={styles.addBtn} onClick={handleAdd} disabled={saving}>
+        <button className={styles.addBtn} onClick={openAdd} disabled={saving}>
           + Přidat
         </button>
       </div>
@@ -247,6 +263,47 @@ export default function AdminItems() {
         <p className={styles.empty}>
           {showInactive ? 'Žádné neaktivní položky.' : 'Žádné aktivní položky.'}
         </p>
+      )}
+
+      {showAdd && (
+        <Modal title="Nový čaj" onClose={() => setShowAdd(false)}>
+          <form onSubmit={handleAddSubmit} className={modal.form}>
+            <div className={modal.field}>
+              <label className={modal.label}>Kategorie</label>
+              <select
+                className={modal.input}
+                value={addForm.category_id}
+                onChange={(e) => setAddForm({ ...addForm, category_id: Number(e.target.value) })}
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className={modal.field}>
+              <label className={modal.label}>Název</label>
+              <input
+                className={modal.input}
+                value={addForm.name}
+                onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+                required
+                autoFocus
+              />
+            </div>
+            <div className={modal.field}>
+              <label className={modal.label}>Poznámka</label>
+              <input
+                className={modal.input}
+                value={addForm.note}
+                onChange={(e) => setAddForm({ ...addForm, note: e.target.value })}
+              />
+            </div>
+            <div className={modal.actions}>
+              <button type="submit" className={modal.submitBtn} disabled={saving}>Vytvořit</button>
+              <button type="button" className={modal.cancelBtn} onClick={() => setShowAdd(false)}>Zrušit</button>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   )

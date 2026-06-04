@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Bags from './Bags'
 import { renderWithToast } from '../../test/renderWithToast'
@@ -49,6 +49,9 @@ describe('Bags', () => {
     renderWithToast(<Bags />)
     await screen.findByText('porcelán')
     await user.click(screen.getByRole('button', { name: /přidat/i }))
+    const dialog = screen.getByRole('dialog')
+    await user.type(within(dialog).getAllByRole('textbox')[0], 'nový') // materiál
+    await user.click(within(dialog).getByRole('button', { name: 'Vytvořit' }))
     await waitFor(() =>
       expect(bagsApi.createBag).toHaveBeenCalledWith({
         surface_type: 'nový',
