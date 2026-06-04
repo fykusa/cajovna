@@ -51,7 +51,7 @@ function dbtParseCsv(string $csv): array {
     }
     $rows = [];
     while (($line = fgetcsv($fh, 0, ';', '"', '')) !== false) {
-        if ($line === [null] || $line === false) continue; // prázdný řádek
+        if ($line === [null]) continue; // prázdný řádek (fgetcsv vrací [null])
         $rows[] = $line;
     }
     fclose($fh);
