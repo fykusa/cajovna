@@ -18,6 +18,9 @@ export interface Category {
   name: string
   parent_id: number | null
   sort_order: number
+  active?: number | string
+  /** 1 = kategorie je použita u čajů (nelze hard-smazat, jen deaktivovat). */
+  has_teas?: number | string
 }
 
 export interface Tea {
@@ -37,6 +40,8 @@ export interface Tea {
   stock_pkg1_pcs: number
   stock_pkg2_pcs: number
   stock_kg: number
+  /** 1 = čaj je použit v nějakém prodeji (nelze hard-smazat, jen deaktivovat). */
+  has_sales?: number | string
 }
 
 export interface Bag {
@@ -56,6 +61,9 @@ export interface Bag {
   var3_price?: number | null
   var3_margin_pct?: number | null
   supplier_url?: string | null
+  active?: number | string
+  /** 1 = pytlík je použit v prodeji (nelze hard-smazat, jen deaktivovat). */
+  has_sales?: number | string
 }
 
 export type ItemType = 'std' | 'pkg1' | 'pkg2' | 'custom'

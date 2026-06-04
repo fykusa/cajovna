@@ -161,6 +161,15 @@
   color: #c98686;
 }
 
+.actionCancel {
+  color: #888;
+  margin-left: 12px;
+}
+
+.actionCancel:hover:not(:disabled) {
+  color: #ccc;
+}
+
 .actionActivate {
   color: #6abf69;
 }

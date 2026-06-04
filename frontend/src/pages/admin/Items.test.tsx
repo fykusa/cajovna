@@ -21,11 +21,12 @@ const CATEGORIES: Category[] = [
   { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
 ]
 
-const mkTea = (id: number, name: string): Tea => ({
+const mkTea = (id: number, name: string, hasSales: 0 | 1 = 0): Tea => ({
   id, category_id: 1, name, note: null, flag: 'active', origin: null,
   std_weight_g: 30, std_price_moc: 130, pkg1_weight_g: null, pkg1_price_moc: null,
   pkg2_weight_g: null, pkg2_price_moc: null,
   stock_std_pcs: 5, stock_pkg1_pcs: 0, stock_pkg2_pcs: 0, stock_kg: 0,
+  has_sales: hasSales,
 })
 
 const TEAS: Tea[] = [mkTea(1, 'Show Mee'), mkTea(2, 'Bai Mu Dan')]
@@ -59,8 +60,9 @@ describe('Items — keyboard navigace během editace', () => {
     expect(screen.getByDisplayValue('Show Mee')).toBe(input)
   })
 
-  it('deaktivovat nastaví flag na discontinued (soft, bez confirm)', async () => {
-    vi.mocked(productsApi.updateProduct).mockResolvedValue({ ...mkTea(1, 'Show Mee'), flag: 'discontinued' })
+  it('čaj s prodejem nabízí deaktivovat (soft, bez confirm)', async () => {
+    vi.mocked(productsApi.getProducts).mockResolvedValue([mkTea(1, 'Show Mee', 1)])
+    vi.mocked(productsApi.updateProduct).mockResolvedValue({ ...mkTea(1, 'Show Mee', 1), flag: 'discontinued' })
     const user = userEvent.setup()
     renderWithToast(<Items />)
     await screen.findByText('Show Mee')
@@ -70,6 +72,19 @@ describe('Items — keyboard navigace během editace', () => {
     await waitFor(() =>
       expect(productsApi.updateProduct).toHaveBeenCalledWith(1, { flag: 'discontinued' })
     )
+  })
+
+  it('čaj bez prodejů lze rovnou smazat (dvoukrokově)', async () => {
+    vi.mocked(productsApi.getProducts).mockResolvedValue([mkTea(1, 'Show Mee', 0)])
+    vi.mocked(productsApi.deleteProduct).mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    renderWithToast(<Items />)
+    await screen.findByText('Show Mee')
+
+    await user.click(screen.getByRole('button', { name: 'smazat' }))
+    await user.click(screen.getByRole('button', { name: 'Potvrdit' }))
+
+    await waitFor(() => expect(productsApi.deleteProduct).toHaveBeenCalledWith(1))
   })
 
   it('+ Přidat vytvoří nový čaj a připne ho', async () => {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { getProducts, getCategories, createProduct, updateProduct } from '../../api/products'
+import { getProducts, getCategories, createProduct, updateProduct, deleteProduct } from '../../api/products'
 import { updateStock } from '../../api/stock'
 import type { Tea, Category } from '../../types'
 import EditableGrid, { type ColDef } from '../../components/admin/EditableGrid'
@@ -19,6 +19,7 @@ export default function AdminItems() {
   const [saving, setSaving] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null)
   const [nameFilter, setNameFilter] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const toast = useToast()
 
   const load = useCallback(async () => {
@@ -132,6 +133,20 @@ export default function AdminItems() {
     }
   }
 
+  async function handleDelete(tea: Tea) {
+    setSaving(true)
+    try {
+      await deleteProduct(tea.id)
+      setTeas((prev) => prev.filter((t) => t.id !== tea.id))
+      toast.success('Čaj smazán')
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Chyba mazání')
+    } finally {
+      setSaving(false)
+      setConfirmDeleteId(null)
+    }
+  }
+
   if (loading) return <p className={styles.loading}>Načítám…</p>
 
   return (
@@ -184,17 +199,47 @@ export default function AdminItems() {
           getRowId={(t) => t.id}
           onSaveCell={handleSaveCell}
           rowClassName={(t) => (t.flag !== 'active' ? styles.rowInactive : '')}
-          renderRowActions={(tea) => (
-            <button
-              className={`${styles.actionBtn} ${
-                tea.flag === 'active' ? styles.actionDeactivate : styles.actionActivate
-              }`}
-              onClick={() => handleToggleActive(tea)}
-              disabled={saving}
-            >
-              {tea.flag === 'active' ? 'deaktivovat' : 'aktivovat'}
-            </button>
-          )}
+          renderRowActions={(tea) =>
+            // Čaj bez prodejů lze rovnou smazat (dvoukrokově); s prodeji jen deaktivovat.
+            !(Number(tea.has_sales) > 0) ? (
+              confirmDeleteId === tea.id ? (
+                <>
+                  <button
+                    className={`${styles.actionBtn} ${styles.actionDeactivate}`}
+                    onClick={() => handleDelete(tea)}
+                    disabled={saving}
+                  >
+                    Potvrdit
+                  </button>
+                  <button
+                    className={`${styles.actionBtn} ${styles.actionCancel}`}
+                    onClick={() => setConfirmDeleteId(null)}
+                    disabled={saving}
+                  >
+                    Zrušit
+                  </button>
+                </>
+              ) : (
+                <button
+                  className={`${styles.actionBtn} ${styles.actionDeactivate}`}
+                  onClick={() => setConfirmDeleteId(tea.id)}
+                  disabled={saving}
+                >
+                  smazat
+                </button>
+              )
+            ) : (
+              <button
+                className={`${styles.actionBtn} ${
+                  tea.flag === 'active' ? styles.actionDeactivate : styles.actionActivate
+                }`}
+                onClick={() => handleToggleActive(tea)}
+                disabled={saving}
+              >
+                {tea.flag === 'active' ? 'deaktivovat' : 'aktivovat'}
+              </button>
+            )
+          }
         />
       </div>
 

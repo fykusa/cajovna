@@ -93,6 +93,20 @@ describe('Bags', () => {
     await waitFor(() => expect(screen.queryByText('porcelán')).not.toBeInTheDocument())
   })
 
+  it('pytlík v prodeji nabízí deaktivovat (active → 0)', async () => {
+    vi.mocked(bagsApi.getBags).mockResolvedValue([
+      { id: 1, surface_type: 'porcelán', volume_ml: 200, dimensions: '8x8', price_per_piece: 12.5, active: 1, has_sales: 1 },
+    ])
+    vi.mocked(bagsApi.updateBag).mockResolvedValue({
+      id: 1, surface_type: 'porcelán', volume_ml: 200, dimensions: '8x8', price_per_piece: 12.5, active: 0,
+    })
+    const user = userEvent.setup()
+    renderWithToast(<Bags />)
+    await screen.findByText('porcelán')
+    await user.click(screen.getByRole('button', { name: 'deaktivovat' }))
+    await waitFor(() => expect(bagsApi.updateBag).toHaveBeenCalledWith(1, { active: 0 }))
+  })
+
   it('409 při mazání zobrazí chybu', async () => {
     const { ApiError } = await import('../../api/client')
     vi.mocked(bagsApi.deleteBag).mockRejectedValue(

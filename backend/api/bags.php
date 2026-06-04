@@ -34,7 +34,7 @@ if ($method === 'GET' && preg_match('#/api/bags$#', $path)) {
 }
 
 function bagColumns(): string {
-    return 'id, surface_type, volume_ml, dimensions, price_per_piece, '
+    return 'id, surface_type, volume_ml, dimensions, price_per_piece, active, '
         . 'var1_qty, var1_price, var1_margin_pct, '
         . 'var2_qty, var2_price, var2_margin_pct, '
         . 'var3_qty, var3_price, var3_margin_pct, supplier_url';
@@ -42,7 +42,13 @@ function bagColumns(): string {
 
 function listBags(): void {
     $rows = getPDO()
-        ->query('SELECT ' . bagColumns() . ' FROM bags ORDER BY surface_type, volume_ml')
+        ->query('SELECT b.id, b.surface_type, b.volume_ml, b.dimensions, b.price_per_piece, b.active,
+                        b.var1_qty, b.var1_price, b.var1_margin_pct,
+                        b.var2_qty, b.var2_price, b.var2_margin_pct,
+                        b.var3_qty, b.var3_price, b.var3_margin_pct, b.supplier_url,
+                        EXISTS(SELECT 1 FROM sale_items si WHERE si.bag_id = b.id) AS has_sales
+                 FROM bags b
+                 ORDER BY b.surface_type, b.volume_ml')
         ->fetchAll();
     echo json_encode($rows);
 }
@@ -70,7 +76,7 @@ function updateBag(int $id): void {
     $data    = json_decode(file_get_contents('php://input'), true) ?? [];
     $pdo     = getPDO();
     $allowed = [
-        'surface_type', 'volume_ml', 'dimensions', 'price_per_piece',
+        'surface_type', 'volume_ml', 'dimensions', 'price_per_piece', 'active',
         'var1_qty', 'var1_price', 'var1_margin_pct',
         'var2_qty', 'var2_price', 'var2_margin_pct',
         'var3_qty', 'var3_price', 'var3_margin_pct', 'supplier_url',

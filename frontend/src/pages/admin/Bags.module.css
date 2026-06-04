@@ -38,11 +38,48 @@
   cursor: not-allowed;
 }
 
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.toggle input {
+  cursor: pointer;
+}
+
 .tableWrapper {
   flex: 1;
   overflow: auto;
   border-radius: 8px;
   background: #222;
+}
+
+.rowInactive {
+  opacity: 0.45;
+}
+
+.activateBtn {
+  padding: 0;
+  background: none;
+  border: none;
+  color: #6abf69;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.activateBtn:hover:not(:disabled) {
+  color: #88cf87;
+}
+
+.activateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .deleteBtn {

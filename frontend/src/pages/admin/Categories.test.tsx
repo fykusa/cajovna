@@ -84,6 +84,22 @@ describe('Categories', () => {
     await waitFor(() => expect(screen.queryByText('Bílé')).not.toBeInTheDocument())
   })
 
+  it('kategorie s čaji nabízí deaktivovat (active → 0)', async () => {
+    vi.mocked(categoriesApi.getCategories).mockResolvedValue([
+      { id: 1, name: 'Bílé', parent_id: null, sort_order: 1, active: 1, has_teas: 1 },
+    ])
+    vi.mocked(categoriesApi.updateCategory).mockResolvedValue({
+      id: 1, name: 'Bílé', parent_id: null, sort_order: 1, active: 0,
+    })
+    const user = userEvent.setup()
+    renderWithToast(<Categories />)
+    await screen.findByText('Bílé')
+    await user.click(screen.getByRole('button', { name: 'deaktivovat' }))
+    await waitFor(() =>
+      expect(categoriesApi.updateCategory).toHaveBeenCalledWith(1, { active: 0 })
+    )
+  })
+
   it('409 při mazání zobrazí chybu', async () => {
     const { ApiError } = await import('../../api/client')
     vi.mocked(categoriesApi.deleteCategory).mockRejectedValue(

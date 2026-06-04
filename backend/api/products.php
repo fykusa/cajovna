@@ -82,7 +82,8 @@ function listProducts(): void {
                     std_weight_g, std_price_moc,
                     pkg1_weight_g, pkg1_price_moc,
                     pkg2_weight_g, pkg2_price_moc,
-                    stock_std_pcs, stock_pkg1_pcs, stock_pkg2_pcs, stock_kg
+                    stock_std_pcs, stock_pkg1_pcs, stock_pkg2_pcs, stock_kg,
+                    EXISTS(SELECT 1 FROM sale_items si WHERE si.tea_id = teas.id) AS has_sales
              FROM teas
              WHERE ' . implode(' AND ', $where) . '
              ORDER BY name';

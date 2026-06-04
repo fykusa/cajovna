@@ -37,13 +37,16 @@ if ($method === 'GET' && preg_match('#/api/categories$#', $path)) {
 
 function listCategories(): void {
     $rows = getPDO()
-        ->query('SELECT id, name, parent_id, sort_order FROM tea_categories ORDER BY sort_order, name')
+        ->query('SELECT c.id, c.name, c.parent_id, c.sort_order, c.active,
+                        EXISTS(SELECT 1 FROM teas t WHERE t.category_id = c.id) AS has_teas
+                 FROM tea_categories c
+                 ORDER BY c.sort_order, c.name')
         ->fetchAll();
     echo json_encode($rows);
 }
 
 function getCategory(int $id): void {
-    $stmt = getPDO()->prepare('SELECT id, name, parent_id, sort_order FROM tea_categories WHERE id = ?');
+    $stmt = getPDO()->prepare('SELECT id, name, parent_id, sort_order, active FROM tea_categories WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch();
     if (!$row) {
@@ -64,7 +67,7 @@ function createCategory(): void {
         $data['sort_order'] ?? 0,
     ]);
     $id   = (int) $pdo->lastInsertId();
-    $stmt = $pdo->prepare('SELECT id, name, parent_id, sort_order FROM tea_categories WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, name, parent_id, sort_order, active FROM tea_categories WHERE id = ?');
     $stmt->execute([$id]);
     http_response_code(201);
     echo json_encode($stmt->fetch());
@@ -73,7 +76,7 @@ function createCategory(): void {
 function updateCategory(int $id): void {
     $data    = json_decode(file_get_contents('php://input'), true) ?? [];
     $pdo     = getPDO();
-    $allowed = ['name', 'parent_id', 'sort_order'];
+    $allowed = ['name', 'parent_id', 'sort_order', 'active'];
     $fields  = [];
     $params  = [];
     foreach ($allowed as $col) {
@@ -89,7 +92,7 @@ function updateCategory(int $id): void {
     }
     $params[] = $id;
     $pdo->prepare('UPDATE tea_categories SET ' . implode(', ', $fields) . ' WHERE id = ?')->execute($params);
-    $stmt = $pdo->prepare('SELECT id, name, parent_id, sort_order FROM tea_categories WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, name, parent_id, sort_order, active FROM tea_categories WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch();
     if (!$row) {

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `tea_categories` (
   `name`       VARCHAR(100) NOT NULL,
   `parent_id`  INT          NULL DEFAULT NULL,
   `sort_order` INT          NOT NULL DEFAULT 0,
+  `active`     TINYINT      NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   KEY `idx_tea_categories_parent_id` (`parent_id`),
   KEY `idx_tea_categories_name`      (`name`),
@@ -99,6 +100,7 @@ CREATE TABLE IF NOT EXISTS `bags` (
   `volume_ml`       INT           NOT NULL,
   `dimensions`      VARCHAR(100)  NULL DEFAULT NULL,
   `price_per_piece` DECIMAL(8,2)  NOT NULL DEFAULT 0.00,
+  `active`          TINYINT       NOT NULL DEFAULT 1,
 
   -- Nákupní varianta 1
   `var1_qty`        INT           NULL DEFAULT NULL,

@@ -9,8 +9,13 @@ export default function AdminBags() {
   const [bags, setBags] = useState<Bag[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showInactive, setShowInactive] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const toast = useToast()
+
+  const visibleBags = bags.filter((b) =>
+    showInactive ? Number(b.active) === 0 : Number(b.active) !== 0
+  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -70,8 +75,23 @@ export default function AdminBags() {
         price_per_piece: 0,
       })
       setBags((prev) => [...prev, created])
+      setShowInactive(false)
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba vytváření')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleToggleActive(bag: Bag) {
+    setSaving(true)
+    try {
+      const newActive = Number(bag.active) === 0 ? 1 : 0
+      const updated = await updateBag(bag.id, { active: newActive })
+      setBags((prev) => prev.map((b) => (b.id === bag.id ? updated : b)))
+      toast.success(newActive ? 'Pytlík aktivován' : 'Pytlík deaktivován')
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Chyba')
     } finally {
       setSaving(false)
     }
@@ -97,6 +117,14 @@ export default function AdminBags() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Pytlíky</h1>
+        <label className={styles.toggle}>
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+          />
+          Zobrazit jen neaktivní
+        </label>
         <button className={styles.addBtn} onClick={handleAdd} disabled={saving}>
           + Přidat
         </button>
@@ -105,35 +133,53 @@ export default function AdminBags() {
       <div className={styles.tableWrapper}>
         <EditableGrid<Bag>
           columns={columns}
-          rows={bags}
+          rows={visibleBags}
           getRowId={(b) => b.id}
           onSaveCell={handleSaveCell}
+          rowClassName={(b) => (Number(b.active) === 0 ? styles.rowInactive : '')}
           renderRowActions={(bag) =>
-            confirmDeleteId === bag.id ? (
-              <>
-                <button className={styles.deleteBtn} onClick={() => handleDelete(bag)} disabled={saving}>
-                  Potvrdit
-                </button>
+            // Pytlík bez prodejů lze smazat (dvoukrokově); s prodeji jen deaktivovat.
+            !(Number(bag.has_sales) > 0) ? (
+              confirmDeleteId === bag.id ? (
+                <>
+                  <button className={styles.deleteBtn} onClick={() => handleDelete(bag)} disabled={saving}>
+                    Potvrdit
+                  </button>
+                  <button
+                    className={styles.cancelBtn}
+                    onClick={() => setConfirmDeleteId(null)}
+                    disabled={saving}
+                  >
+                    Zrušit
+                  </button>
+                </>
+              ) : (
                 <button
-                  className={styles.cancelBtn}
-                  onClick={() => setConfirmDeleteId(null)}
+                  className={styles.deleteBtn}
+                  onClick={() => setConfirmDeleteId(bag.id)}
                   disabled={saving}
                 >
-                  Zrušit
+                  smazat
                 </button>
-              </>
+              )
             ) : (
               <button
-                className={styles.deleteBtn}
-                onClick={() => setConfirmDeleteId(bag.id)}
+                className={Number(bag.active) === 0 ? styles.activateBtn : styles.deleteBtn}
+                onClick={() => handleToggleActive(bag)}
                 disabled={saving}
               >
-                smazat
+                {Number(bag.active) === 0 ? 'aktivovat' : 'deaktivovat'}
               </button>
             )
           }
         />
       </div>
+
+      {visibleBags.length === 0 && (
+        <p className={styles.loading}>
+          {showInactive ? 'Žádné neaktivní pytlíky.' : 'Žádné aktivní pytlíky.'}
+        </p>
+      )}
     </div>
   )
 }
