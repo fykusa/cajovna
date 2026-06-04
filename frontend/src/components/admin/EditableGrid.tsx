@@ -273,8 +273,15 @@ export default function EditableGrid<T>({
   useLayoutEffect(() => {
     if (colWidths || !headRowRef.current || sortedRows.length === 0) return
     const ths = Array.from(headRowRef.current.children) as HTMLElement[]
-    setColWidths(ths.map((th) => Math.ceil(th.getBoundingClientRect().width)))
-  }, [colWidths, sortedRows.length])
+    const widths = ths.map((th) => Math.ceil(th.getBoundingClientRect().width))
+    // Akční sloupec (poslední) měří jen krátkou hlavičku „Akce", ale musí
+    // pojmout i širší stav potvrzení mazání („Potvrdit  Zrušit").
+    if (renderRowActions && widths.length > 0) {
+      const last = widths.length - 1
+      widths[last] = Math.max(widths[last], 105)
+    }
+    setColWidths(widths)
+  }, [colWidths, sortedRows.length, renderRowActions])
 
   const focusGrid = useCallback(() => setTimeout(() => gridRef.current?.focus(), 0), [])
 

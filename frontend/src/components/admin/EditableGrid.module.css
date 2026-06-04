@@ -96,5 +96,6 @@
 
 .actionCell {
   padding: 1px 8px;
-  text-align: center;
+  /* Zarovnání doleva → při přepnutí na „Potvrdit / Zrušit" obsah neposkočí. */
+  text-align: left;
 }
