@@ -3,13 +3,15 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
 require_once __DIR__ . '/../lib/db_transfer.php';
 
+// CORS hlavičky bezpodmínečně (i na GET/POST odpovědích), jako ostatní api soubory.
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
 $path   = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'OPTIONS') {
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization');
     http_response_code(204);
     exit;
 }
@@ -35,6 +37,10 @@ function handleExport(): void {
         header('Content-Disposition: attachment; filename="' . $name . '"');
         header('Content-Length: ' . filesize($zipPath));
         readfile($zipPath);
+    } catch (Throwable $e) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(500);
+        echo json_encode(['error' => $e->getMessage()]);
     } finally {
         @unlink($zipPath);
     }
