@@ -85,7 +85,8 @@ test('kompletní prodej bez pytlíku', async ({ page }) => {
   // Step 4: bag_yn — default is wantBag=true (Ano active).
   // ArrowDown toggles to wantBag=false (Ne active), then Enter confirms no bag
   await page.keyboard.press('ArrowDown')
-  await expect(page.locator('text=Ne')).toBeVisible()
+  const neOption = page.getByRole('list').first().getByRole('listitem').nth(1)
+  await expect(neOption).toHaveClass(/active/)
   await page.keyboard.press('Enter')
 
   // Should return to category step with 1 cart item
