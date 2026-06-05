@@ -27,7 +27,7 @@
 .header {
   padding: 8px 12px;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #888;
@@ -48,11 +48,12 @@
 }
 
 .item {
-  padding: 10px 12px;
+  padding: 12px 14px;
   cursor: default;
   border-left: 3px solid transparent;
   color: #aaa;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 600;
   display: flex;
   justify-content: space-between;
 }
@@ -61,7 +62,6 @@
   background: #2a5a2a;
   border-left-color: #4caf50;
   color: #4caf50;
-  font-weight: 500;
 }
 
 .quantityDisplay {

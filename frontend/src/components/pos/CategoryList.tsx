@@ -16,7 +16,7 @@ export default function CategoryList({ categories, activeIndex, onSelect }: Prop
     const frame = requestAnimationFrame(() => {
       if (!listRef.current) return
       const activeItem = listRef.current.children[activeIndex] as HTMLElement | undefined
-      activeItem?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      activeItem?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
     })
     return () => cancelAnimationFrame(frame)
   }, [activeIndex])

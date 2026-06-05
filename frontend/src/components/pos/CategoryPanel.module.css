@@ -19,7 +19,7 @@
 .header {
   padding: 8px 12px;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   border-bottom: 1px solid #333;
   background: #222;
   color: #888;
@@ -36,12 +36,13 @@
 }
 
 .item {
-  padding: 10px 12px;
+  padding: 12px 14px;
   cursor: pointer;
   border-left: 3px solid transparent;
   transition: background 0.1s, border-color 0.1s;
   color: #aaa;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .item:hover {
@@ -51,6 +52,5 @@
 .item.selected {
   background: #2a5a2a;
   border-left-color: #4caf50;
-  font-weight: 500;
   color: #4caf50;
 }

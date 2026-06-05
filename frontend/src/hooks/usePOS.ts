@@ -121,10 +121,11 @@ function buildCartItem(tea: Tea, itemType: ItemType, quantity: number, bag: Bag 
 function reducer(state: POSState, action: Action): POSState {
   switch (action.type) {
     case 'LOAD_DATA': {
-      const firstCategory = action.categories[0] ?? null
+      const categories = [...action.categories].sort((a, b) => a.id - b.id)
+      const firstCategory = categories[0] ?? null
       return {
         ...state,
-        categories: action.categories,
+        categories,
         allTeas: action.allTeas,
         bags: action.bags,
         step: 'category',
@@ -246,8 +247,6 @@ function reducer(state: POSState, action: Action): POSState {
         return { ...state, step: 'configure', configPanel: 'packaging', packagingIndex: 0, bagIndex: 0, quantity: 1, selectedTea: tea, searchQuery: '', searchResults: [] }
       }
       if (state.step === 'configure') {
-        if (state.configPanel === 'packaging') return { ...state, configPanel: 'quantity' }
-        if (state.configPanel === 'quantity') return { ...state, configPanel: 'bag' }
         if (!state.selectedTea) return state
         const opts = getPackagingOptions(state.selectedTea)
         const opt = opts[state.packagingIndex] ?? opts[0]

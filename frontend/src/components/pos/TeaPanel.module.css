@@ -18,7 +18,7 @@
 .header {
   padding: 8px 12px;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   border-bottom: 1px solid #333;
   background: #222;
   color: #888;
@@ -35,14 +35,14 @@
   color: #fff;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .filterLabel {
-  font-size: 12px;
+  font-size: 14px;
   color: #ff9800;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .list {
@@ -54,7 +54,7 @@
 }
 
 .item {
-  padding: 10px 12px;
+  padding: 12px 14px;
   cursor: pointer;
   border-left: 3px solid transparent;
   transition: background 0.1s, border-color 0.1s;
@@ -63,7 +63,8 @@
   align-items: center;
   gap: 8px;
   color: #aaa;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .item:hover {
@@ -78,12 +79,12 @@
 
 .name {
   flex: 1;
-  font-weight: 500;
 }
 
 .price {
-  color: #666;
-  font-size: 12px;
+  color: #888;
+  font-size: 16px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -91,5 +92,6 @@
   padding: 20px;
   text-align: center;
   color: #666;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 600;
 }

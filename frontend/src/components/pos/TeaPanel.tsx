@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import type { Tea } from '../../types'
 import styles from './TeaPanel.module.css'
 
@@ -10,6 +11,17 @@ interface Props {
 }
 
 export default function TeaPanel({ teas, selectedIndex, isActive, isFilterActive, filterQuery = '' }: Props) {
+  const listRef = useRef<HTMLUListElement>(null)
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (!listRef.current) return
+      const item = listRef.current.children[selectedIndex] as HTMLElement | undefined
+      item?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [selectedIndex])
+
   return (
     <div className={`${styles.panel} ${isActive ? styles.active : styles.inactive}`}>
       <div className={styles.header}>
@@ -19,7 +31,7 @@ export default function TeaPanel({ teas, selectedIndex, isActive, isFilterActive
           'Čaje'
         )}
       </div>
-      <ul className={styles.list} role="list">
+      <ul className={styles.list} ref={listRef} role="list">
         {teas.length === 0 ? (
           <li className={styles.empty}>Žádné čaje</li>
         ) : (

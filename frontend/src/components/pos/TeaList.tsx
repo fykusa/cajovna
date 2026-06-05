@@ -19,7 +19,7 @@ export default function TeaList({ teas, activeIndex, onSelect }: Props) {
     const frame = requestAnimationFrame(() => {
       if (!listRef.current) return
       const activeItem = listRef.current.children[activeIndex] as HTMLElement | undefined
-      activeItem?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      activeItem?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
     })
     return () => cancelAnimationFrame(frame)
   }, [activeIndex])
