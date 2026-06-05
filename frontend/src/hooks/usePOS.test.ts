@@ -201,7 +201,9 @@ describe('usePOS – configure confirm → košík', () => {
 
   it('confirm s bagIndex=0 přidá položku bez pytlíku', async () => {
     const { result } = await atConfigureStep()
-    act(() => result.current.confirm())
+    act(() => result.current.confirm()) // balení → množství
+    act(() => result.current.confirm()) // množství → pytlík
+    act(() => result.current.confirm()) // pytlík → košík
     expect(result.current.state.step).toBe('category')
     expect(result.current.state.cart).toHaveLength(1)
     expect(result.current.state.cart[0].bag).toBeNull()
@@ -221,7 +223,9 @@ describe('usePOS – configure confirm → košík', () => {
 
   it('confirm resetuje state a vrátí na category', async () => {
     const { result } = await atConfigureStep()
-    act(() => result.current.confirm())
+    act(() => result.current.confirm()) // balení → množství
+    act(() => result.current.confirm()) // množství → pytlík
+    act(() => result.current.confirm()) // pytlík → košík
     expect(result.current.state.step).toBe('category')
     expect(result.current.state.selectedTea).toBeNull()
     expect(result.current.state.quantity).toBe(1)
@@ -289,10 +293,10 @@ describe('usePOS – cancelItem (Escape)', () => {
     // přidá první položku bez pytlíku
     act(() => result.current.moveRight()) // → tea
     await act(async () => {})
-    act(() => result.current.confirm()) // → quantity
-    act(() => result.current.confirm()) // → bag_yn
-    act(() => result.current.moveDown()) // wantBag=false
-    act(() => result.current.confirm()) // přidá do košíku, → category
+    act(() => result.current.confirm()) // → configure (balení)
+    act(() => result.current.confirm()) // → množství
+    act(() => result.current.confirm()) // → pytlík
+    act(() => result.current.confirm()) // → košík, → category
     expect(result.current.state.cart).toHaveLength(1)
     // začne druhou položku a zruší ji
     act(() => result.current.moveRight()) // → tea
@@ -321,10 +325,10 @@ describe('usePOS – košík', () => {
     await act(async () => {})
     act(() => result.current.moveRight())
     await act(async () => {})
-    act(() => result.current.confirm())
-    act(() => result.current.confirm())
-    act(() => result.current.moveDown())
-    act(() => result.current.confirm())
+    act(() => result.current.confirm()) // → balení
+    act(() => result.current.confirm()) // → množství
+    act(() => result.current.confirm()) // → pytlík
+    act(() => result.current.confirm()) // → košík
     expect(result.current.state.cart).toHaveLength(1)
     const id = result.current.state.cart[0].localId
     act(() => result.current.removeFromCart(id))
@@ -336,10 +340,10 @@ describe('usePOS – košík', () => {
     await act(async () => {})
     act(() => result.current.moveRight())
     await act(async () => {})
-    act(() => result.current.confirm())
-    act(() => result.current.confirm())
-    act(() => result.current.moveDown())
-    act(() => result.current.confirm())
+    act(() => result.current.confirm()) // → balení
+    act(() => result.current.confirm()) // → množství
+    act(() => result.current.confirm()) // → pytlík
+    act(() => result.current.confirm()) // → košík
     expect(result.current.state.cart).toHaveLength(1)
     act(() => result.current.clearCart())
     expect(result.current.state.cart).toHaveLength(0)

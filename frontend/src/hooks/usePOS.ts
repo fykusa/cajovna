@@ -247,6 +247,8 @@ function reducer(state: POSState, action: Action): POSState {
         return { ...state, step: 'configure', configPanel: 'packaging', packagingIndex: 0, bagIndex: 0, quantity: 1, selectedTea: tea, searchQuery: '', searchResults: [] }
       }
       if (state.step === 'configure') {
+        if (state.configPanel === 'packaging') return { ...state, configPanel: 'quantity' }
+        if (state.configPanel === 'quantity') return { ...state, configPanel: 'bag' }
         if (!state.selectedTea) return state
         const opts = getPackagingOptions(state.selectedTea)
         const opt = opts[state.packagingIndex] ?? opts[0]
