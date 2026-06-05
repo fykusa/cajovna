@@ -29,8 +29,7 @@
 }
 
 .item.selected {
-  background: #6abf69;
-  color: #111;
+  background: #333;
   border-left-color: #6abf69;
 }
 
@@ -47,26 +46,14 @@
   color: #d4a84b;
 }
 
-.item.selected .amount {
-  color: #111;
-}
-
 .time {
   color: #888;
   font-size: 0.8rem;
 }
 
-.item.selected .time {
-  color: #111;
-}
-
 .itemMeta {
   font-size: 0.75rem;
   color: #888;
-}
-
-.item.selected .itemMeta {
-  color: #111;
 }
 
 .user {
