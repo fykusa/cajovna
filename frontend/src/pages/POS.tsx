@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react'
 import { usePOS } from '../hooks/usePOS'
 import { useAuthStore } from '../store/authStore'
+import { getSales } from '../api/sales'
 import CategoryList from '../components/pos/CategoryList'
 import TeaList from '../components/pos/TeaList'
 import SearchResults from '../components/pos/SearchResults'
@@ -9,6 +10,7 @@ import BagSelector from '../components/pos/BagSelector'
 import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
 import { useToast } from '../components/toast/useToast'
+import type { Sale } from '../types'
 import styles from './POS.module.css'
 
 export default function POS() {
@@ -18,6 +20,30 @@ export default function POS() {
   const user = useAuthStore((s) => s.user)
   const [showCheckout, setShowCheckout] = useState(false)
   const toast = useToast()
+
+  const [posMode, setPosMode] = useState<'sell' | 'history'>('sell')
+  const [history, setHistory] = useState<Sale[]>([])
+  const [historyIndex, setHistoryIndex] = useState(0)
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
+  const [historyLoading, setHistoryLoading] = useState(true)
+  const [historyError, setHistoryError] = useState<string | null>(null)
+
+  const handleSpace = useCallback(() => {
+    if (state.step !== 'category') return
+    setPosMode((prev) => (prev === 'sell' ? 'history' : 'sell'))
+  }, [state.step])
+
+  const handleHistoryNavigation = useCallback(
+    (direction: 'up' | 'down') => {
+      if (posMode !== 'history' || history.length === 0) return
+      const newIndex = direction === 'up'
+        ? (historyIndex - 1 + history.length) % history.length
+        : (historyIndex + 1) % history.length
+      setHistoryIndex(newIndex)
+      setSelectedSale(history[newIndex])
+    },
+    [posMode, history, historyIndex],
+  )
 
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -32,11 +58,32 @@ export default function POS() {
       return
     }
 
+    // SPACE = přepínání mezi módy
+    if (e.key === ' ') {
+      e.preventDefault()
+      handleSpace()
+      return
+    }
+
     if ((e.target as HTMLElement).tagName === 'INPUT') return
 
     switch (e.key) {
-      case 'ArrowUp':   e.preventDefault(); moveUp(); break
-      case 'ArrowDown': e.preventDefault(); moveDown(); break
+      case 'ArrowUp':
+        e.preventDefault()
+        if (posMode === 'history') {
+          handleHistoryNavigation('up')
+        } else {
+          moveUp()
+        }
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        if (posMode === 'history') {
+          handleHistoryNavigation('down')
+        } else {
+          moveDown()
+        }
+        break
       case 'F10':
         if (state.cart.length > 0) { e.preventDefault(); setShowCheckout(true) }
         break
@@ -54,12 +101,32 @@ export default function POS() {
           }
         }
     }
-  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch, cancelItem])
+  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch, cancelItem, posMode, handleSpace, handleHistoryNavigation])
 
   useEffect(() => {
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
   }, [handleKey])
+
+  // Načteme dnešní prodeje na mount
+  useEffect(() => {
+    const today = new Date()
+    const dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const dateTo = new Date(dateFrom.getTime() + 24 * 60 * 60 * 1000 - 1)
+
+    getSales({
+      date_from: dateFrom.toISOString().split('T')[0],
+      date_to: dateTo.toISOString().split('T')[0],
+    })
+      .then((sales) => {
+        setHistory(sales)
+        setHistoryLoading(false)
+      })
+      .catch((e) => {
+        setHistoryError(e instanceof Error ? e.message : 'Chyba při načítání')
+        setHistoryLoading(false)
+      })
+  }, [])
 
   function renderMainPanel() {
     if (state.step === 'search') {
