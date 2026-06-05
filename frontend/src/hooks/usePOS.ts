@@ -15,6 +15,7 @@ export type POSStep =
 
 export interface POSState {
   step: POSStep
+  activePanel: 'categories' | 'teas'
   categories: Category[]
   teas: Tea[]
   allTeas: Tea[]
@@ -42,6 +43,8 @@ type Action =
   | { type: 'LOAD_TEAS'; teas: Tea[] }
   | { type: 'MOVE_UP' }
   | { type: 'MOVE_DOWN' }
+  | { type: 'MOVE_LEFT' }
+  | { type: 'MOVE_RIGHT' }
   | { type: 'CONFIRM' }
   | { type: 'SET_QUANTITY'; value: number }
   | { type: 'START_SEARCH'; query: string }
@@ -53,6 +56,7 @@ type Action =
 
 const initialState: POSState = {
   step: 'category',
+  activePanel: 'categories',
   categories: [],
   teas: [],
   allTeas: [],
@@ -128,6 +132,8 @@ function reducer(state: POSState, action: Action): POSState {
         allTeas: action.allTeas,
         bags: action.bags,
         bagMaterials: materials,
+        step: 'category',
+        activePanel: 'categories',
         loading: false,
       }
     }
@@ -195,13 +201,27 @@ function reducer(state: POSState, action: Action): POSState {
       return state
     }
 
+    case 'MOVE_LEFT': {
+      return { ...state, activePanel: 'categories', step: 'category', searchQuery: '', searchResults: [] }
+    }
+
+    case 'MOVE_RIGHT': {
+      if (state.step === 'category') {
+        return { ...state, activePanel: 'teas', step: 'tea' }
+      }
+      if (state.step === 'search') {
+        return { ...state, activePanel: 'teas', step: 'search' }
+      }
+      return state
+    }
+
     case 'SET_QUANTITY':
       return { ...state, quantity: Math.max(1, action.value) }
 
     case 'CONFIRM': {
       if (state.step === 'category') {
         const cat = state.categories[state.categoryIndex] ?? null
-        return { ...state, step: 'tea', selectedCategory: cat, teaIndex: 0 }
+        return { ...state, step: 'tea', activePanel: 'teas', selectedCategory: cat, teaIndex: 0 }
       }
       if (state.step === 'tea') {
         const tea = state.teas[state.teaIndex] ?? null
@@ -261,6 +281,7 @@ function reducer(state: POSState, action: Action): POSState {
       return {
         ...state,
         step: 'category',
+        activePanel: 'categories',
         categoryIndex: 0,
         teaIndex: 0,
         selectedCategory: null,
@@ -286,6 +307,8 @@ function reducer(state: POSState, action: Action): POSState {
 export interface POSActions {
   moveUp: () => void
   moveDown: () => void
+  moveLeft: () => void
+  moveRight: () => void
   confirm: () => void
   setQuantity: (v: number) => void
   startSearch: (query: string) => void
@@ -317,6 +340,8 @@ export function usePOS(): { state: POSState } & POSActions {
 
   const moveUp = useCallback(() => dispatch({ type: 'MOVE_UP' }), [])
   const moveDown = useCallback(() => dispatch({ type: 'MOVE_DOWN' }), [])
+  const moveLeft = useCallback(() => dispatch({ type: 'MOVE_LEFT' }), [])
+  const moveRight = useCallback(() => dispatch({ type: 'MOVE_RIGHT' }), [])
   const confirm = useCallback(() => dispatch({ type: 'CONFIRM' }), [])
   const setQuantity = useCallback((v: number) => dispatch({ type: 'SET_QUANTITY', value: v }), [])
   const startSearch = useCallback((query: string) => dispatch({ type: 'START_SEARCH', query }), [])
@@ -333,5 +358,5 @@ export function usePOS(): { state: POSState } & POSActions {
     }
   }, [])
 
-  return { state, moveUp, moveDown, confirm, setQuantity, startSearch, appendSearch, cancelItem, removeFromCart, clearCart, loadTeasForCategory }
+  return { state, moveUp, moveDown, moveLeft, moveRight, confirm, setQuantity, startSearch, appendSearch, cancelItem, removeFromCart, clearCart, loadTeasForCategory }
 }
