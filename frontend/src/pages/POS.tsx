@@ -171,10 +171,12 @@ export default function POS() {
     Promise.all(promises)
       .then((results) => {
         const map: Record<number, SaleItem[]> = {}
+        console.log('[History] Results:', results)
         for (const { saleId, items } of results) {
           map[saleId] = items
+          console.log(`[History] Added sale ${saleId} with ${items.length} items`)
         }
-        console.log(`[History] Loaded ${Object.keys(map).length} sales with items. Map keys:`, Object.keys(map))
+        console.log(`[History] Final map keys:`, Object.keys(map), `Map:`, map)
         setSaleItemsByIndex(map)
       })
       .catch((e) => {

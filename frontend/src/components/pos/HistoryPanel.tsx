@@ -16,10 +16,11 @@ function calculatePrices(items: SaleItem[]) {
   let bagPrice = 0
 
   for (const item of items) {
+    const price = Number(item.total_price) || 0
     if (item.item_type === 'bag') {
-      bagPrice += item.total_price
+      bagPrice += price
     } else {
-      goodsPrice += item.total_price
+      goodsPrice += price
     }
   }
 
