@@ -12,8 +12,8 @@ const ITEMS_SALE1: SaleItem[] = [
     item_type: 'std',
     weight_g: null,
     quantity: 2,
-    unit_price: 10000,
-    total_price: 20000,
+    unit_price: 100,
+    total_price: 200,
     note: null,
     tea_id: 5,
     tea_name: 'Zelený čaj',
@@ -26,8 +26,8 @@ const ITEMS_SALE1: SaleItem[] = [
     item_type: 'bag',
     weight_g: null,
     quantity: 1,
-    unit_price: 6000,
-    total_price: 6000,
+    unit_price: 60,
+    total_price: 60,
     note: null,
     tea_id: null,
     tea_name: null,
@@ -43,8 +43,8 @@ const ITEMS_SALE2: SaleItem[] = [
     item_type: 'std',
     weight_g: null,
     quantity: 1,
-    unit_price: 13000,
-    total_price: 13000,
+    unit_price: 130,
+    total_price: 130,
     note: null,
     tea_id: 8,
     tea_name: 'Bílý čaj',
@@ -58,7 +58,7 @@ const SALE: Sale = {
   id: 1,
   user_id: 1,
   username: 'prodavacka',
-  total_amount: 26000,
+  total_amount: 260,
   note: null,
   created_at: '2026-06-05T14:32:00',
 }
@@ -67,7 +67,7 @@ const SALE2: Sale = {
   id: 2,
   user_id: 1,
   username: 'admin',
-  total_amount: 13000,
+  total_amount: 130,
   note: null,
   created_at: '2026-06-05T13:15:00',
 }
@@ -131,7 +131,7 @@ describe('HistoryPanel — tabulkový formát', () => {
   })
 
   it('vypočítá cenu za zboží (bez pytlíků) — std + custom, ne bag', () => {
-    // ITEMS_SALE1: 1× std (20000 haléř = 200 Kč) + 1× bag (6000 haléř = 60 Kč) = 200 Kč zboží
+    // ITEMS_SALE1: 1× std (200 Kč) + 1× bag (60 Kč) = 200 Kč zboží
     render(
       <HistoryPanel
         sales={[SALE]}
@@ -143,11 +143,11 @@ describe('HistoryPanel — tabulkový formát', () => {
     )
     // Cena za zboží: součet total_price kde item_type != 'bag'
     const goodsCell = screen.getByTestId('col-goods')
-    expect(goodsCell.textContent).toBe('200.00 Kč')
+    expect(goodsCell.textContent).toBe('200 Kč')
   })
 
   it('vypočítá cenu za pytlíky (bag items)', () => {
-    // ITEMS_SALE1: 1× bag (6000 haléř = 60 Kč)
+    // ITEMS_SALE1: 1× bag (60 Kč)
     render(
       <HistoryPanel
         sales={[SALE]}
@@ -158,7 +158,7 @@ describe('HistoryPanel — tabulkový formát', () => {
       />
     )
     const bagCell = screen.getByTestId('col-bag')
-    expect(bagCell.textContent).toBe('60.00 Kč')
+    expect(bagCell.textContent).toBe('60 Kč')
   })
 
   it('zobrazí celkovou cenu (total_amount)', () => {
@@ -172,7 +172,7 @@ describe('HistoryPanel — tabulkový formát', () => {
       />
     )
     const totalCell = screen.getByTestId('col-total')
-    expect(totalCell.textContent).toBe('260.00 Kč')
+    expect(totalCell.textContent).toBe('260 Kč')
   })
 
   it('zvýrazní vybraný řádek', () => {

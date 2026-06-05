@@ -68,9 +68,9 @@ export default function HistoryPanel({
           const items = saleItemsByIndex[sale.id] || []
           const { goodsPrice, bagPrice } = calculatePrices(items)
 
-          const goodsPriceNum = Number(goodsPrice) || 0
-          const bagPriceNum = Number(bagPrice) || 0
-          const totalNum = Number(sale.total_amount) || 0
+          const goodsPriceNum = Math.round(Number(goodsPrice) || 0)
+          const bagPriceNum = Math.round(Number(bagPrice) || 0)
+          const totalNum = Math.round(Number(sale.total_amount) || 0)
 
           return (
             <div
@@ -89,13 +89,13 @@ export default function HistoryPanel({
               </div>
               <div className={styles.colUser} data-testid="col-user">{sale.username}</div>
               <div className={styles.colGoods} data-testid="col-goods">
-                {(goodsPriceNum / 100).toFixed(2)} Kč
+                {goodsPriceNum} Kč
               </div>
               <div className={styles.colBag} data-testid="col-bag">
-                {(bagPriceNum / 100).toFixed(2)} Kč
+                {bagPriceNum} Kč
               </div>
               <div className={styles.colTotal} data-testid="col-total">
-                {(totalNum / 100).toFixed(2)} Kč
+                {totalNum} Kč
               </div>
             </div>
           )
