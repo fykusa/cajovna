@@ -112,7 +112,7 @@ export default function Sales() {
               </tr>
             </thead>
             <tbody>
-              {sales.map((s, i) => (
+              {sales.map((s) => (
                 <tr key={s.id}>
                   <td className={styles.time}>
                     {new Date(s.created_at).toLocaleString('cs-CZ', {
@@ -120,7 +120,7 @@ export default function Sales() {
                       hour: '2-digit', minute: '2-digit'
                     })}
                   </td>
-                  <td>{i === 0 || sales[i - 1].username !== s.username ? s.username : ''}</td>
+                  <td>{s.username}</td>
                   <td className={styles.amount}>{Math.round(Number(s.total_amount))} Kč</td>
                 </tr>
               ))}

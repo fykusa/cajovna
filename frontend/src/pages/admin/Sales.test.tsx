@@ -23,20 +23,28 @@ beforeEach(() => {
 describe('Sales', () => {
   it('zobrazí tabulku prodejů', async () => {
     renderWithToast(<Sales />)
-    expect(await screen.findByText('terka')).toBeInTheDocument()
-    expect(screen.getByText('boss')).toBeInTheDocument()
+    expect(await screen.findByText('boss')).toBeInTheDocument()
+    expect(screen.getAllByText('terka').length).toBeGreaterThan(0)
+  })
+
+  it('ukáže prodavačku u každého řádku i při opakování po sobě', async () => {
+    // terka má dva prodeje po sobě — jméno se musí zobrazit u OBOU řádků,
+    // ne jen u prvního (regrese: dřív se opakující prodavačka skrývala).
+    renderWithToast(<Sales />)
+    await screen.findByText('boss')
+    expect(screen.getAllByText('terka')).toHaveLength(2)
   })
 
   it('zobrazí celkovou tržbu', async () => {
     renderWithToast(<Sales />)
-    await screen.findByText('terka')
+    await screen.findByText('boss')
     expect(screen.getByText(/890/)).toBeInTheDocument()
   })
 
   it('filtruje prodeje po kliku na Zobrazit', async () => {
     const user = userEvent.setup()
     renderWithToast(<Sales />)
-    await screen.findByText('terka')
+    await screen.findByText('boss')
     const fromInput = screen.getByLabelText(/od/i)
     await user.clear(fromInput)
     await user.type(fromInput, '2026-05-28')
