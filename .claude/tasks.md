@@ -2,6 +2,8 @@
 
 ## Čekající
 
+- [ ] [2026-06-05] **Úprava History panelu — tabulkový přehled**: Přepracovat HistoryPanel z jednoduchého seznamu na tabulkový přehled prodejů. Jeden řádek = jeden prodej. Sloupce (zleva doprava): ID prodeje (zarovnání doleva) | Čas | Prodavající | Cena za zboží (vpravo) | Cena za pytlíky (vpravo) | Celková cena (vpravo). Vyžaduje: (1) vypočítat cenu za zboží a pytlíky z saleItems (musí být dostupné v HistoryPanel); (2) CSS layout (flex/grid tabulka); (3) rozšířit HistoryPanel props na saleItemsByIndex či similar. Spec/plán: docs/superpowers/{specs,plans}/2026-06-05-history-table-redesign*.
+
 - [ ] [2026-06-02] **Storno prodejů**: Admin může stornovat (a) **konkrétní položku** v prodeji (`sale_items`) i (b) **celý prodej** (`sales`). DB příprava: přidat sloupec pro storno — návrh `cancelled_at DATETIME NULL` na `sale_items` i `sales` (kdo/proč případně `cancel_reason`/`cancelled_by`). Backend: admin-only endpointy pro storno položky a prodeje. Rozhodnout: (1) zda storno **vrací zboží na sklad** (`stock_*`/`stock_kg`); (2) jak se stornované položky/prodeje promítnou do tržeb (Dashboard/Sales) — vyloučit z součtů, zobrazit přeškrtnuté/zvlášť. UI: akce „Stornovat" u položky i u prodeje (s potvrzením). Udělat jako featuru: brainstorm → spec → plán.
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
