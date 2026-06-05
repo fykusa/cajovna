@@ -2,12 +2,12 @@
 
 ## Čekající
 
-- [ ] [2026-06-05] **Úprava History panelu — tabulkový přehled**: Přepracovat HistoryPanel z jednoduchého seznamu na tabulkový přehled prodejů. Jeden řádek = jeden prodej. Sloupce (zleva doprava): ID prodeje (zarovnání doleva) | Čas | Prodavající | Cena za zboží (vpravo) | Cena za pytlíky (vpravo) | Celková cena (vpravo). Vyžaduje: (1) vypočítat cenu za zboží a pytlíky z saleItems (musí být dostupné v HistoryPanel); (2) CSS layout (flex/grid tabulka); (3) rozšířit HistoryPanel props na saleItemsByIndex či similar. Spec/plán: docs/superpowers/{specs,plans}/2026-06-05-history-table-redesign*.
-
 - [ ] [2026-06-02] **Storno prodejů**: Admin může stornovat (a) **konkrétní položku** v prodeji (`sale_items`) i (b) **celý prodej** (`sales`). DB příprava: přidat sloupec pro storno — návrh `cancelled_at DATETIME NULL` na `sale_items` i `sales` (kdo/proč případně `cancel_reason`/`cancelled_by`). Backend: admin-only endpointy pro storno položky a prodeje. Rozhodnout: (1) zda storno **vrací zboží na sklad** (`stock_*`/`stock_kg`); (2) jak se stornované položky/prodeje promítnou do tržeb (Dashboard/Sales) — vyloučit z součtů, zobrazit přeškrtnuté/zvlášť. UI: akce „Stornovat" u položky i u prodeje (s potvrzením). Udělat jako featuru: brainstorm → spec → plán.
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
 ## Hotovo
+
+- [x] [2026-06-05] **Úprava History panelu — tabulkový přehled**: Přepracován HistoryPanel z jednoduchého seznamu na tabulkový přehled. Sloupce: ID (doleva) | Čas | Prodavající | Cena za zboží (doprava) | Cena za pytlíky (doprava) | Celková (doprava). Implementace: (1) Helper `calculatePrices()` — dělí items na zboží (nem-bag) a pytlíky (bag), sčítá total_price; (2) CSS flex layout — header sticky, body scrollable, gap mezi sloupce; (3) Props: `saleItemsByIndex: Record<number, SaleItem[]>` mapuje sale_id na items. V POS.tsx effect nahrává items pro všechny dnešní prodeje v parallel. Ceny formátovány na 2 desetinná místa (děleno 100). E2E test ruční (screenshot potvrdil, funguje). 146/146 testů. Commity: `c7dbb47`, `7d37004`, `fa53d5e`.
 
 - [x] [2026-06-05] **POS — Scroll do viditelnosti**: Šipky navigaci v kategoriích/čajích/historii scrollují aktivní prvek do viditelnosti. Implementace: `requestAnimationFrame` + `scrollIntoView({ behavior: 'smooth', block: 'nearest' })`. Řešení `requestAnimationFrame` je bezpečné pro testy (na rozdíl od `useEffect`/`useLayoutEffect`). 140/140 testů. Commit: `23c811c`.
 
