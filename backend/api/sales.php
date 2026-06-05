@@ -28,6 +28,7 @@ if ($method === 'POST' && preg_match('#/api/sales$#', $path)) {
 
 // GET /api/sales/:id/items – položky prodeje
 } elseif ($method === 'GET' && preg_match('#/api/sales/(\d+)/items$#', $path, $m)) {
+    requireAuth();
     listSaleItems((int) $m[1]);
 
 } else {

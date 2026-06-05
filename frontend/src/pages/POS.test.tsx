@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { screen, act } from '@testing-library/react'
+import { screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import POS from './POS'
 import { renderWithToast } from '../test/renderWithToast'
@@ -19,6 +19,10 @@ vi.mock('../api/bags', () => ({
   getBags: vi.fn().mockResolvedValue([
     { id: 1, surface_type: 'papír', volume_ml: 100, dimensions: null, price_per_piece: 2.91 },
   ]),
+}))
+vi.mock('../api/sales', () => ({
+  getSales: vi.fn().mockResolvedValue([]),
+  getSaleItems: vi.fn().mockResolvedValue([]),
 }))
 vi.mock('../store/authStore', () => ({
   useAuthStore: (s: (state: { user: { id: number; username: string; role: string } | null; token: string | null; logout: () => void }) => unknown) =>
