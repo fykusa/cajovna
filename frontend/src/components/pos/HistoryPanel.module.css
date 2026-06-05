@@ -4,7 +4,6 @@
   flex-direction: column;
   height: 100%;
   background: #1a1a1a;
-  overflow-y: auto;
 }
 
 .tableHeader {
@@ -12,7 +11,7 @@
   top: 0;
   background: #222;
   border-bottom: 1px solid #333;
-  z-index: 99;
+  z-index: 101;
   flex-shrink: 0;
 }
 
