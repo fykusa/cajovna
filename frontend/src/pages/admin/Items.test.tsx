@@ -87,6 +87,33 @@ describe('Items — keyboard navigace během editace', () => {
     await waitFor(() => expect(productsApi.deleteProduct).toHaveBeenCalledWith(1))
   })
 
+  it('po editaci buňky zůstane u čaje s prodeji akce "deaktivovat" (ne "smazat")', async () => {
+    const teaWithSales = mkTea(1, 'Show Mee', 1)
+    vi.mocked(productsApi.getProducts).mockResolvedValue([teaWithSales])
+    // Reálný backend update vrací řádek BEZ počítaného has_sales (SELECT *).
+    const { has_sales: _omit, ...withoutHasSales } = teaWithSales
+    vi.mocked(productsApi.updateProduct).mockResolvedValue({ ...withoutHasSales, name: 'Show Mee 2' } as Tea)
+    const user = userEvent.setup()
+    renderWithToast(<Items />)
+
+    // Před editací: čaj s prodeji nabízí "deaktivovat"
+    expect(await screen.findByRole('button', { name: 'deaktivovat' })).toBeInTheDocument()
+
+    // Edituj buňku Název
+    await user.click(screen.getByText('Show Mee'))
+    await user.keyboard('{Enter}')
+    const input = screen.getByDisplayValue('Show Mee')
+    await user.clear(input)
+    await user.type(input, 'Show Mee 2')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(productsApi.updateProduct).toHaveBeenCalled())
+
+    // Po editaci MUSÍ akce zůstat "deaktivovat" — has_sales se nesmí ztratit
+    expect(await screen.findByRole('button', { name: 'deaktivovat' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'smazat' })).not.toBeInTheDocument()
+  })
+
   it('+ Přidat otevře modal a vytvoří nový čaj', async () => {
     vi.mocked(productsApi.createProduct).mockResolvedValue(mkTea(3, 'Nový čaj'))
     const user = userEvent.setup()
