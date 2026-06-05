@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #333;
+  background: #1a1a1a;
+  transition: background 0.15s, border-color 0.15s;
+  min-width: 0;
+}
+
+.section:last-child {
+  border-right: none;
+}
+
+.section.active {
+  background: #1e2a1e;
+  border-top: 2px solid #4caf50;
+}
+
+.header {
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  background: #222;
+  border-bottom: 1px solid #333;
+}
+
+.section.active .header {
+  color: #4caf50;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.item {
+  padding: 10px 12px;
+  cursor: default;
+  border-left: 3px solid transparent;
+  color: #aaa;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.item.selected {
+  background: #2a5a2a;
+  border-left-color: #4caf50;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.quantityDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 8px;
+}
+
+.quantityValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #eee;
+  line-height: 1;
+}
+
+.quantityHint {
+  font-size: 11px;
+  color: #555;
+}
