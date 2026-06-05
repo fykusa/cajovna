@@ -5,7 +5,7 @@ import { getSales, getSaleItems } from '../api/sales'
 import CategoryPanel from '../components/pos/CategoryPanel'
 import TeaPanel from '../components/pos/TeaPanel'
 import SearchResults from '../components/pos/SearchResults'
-import QuantitySelector from '../components/pos/QuantitySelector'
+import QuantityModal from '../components/pos/QuantityModal'
 import BagSelector from '../components/pos/BagSelector'
 import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
@@ -250,18 +250,12 @@ export default function POS() {
       )
     }
 
-    // Quantity selector
-    if (state.step === 'quantity' && state.selectedTea) {
+    // Quantity modal — just show empty split layout, modal is rendered separately
+    if (state.step === 'quantity') {
       return (
         <div className={styles.splitLayout}>
           <div className={styles.panelPlaceholder} />
-          <div className={styles.mainContent}>
-            <QuantitySelector
-              tea={state.selectedTea}
-              quantity={state.quantity}
-              onChange={setQuantity}
-            />
-          </div>
+          <div className={styles.mainContent} />
         </div>
       )
     }
@@ -361,6 +355,16 @@ export default function POS() {
           </>
         )}
       </main>
+
+      {state.step === 'quantity' && state.selectedTea && (
+        <QuantityModal
+          tea={state.selectedTea}
+          quantity={state.quantity}
+          onQuantityChange={setQuantity}
+          onConfirm={confirm}
+          onCancel={cancelItem}
+        />
+      )}
 
       {showCheckout && (
         <CheckoutDialog
