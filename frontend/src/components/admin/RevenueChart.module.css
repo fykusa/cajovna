@@ -62,6 +62,13 @@
 .col:hover .bar {
   background: linear-gradient(#d4a84b, #b8923f);
 }
+/* Interval bez tržby — neutrální „mrtvá" barva, viditelná, ale ne jako tržba. */
+.barZero {
+  background: #444;
+}
+.col:hover .barZero {
+  background: #555;
+}
 .xlabel {
   height: 0.9rem;
   margin-top: 4px;

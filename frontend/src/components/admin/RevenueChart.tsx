@@ -31,7 +31,10 @@ export default function RevenueChart({ data, title = 'Tržby v čase' }: Props) 
           {data.map((d, i) => (
             <div key={i} className={styles.col} title={`${d.label}: ${fmtKc(d.value)} Kč`}>
               <div className={styles.barWrap}>
-                <div className={styles.bar} style={{ height: `${(d.value / max) * 100}%` }} />
+                <div
+                  className={`${styles.bar}${d.value === 0 ? ' ' + styles.barZero : ''}`}
+                  style={{ height: `${(d.value / max) * 100}%` }}
+                />
               </div>
               <span className={styles.xlabel}>{i % step === 0 ? d.label : ''}</span>
             </div>
