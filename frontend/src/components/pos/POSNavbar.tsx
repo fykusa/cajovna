@@ -5,10 +5,9 @@ interface Props {
   onTabChange: (tab: 'sell' | 'overview') => void
   username: string
   onLogout: () => void
-  step?: string
 }
 
-export default function POSNavbar({ activeTab, onTabChange, username, onLogout, step }: Props) {
+export default function POSNavbar({ activeTab, onTabChange, username, onLogout }: Props) {
   return (
     <header className={styles.navbar}>
       <div className={styles.tabs}>
@@ -24,10 +23,9 @@ export default function POSNavbar({ activeTab, onTabChange, username, onLogout, 
         >
           Dnešní přehled
         </button>
-        {step && activeTab === 'sell' && <span className={styles.step}>Krok: {step}</span>}
       </div>
       <div className={styles.footer}>
-        <span className={styles.username}>{username}</span>
+        <span className={styles.brand}>{username}</span>
         <button onClick={onLogout} className={styles.logoutBtn}>Odhlásit</button>
       </div>
     </header>

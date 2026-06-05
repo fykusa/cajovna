@@ -47,24 +47,27 @@
   margin-left: auto;
 }
 
-.username {
-  font-size: 0.85rem;
-  color: #888;
+.brand {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #d4a84b;
   white-space: nowrap;
 }
 
 .logoutBtn {
-  background: none;
-  border: 1px solid #555;
-  color: #aaa;
-  padding: 4px 10px;
+  display: block;
+  padding: 8px 14px;
+  background: #3a0d0d;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #e05555;
   transition: all 0.2s;
 }
 
 .logoutBtn:hover {
-  border-color: #888;
-  color: #bbb;
+  background: #4d1010;
+  color: #f07070;
 }
