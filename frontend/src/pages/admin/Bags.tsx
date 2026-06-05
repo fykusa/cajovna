@@ -61,7 +61,7 @@ export default function AdminBags() {
       let parsed: any = value
       if (col.type === 'number') parsed = value === '' ? null : parseFloat(value)
       const updated = await updateBag(bag.id, { [col.key]: parsed })
-      setBags((prev) => prev.map((b) => (b.id === bag.id ? updated : b)))
+      setBags((prev) => prev.map((b) => (b.id === bag.id ? { ...b, ...updated } : b)))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
@@ -100,7 +100,7 @@ export default function AdminBags() {
     try {
       const newActive = Number(bag.active) === 0 ? 1 : 0
       const updated = await updateBag(bag.id, { active: newActive })
-      setBags((prev) => prev.map((b) => (b.id === bag.id ? updated : b)))
+      setBags((prev) => prev.map((b) => (b.id === bag.id ? { ...b, ...updated } : b)))
       toast.success(newActive ? 'Pytlík aktivován' : 'Pytlík deaktivován')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba')

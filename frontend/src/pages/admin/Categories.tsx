@@ -62,7 +62,7 @@ export default function AdminCategories() {
       if (col.type === 'number') parsed = value === '' ? 0 : parseInt(value, 10)
       if (col.key === 'parent_id') parsed = value === '' ? null : parseInt(value, 10)
       const updated = await updateCategory(cat.id, { [col.key]: parsed })
-      setCategories((prev) => prev.map((c) => (c.id === cat.id ? updated : c)))
+      setCategories((prev) => prev.map((c) => (c.id === cat.id ? { ...c, ...updated } : c)))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba uložení')
     } finally {
@@ -100,7 +100,7 @@ export default function AdminCategories() {
     try {
       const newActive = Number(cat.active) === 0 ? 1 : 0
       const updated = await updateCategory(cat.id, { active: newActive })
-      setCategories((prev) => prev.map((c) => (c.id === cat.id ? updated : c)))
+      setCategories((prev) => prev.map((c) => (c.id === cat.id ? { ...c, ...updated } : c)))
       toast.success(newActive ? 'Kategorie aktivována' : 'Kategorie deaktivována')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba')

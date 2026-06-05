@@ -92,10 +92,10 @@ export default function AdminItems() {
 
       if (col.key.startsWith('stock_')) {
         const updated = await updateStock(tea.id, { [col.key]: parsed })
-        setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
+        setTeas((prev) => prev.map((t) => (t.id === tea.id ? { ...t, ...updated } : t)))
       } else {
         const updated = await updateProduct(tea.id, { [col.key]: parsed })
-        setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
+        setTeas((prev) => prev.map((t) => (t.id === tea.id ? { ...t, ...updated } : t)))
       }
       toast.success('Záznam uložen')
     } catch (e) {
@@ -140,7 +140,7 @@ export default function AdminItems() {
     try {
       const newFlag = tea.flag === 'active' ? 'discontinued' : 'active'
       const updated = await updateProduct(tea.id, { flag: newFlag })
-      setTeas((prev) => prev.map((t) => (t.id === tea.id ? updated : t)))
+      setTeas((prev) => prev.map((t) => (t.id === tea.id ? { ...t, ...updated } : t)))
       toast.success(newFlag === 'active' ? 'Čaj aktivován' : 'Čaj deaktivován')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba')
