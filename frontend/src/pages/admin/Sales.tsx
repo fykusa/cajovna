@@ -2,20 +2,22 @@ import { useEffect, useState } from 'react'
 import type { Sale } from '../../types'
 import { getSales } from '../../api/sales'
 import { useToast } from '../../components/toast/useToast'
+import { periodRange, PERIODS, type Period } from './periodRange'
 import styles from './Sales.module.css'
 
 export default function Sales() {
-  const today = new Date().toISOString().split('T')[0]
-  const [from, setFrom] = useState(today)
-  const [to, setTo] = useState(today)
+  const initRange = periodRange('month')
+  const [from, setFrom] = useState(initRange.from)
+  const [to, setTo] = useState(initRange.to)
+  const [activePeriod, setActivePeriod] = useState<Period | null>('month')
   const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
   const toast = useToast()
 
-  async function load() {
+  async function load(f = from, t = to) {
     setLoading(true)
     try {
-      const data = await getSales({ from: from + ' 00:00:00', to: to + ' 23:59:59' })
+      const data = await getSales({ from: f + ' 00:00:00', to: t + ' 23:59:59' })
       setSales(data)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Chyba načítání')
@@ -25,6 +27,14 @@ export default function Sales() {
   }
 
   useEffect(() => { load() }, [])
+
+  function selectPeriod(p: Period) {
+    const range = periodRange(p)
+    setFrom(range.from)
+    setTo(range.to)
+    setActivePeriod(p)
+    load(range.from, range.to)
+  }
 
   const total = sales.reduce((s, sale) => s + Number(sale.total_amount), 0)
 
@@ -38,13 +48,25 @@ export default function Sales() {
       <h1 className={styles.title}>Tržby</h1>
 
       <form onSubmit={(e) => { e.preventDefault(); load() }} className={styles.filter}>
+        <div className={styles.periods}>
+          {PERIODS.map(({ key, label }) => (
+            <button
+              type="button"
+              key={key}
+              className={`${styles.periodBtn}${activePeriod === key ? ' ' + styles.active : ''}`}
+              onClick={() => selectPeriod(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <label>
           Od: <input aria-label="od" type="date" value={from}
-            onChange={(e) => setFrom(e.target.value)} className={styles.dateInput} />
+            onChange={(e) => { setFrom(e.target.value); setActivePeriod(null) }} className={styles.dateInput} />
         </label>
         <label>
           Do: <input aria-label="do" type="date" value={to}
-            onChange={(e) => setTo(e.target.value)} className={styles.dateInput} />
+            onChange={(e) => { setTo(e.target.value); setActivePeriod(null) }} className={styles.dateInput} />
         </label>
         <button type="submit" className={styles.filterBtn}>Zobrazit</button>
       </form>

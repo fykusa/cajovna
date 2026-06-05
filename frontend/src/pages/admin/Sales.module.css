@@ -6,6 +6,12 @@
              border-radius: 4px; color: #eee; }
 .filterBtn { padding: 6px 16px; background: #d4a84b; color: #111; border: none;
              border-radius: 4px; font-weight: 600; cursor: pointer; }
+.periods { display: flex; gap: 8px; flex-wrap: wrap; }
+.periodBtn { padding: 6px 16px; border-radius: 6px; border: 1px solid #444;
+             background: #333; color: #ccc; cursor: pointer; font-size: 0.85rem;
+             transition: background 0.15s, color 0.15s; }
+.periodBtn:hover { background: #3a3a3a; color: #fff; }
+.periodBtn.active { background: #d4a84b; color: #1a1a1a; border-color: #d4a84b; font-weight: 700; }
 .stats { display: flex; gap: 16px; margin-bottom: 24px; }
 .stat { background: #2a2a2a; padding: 16px 24px; border-radius: 8px; }
 .statLabel { color: #888; font-size: 0.85rem; margin-bottom: 4px; }
