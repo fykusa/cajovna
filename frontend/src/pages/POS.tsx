@@ -60,6 +60,7 @@ export default function POS() {
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
+      if (showCheckout) return
       // When in configure step, handle all arrows + Enter/Escape
       if (state.step === 'configure') {
         if (e.key === 'Enter') {
@@ -136,15 +137,16 @@ export default function POS() {
           moveRight()
           break
         case 'F10':
-          if (state.cart.length > 0) {
-            e.preventDefault()
-            setShowCheckout(true)
-          }
+          e.preventDefault()
+          logout()
           break
         case 'Backspace':
           if ((state.step === 'category' || state.step === 'tea' || state.step === 'search') && state.searchQuery.length > 0) {
             e.preventDefault()
             startSearch(state.searchQuery.slice(0, -1))
+          } else if (state.cart.length > 0 && !showCheckout) {
+            e.preventDefault()
+            setShowCheckout(true)
           }
           break
         default:
@@ -157,7 +159,7 @@ export default function POS() {
           }
       }
     },
-    [state, moveUp, moveDown, moveLeft, moveRight, confirm, startSearch, cancelItem, activeTab, handleHistoryNavigation],
+    [state, moveUp, moveDown, moveLeft, moveRight, confirm, startSearch, cancelItem, activeTab, handleHistoryNavigation, logout, showCheckout],
   )
 
   useEffect(() => {
