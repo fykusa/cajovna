@@ -11,11 +11,12 @@ export default function CategoryPanel({ categories, selectedIndex, isActive }: P
   return (
     <div className={`${styles.panel} ${isActive ? styles.active : styles.inactive}`}>
       <div className={styles.header}>Kategorie</div>
-      <ul className={styles.list}>
+      <ul className={styles.list} role="list">
         {categories.map((cat, idx) => (
           <li
             key={cat.id}
             className={`${styles.item} ${idx === selectedIndex ? styles.selected : ''}`}
+            role="listitem"
           >
             {cat.name}
           </li>

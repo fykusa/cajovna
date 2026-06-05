@@ -19,12 +19,12 @@ export default function TeaPanel({ teas, selectedIndex, isActive, isFilterActive
           'Čaje'
         )}
       </div>
-      <ul className={styles.list}>
+      <ul className={styles.list} role="list">
         {teas.length === 0 ? (
           <li className={styles.empty}>Žádné čaje</li>
         ) : (
           teas.map((tea, idx) => (
-            <li key={tea.id} className={`${styles.item} ${idx === selectedIndex ? styles.selected : ''}`}>
+            <li key={tea.id} className={`${styles.item} ${idx === selectedIndex ? styles.selected : ''}`} role="listitem">
               <div className={styles.name}>{tea.name}</div>
               {tea.std_price_moc && <div className={styles.price}>{tea.std_price_moc} Kč</div>}
             </li>
