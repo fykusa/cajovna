@@ -226,8 +226,8 @@ function reducer(state: POSState, action: Action): POSState {
 
     case 'CONFIRM': {
       if (state.step === 'category') {
-        // In category step, CONFIRM does nothing — use MOVE_RIGHT to go to teas
-        return state
+        const cat = state.categories[state.categoryIndex] ?? null
+        return { ...state, step: 'tea', activePanel: 'teas', selectedCategory: cat, teaIndex: 0 }
       }
       if (state.step === 'tea') {
         const tea = state.teas[state.teaIndex] ?? null
