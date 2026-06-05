@@ -142,7 +142,7 @@ export default function POS() {
           }
           break
         case 'Backspace':
-          if ((state.step === 'category' || state.step === 'tea') && state.searchQuery.length > 0) {
+          if ((state.step === 'category' || state.step === 'tea' || state.step === 'search') && state.searchQuery.length > 0) {
             e.preventDefault()
             startSearch(state.searchQuery.slice(0, -1))
           }
@@ -151,6 +151,8 @@ export default function POS() {
           if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
             if (state.step === 'category' || state.step === 'tea') {
               startSearch(e.key)
+            } else if (state.step === 'search') {
+              appendSearch(e.key)
             }
           }
       }
@@ -186,15 +188,13 @@ export default function POS() {
     }
   }, [activeTab])
 
-  // Načteme dnešní prodeje na mount
-  useEffect(() => {
-    const today = new Date()
-    const dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const dateTo = new Date(dateFrom.getTime() + 24 * 60 * 60 * 1000 - 1)
-
+  const reloadHistory = useCallback(() => {
+    const now = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
     getSales({
-      date_from: dateFrom.toISOString().split('T')[0],
-      date_to: dateTo.toISOString().split('T')[0],
+      from: todayStr,
+      to: `${todayStr} 23:59:59`,
     })
       .then((sales) => {
         setHistory(sales)
@@ -205,6 +205,11 @@ export default function POS() {
         setHistoryLoading(false)
       })
   }, [])
+
+  // Načteme dnešní prodeje na mount
+  useEffect(() => {
+    reloadHistory()
+  }, [reloadHistory])
 
   // Načteme položky pro všechny prodeje v parallel
   useEffect(() => {
@@ -362,6 +367,7 @@ export default function POS() {
             clearCart()
             setShowCheckout(false)
             toast.success('Prodej uložen')
+            reloadHistory()
           }}
           onCancel={() => setShowCheckout(false)}
         />
