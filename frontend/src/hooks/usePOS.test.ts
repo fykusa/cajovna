@@ -86,7 +86,7 @@ describe('usePOS – navigace kategorií', () => {
   })
 })
 
-describe('usePOS – výběr čaje', () => {
+describe('usePOS – výběr čaje → configure', () => {
   async function atTeaStep() {
     const hook = renderHook(() => usePOS())
     await act(async () => {})
@@ -95,17 +95,20 @@ describe('usePOS – výběr čaje', () => {
     return hook
   }
 
-  it('confirm na čaji přejde na krok quantity', async () => {
+  it('confirm na čaji přejde na krok configure s packagingIndex=0 a bagIndex=0', async () => {
     const { result } = await atTeaStep()
     act(() => result.current.confirm())
-    expect(result.current.state.step).toBe('quantity')
+    expect(result.current.state.step).toBe('configure')
     expect(result.current.state.selectedTea).toEqual(TEAS[0])
     expect(result.current.state.quantity).toBe(1)
+    expect(result.current.state.configPanel).toBe('packaging')
+    expect(result.current.state.packagingIndex).toBe(0)
+    expect(result.current.state.bagIndex).toBe(0)
   })
 })
 
-describe('usePOS – množství', () => {
-  async function atQuantityStep() {
+describe('usePOS – configure navigace', () => {
+  async function atConfigureStep() {
     const hook = renderHook(() => usePOS())
     await act(async () => {})
     act(() => hook.result.current.moveRight())
@@ -114,73 +117,116 @@ describe('usePOS – množství', () => {
     return hook
   }
 
-  it('moveUp zvýší množství o 1', async () => {
-    const { result } = await atQuantityStep()
+  it('moveRight z packaging přejde na quantity', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
+    expect(result.current.state.configPanel).toBe('quantity')
+  })
+
+  it('moveRight z quantity přejde na bag', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
+    act(() => result.current.moveRight())
+    expect(result.current.state.configPanel).toBe('bag')
+  })
+
+  it('moveRight z bag nic neudělá', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
+    act(() => result.current.moveRight())
+    act(() => result.current.moveRight())
+    expect(result.current.state.configPanel).toBe('bag')
+  })
+
+  it('moveLeft z bag přejde na quantity', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
+    act(() => result.current.moveRight())
+    act(() => result.current.moveLeft())
+    expect(result.current.state.configPanel).toBe('quantity')
+  })
+
+  it('moveLeft z packaging nic neudělá', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveLeft())
+    expect(result.current.state.configPanel).toBe('packaging')
+  })
+
+  it('moveUp/Down v packaging mění packagingIndex (wrap)', async () => {
+    // TEAS[0] má jen std → packagingOptions.length = 1, index se nezmění (wrap na sebe)
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveDown())
+    expect(result.current.state.packagingIndex).toBe(0)
+    act(() => result.current.moveUp())
+    expect(result.current.state.packagingIndex).toBe(0)
+  })
+
+  it('moveUp v quantity zvýší quantity', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight()) // přejdi na quantity panel
     act(() => result.current.moveUp())
     expect(result.current.state.quantity).toBe(2)
   })
 
-  it('moveDown sníží množství (minimum 1)', async () => {
-    const { result } = await atQuantityStep()
+  it('moveDown v quantity sníží quantity (min 1)', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
     act(() => result.current.moveDown())
-    expect(result.current.state.quantity).toBe(1)
+    expect(result.current.state.quantity).toBe(1) // nemůže jít pod 1
   })
 
-  it('setQuantity nastaví přesné množství', async () => {
-    const { result } = await atQuantityStep()
-    act(() => result.current.setQuantity(5))
-    expect(result.current.state.quantity).toBe(5)
-  })
-
-  it('confirm na quantity přejde na bag_yn', async () => {
-    const { result } = await atQuantityStep()
-    act(() => result.current.confirm())
-    expect(result.current.state.step).toBe('bag_yn')
-    expect(result.current.state.wantBag).toBe(true)
+  it('moveUp/Down v bag mění bagIndex (wrap)', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
+    act(() => result.current.moveRight()) // přejdi na bag panel
+    // bagList = [Žádný, bílý matný 250ml, papír 100ml, papír 250ml] → 4 položky
+    act(() => result.current.moveDown())
+    expect(result.current.state.bagIndex).toBe(1)
+    act(() => result.current.moveDown())
+    act(() => result.current.moveDown())
+    act(() => result.current.moveDown()) // wrap
+    expect(result.current.state.bagIndex).toBe(0)
   })
 })
 
-describe('usePOS – pytlík', () => {
-  async function atBagYnStep() {
+describe('usePOS – configure confirm → košík', () => {
+  async function atConfigureStep() {
     const hook = renderHook(() => usePOS())
     await act(async () => {})
     act(() => hook.result.current.moveRight())
     await act(async () => {})
     act(() => hook.result.current.confirm())
-    act(() => hook.result.current.confirm())
     return hook
   }
 
-  it('bez pytlíku (wantBag=false) přidá položku do košíku a vrátí na category', async () => {
-    const { result } = await atBagYnStep()
-    act(() => result.current.moveDown())
+  it('confirm s bagIndex=0 přidá položku bez pytlíku', async () => {
+    const { result } = await atConfigureStep()
     act(() => result.current.confirm())
     expect(result.current.state.step).toBe('category')
     expect(result.current.state.cart).toHaveLength(1)
     expect(result.current.state.cart[0].bag).toBeNull()
+    expect(result.current.state.cart[0].itemType).toBe('std')
+    expect(result.current.state.cart[0].quantity).toBe(1)
   })
 
-  it('s pytlíkem (wantBag=true) přejde na bag_material', async () => {
-    const { result } = await atBagYnStep()
+  it('confirm s bagIndex>0 přidá položku s pytlíkem', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.moveRight())
+    act(() => result.current.moveRight()) // bag panel
+    act(() => result.current.moveDown())  // bagIndex=1 (bílý matný 250ml - první po sort)
     act(() => result.current.confirm())
-    expect(result.current.state.step).toBe('bag_material')
-  })
-
-  it('po výběru materiálu přejde na bag_volume', async () => {
-    const { result } = await atBagYnStep()
-    act(() => result.current.confirm())
-    act(() => result.current.confirm())
-    expect(result.current.state.step).toBe('bag_volume')
-  })
-
-  it('po výběru objemu přidá položku+pytlík do košíku a vrátí na category', async () => {
-    const { result } = await atBagYnStep()
-    act(() => result.current.confirm())
-    act(() => result.current.confirm())
-    act(() => result.current.confirm())
-    expect(result.current.state.step).toBe('category')
     expect(result.current.state.cart).toHaveLength(1)
     expect(result.current.state.cart[0].bag).not.toBeNull()
+  })
+
+  it('confirm resetuje state a vrátí na category', async () => {
+    const { result } = await atConfigureStep()
+    act(() => result.current.confirm())
+    expect(result.current.state.step).toBe('category')
+    expect(result.current.state.selectedTea).toBeNull()
+    expect(result.current.state.quantity).toBe(1)
+    expect(result.current.state.bagIndex).toBe(0)
+    expect(result.current.state.packagingIndex).toBe(0)
   })
 })
 
@@ -206,7 +252,7 @@ describe('usePOS – search', () => {
     await act(async () => {})
     act(() => result.current.startSearch('show'))
     act(() => result.current.confirm())
-    expect(result.current.state.step).toBe('quantity')
+    expect(result.current.state.step).toBe('configure')
     expect(result.current.state.selectedTea?.name).toBe('Show Mee')
   })
 })

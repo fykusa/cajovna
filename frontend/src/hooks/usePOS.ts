@@ -8,10 +8,7 @@ export type POSStep =
   | 'category'
   | 'tea'
   | 'search'
-  | 'quantity'
-  | 'bag_yn'
-  | 'bag_material'
-  | 'bag_volume'
+  | 'configure'
 
 export interface POSState {
   step: POSStep
@@ -28,11 +25,9 @@ export interface POSState {
   selectedCategory: Category | null
   selectedTea: Tea | null
   quantity: number
-  wantBag: boolean
-  bagMaterials: string[]
-  materialIndex: number
-  bagVolumes: number[]
-  volumeIndex: number
+  configPanel: 'packaging' | 'quantity' | 'bag'
+  packagingIndex: number
+  bagIndex: number
   cart: CartItem[]
   loading: boolean
   error: string | null
@@ -69,31 +64,39 @@ const initialState: POSState = {
   selectedCategory: null,
   selectedTea: null,
   quantity: 1,
-  wantBag: true,
-  bagMaterials: [],
-  materialIndex: 0,
-  bagVolumes: [],
-  volumeIndex: 0,
+  configPanel: 'packaging',
+  packagingIndex: 0,
+  bagIndex: 0,
   cart: [],
   loading: true,
   error: null,
 }
 
+export type PackagingOption = { type: ItemType; label: string; weightG: number; price: number }
+
+export function getPackagingOptions(tea: Tea): PackagingOption[] {
+  const opts: PackagingOption[] = []
+  if (tea.std_weight_g != null && tea.std_price_moc != null)
+    opts.push({ type: 'std', label: `Std ${tea.std_weight_g}g`, weightG: tea.std_weight_g, price: tea.std_price_moc })
+  if (tea.pkg1_weight_g != null && tea.pkg1_price_moc != null)
+    opts.push({ type: 'pkg1', label: `Bal 1 ${tea.pkg1_weight_g}g`, weightG: tea.pkg1_weight_g, price: tea.pkg1_price_moc })
+  if (tea.pkg2_weight_g != null && tea.pkg2_price_moc != null)
+    opts.push({ type: 'pkg2', label: `Bal 2 ${tea.pkg2_weight_g}g`, weightG: tea.pkg2_weight_g, price: tea.pkg2_price_moc })
+  return opts
+}
+
+export type BagListItem = { bag: Bag | null; label: string }
+
+export function getBagList(bags: Bag[]): BagListItem[] {
+  const sorted = [...bags].sort((a, b) =>
+    a.surface_type.localeCompare(b.surface_type) || a.volume_ml - b.volume_ml
+  )
+  return [{ bag: null, label: 'Žádný' }, ...sorted.map(b => ({ bag: b, label: `${b.surface_type} ${b.volume_ml} ml` }))]
+}
+
 function searchFilter(teas: Tea[], query: string): Tea[] {
   const q = query.toLowerCase()
   return teas.filter((t) => t.name.toLowerCase().includes(q))
-}
-
-function uniqueMaterials(bags: Bag[]): string[] {
-  return [...new Set(bags.map((b) => b.surface_type))]
-}
-
-function volumesForMaterial(bags: Bag[], material: string): number[] {
-  return bags.filter((b) => b.surface_type === material).map((b) => b.volume_ml).sort((a, b) => a - b)
-}
-
-function makeBagItem(bags: Bag[], material: string, volume: number): Bag | null {
-  return bags.find((b) => b.surface_type === material && b.volume_ml === volume) ?? null
 }
 
 function buildCartItem(tea: Tea, itemType: ItemType, quantity: number, bag: Bag | null): CartItem {
@@ -115,24 +118,15 @@ function buildCartItem(tea: Tea, itemType: ItemType, quantity: number, bag: Bag 
   }
 }
 
-function resolveItemType(tea: Tea): ItemType {
-  if (tea.std_price_moc != null) return 'std'
-  if (tea.pkg1_price_moc != null) return 'pkg1'
-  if (tea.pkg2_price_moc != null) return 'pkg2'
-  return 'custom'
-}
-
 function reducer(state: POSState, action: Action): POSState {
   switch (action.type) {
     case 'LOAD_DATA': {
-      const materials = uniqueMaterials(action.bags)
       const firstCategory = action.categories[0] ?? null
       return {
         ...state,
         categories: action.categories,
         allTeas: action.allTeas,
         bags: action.bags,
-        bagMaterials: materials,
         step: 'category',
         activePanel: 'categories',
         selectedCategory: firstCategory,
@@ -158,19 +152,19 @@ function reducer(state: POSState, action: Action): POSState {
         const len = state.searchResults.length
         return { ...state, searchIndex: (state.searchIndex - 1 + len) % len }
       }
-      if (state.step === 'quantity') {
-        return { ...state, quantity: state.quantity + 1 }
-      }
-      if (state.step === 'bag_yn') {
-        return { ...state, wantBag: !state.wantBag }
-      }
-      if (state.step === 'bag_material') {
-        const len = state.bagMaterials.length
-        return { ...state, materialIndex: (state.materialIndex - 1 + len) % len }
-      }
-      if (state.step === 'bag_volume') {
-        const len = state.bagVolumes.length
-        return { ...state, volumeIndex: (state.volumeIndex - 1 + len) % len }
+      if (state.step === 'configure') {
+        if (state.configPanel === 'packaging') {
+          const len = getPackagingOptions(state.selectedTea!).length
+          if (len === 0) return state
+          return { ...state, packagingIndex: (state.packagingIndex - 1 + len) % len }
+        }
+        if (state.configPanel === 'quantity') {
+          return { ...state, quantity: state.quantity + 1 }
+        }
+        if (state.configPanel === 'bag') {
+          const len = getBagList(state.bags).length
+          return { ...state, bagIndex: (state.bagIndex - 1 + len) % len }
+        }
       }
       return state
     }
@@ -190,28 +184,42 @@ function reducer(state: POSState, action: Action): POSState {
         const len = state.searchResults.length
         return { ...state, searchIndex: (state.searchIndex + 1) % len }
       }
-      if (state.step === 'quantity') {
-        return { ...state, quantity: Math.max(1, state.quantity - 1) }
-      }
-      if (state.step === 'bag_yn') {
-        return { ...state, wantBag: !state.wantBag }
-      }
-      if (state.step === 'bag_material') {
-        const len = state.bagMaterials.length
-        return { ...state, materialIndex: (state.materialIndex + 1) % len }
-      }
-      if (state.step === 'bag_volume') {
-        const len = state.bagVolumes.length
-        return { ...state, volumeIndex: (state.volumeIndex + 1) % len }
+      if (state.step === 'configure') {
+        if (state.configPanel === 'packaging') {
+          const len = getPackagingOptions(state.selectedTea!).length
+          if (len === 0) return state
+          return { ...state, packagingIndex: (state.packagingIndex + 1) % len }
+        }
+        if (state.configPanel === 'quantity') {
+          return { ...state, quantity: Math.max(1, state.quantity - 1) }
+        }
+        if (state.configPanel === 'bag') {
+          const len = getBagList(state.bags).length
+          return { ...state, bagIndex: (state.bagIndex + 1) % len }
+        }
       }
       return state
     }
 
     case 'MOVE_LEFT': {
+      if (state.step === 'configure') {
+        const next =
+          state.configPanel === 'quantity' ? 'packaging' :
+          state.configPanel === 'bag' ? 'quantity' :
+          'packaging'
+        return { ...state, configPanel: next }
+      }
       return { ...state, activePanel: 'categories', step: 'category', searchQuery: '', searchResults: [] }
     }
 
     case 'MOVE_RIGHT': {
+      if (state.step === 'configure') {
+        const next =
+          state.configPanel === 'packaging' ? 'quantity' :
+          state.configPanel === 'quantity' ? 'bag' :
+          'bag'
+        return { ...state, configPanel: next }
+      }
       if (state.step === 'category') {
         return { ...state, activePanel: 'teas', step: 'tea' }
       }
@@ -231,36 +239,30 @@ function reducer(state: POSState, action: Action): POSState {
       }
       if (state.step === 'tea') {
         const tea = state.teas[state.teaIndex] ?? null
-        return { ...state, step: 'quantity', selectedTea: tea, quantity: 1 }
+        return { ...state, step: 'configure', configPanel: 'packaging', packagingIndex: 0, bagIndex: 0, quantity: 1, selectedTea: tea }
       }
       if (state.step === 'search') {
         const tea = state.searchResults[state.searchIndex] ?? null
-        return { ...state, step: 'quantity', selectedTea: tea, quantity: 1, searchQuery: '', searchResults: [] }
+        return { ...state, step: 'configure', configPanel: 'packaging', packagingIndex: 0, bagIndex: 0, quantity: 1, selectedTea: tea, searchQuery: '', searchResults: [] }
       }
-      if (state.step === 'quantity') {
-        return { ...state, step: 'bag_yn', wantBag: true }
-      }
-      if (state.step === 'bag_yn') {
-        if (!state.wantBag) {
-          if (!state.selectedTea) return state
-          const item = buildCartItem(state.selectedTea, resolveItemType(state.selectedTea), state.quantity, null)
-          return { ...state, step: 'category', cart: [...state.cart, item], selectedTea: null, quantity: 1, categoryIndex: 0 }
-        }
-        const volumes = volumesForMaterial(state.bags, state.bagMaterials[state.materialIndex])
-        return { ...state, step: 'bag_material', materialIndex: 0, bagVolumes: volumes }
-      }
-      if (state.step === 'bag_material') {
-        const material = state.bagMaterials[state.materialIndex]
-        const volumes = volumesForMaterial(state.bags, material)
-        return { ...state, step: 'bag_volume', bagVolumes: volumes, volumeIndex: 0 }
-      }
-      if (state.step === 'bag_volume') {
-        const material = state.bagMaterials[state.materialIndex]
-        const volume = state.bagVolumes[state.volumeIndex]
-        const bag = makeBagItem(state.bags, material, volume)
+      if (state.step === 'configure') {
         if (!state.selectedTea) return state
-        const item = buildCartItem(state.selectedTea, resolveItemType(state.selectedTea), state.quantity, bag)
-        return { ...state, step: 'category', cart: [...state.cart, item], selectedTea: null, quantity: 1, categoryIndex: 0 }
+        const opts = getPackagingOptions(state.selectedTea)
+        const opt = opts[state.packagingIndex] ?? opts[0]
+        const bagList = getBagList(state.bags)
+        const selectedBag = state.bagIndex === 0 ? null : (bagList[state.bagIndex]?.bag ?? null)
+        const item = buildCartItem(state.selectedTea, opt?.type ?? 'std', state.quantity, selectedBag)
+        return {
+          ...state,
+          step: 'category',
+          activePanel: 'categories',
+          cart: [...state.cart, item],
+          selectedTea: null,
+          quantity: 1,
+          configPanel: 'packaging',
+          packagingIndex: 0,
+          bagIndex: 0,
+        }
       }
       return state
     }
@@ -293,10 +295,9 @@ function reducer(state: POSState, action: Action): POSState {
         selectedCategory: null,
         selectedTea: null,
         quantity: 1,
-        wantBag: true,
-        materialIndex: 0,
-        bagVolumes: [],
-        volumeIndex: 0,
+        configPanel: 'packaging',
+        packagingIndex: 0,
+        bagIndex: 0,
         searchQuery: '',
         searchResults: [],
         searchIndex: 0,
