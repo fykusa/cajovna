@@ -5,7 +5,9 @@ import { getCategories, getProducts } from '../../api/products'
 import type { Sale, SaleItem, User, Category, Tea } from '../../types'
 import { useToast } from '../../components/toast/useToast'
 import ImportDialog from '../../components/admin/ImportDialog'
+import RevenueChart from '../../components/admin/RevenueChart'
 import { exportDatabase } from '../../api/admin'
+import { bucketRevenue } from './revenueBuckets'
 import styles from './Dashboard.module.css'
 
 type Period = 'month' | 'lastmonth' | 'year'
@@ -192,6 +194,7 @@ export default function AdminDashboard() {
   const total = visibleSales.reduce((s, sale) => s + Number(sale.total_amount), 0)
   const selectedSale = visibleSales.find((s) => s.id === selectedId) ?? null
   const grouped = groupItems(items)
+  const chartData = bucketRevenue(visibleSales, from, to)
 
   async function handleExport() {
     const allItems: Array<SaleItem & { sale: Sale }> = []
@@ -466,6 +469,10 @@ export default function AdminDashboard() {
                   )}
                 </>
               )}
+            </div>
+
+            <div className={styles.chartPanel}>
+              <RevenueChart data={chartData} />
             </div>
           </div>
         </>

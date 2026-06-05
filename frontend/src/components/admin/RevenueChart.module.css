@@ -1,0 +1,90 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #222;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.title {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.total {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #d4a84b;
+  font-variant-numeric: tabular-nums;
+}
+
+.plot {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 12px 10px 4px;
+  min-height: 0;
+}
+.col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+.barWrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 0;
+}
+.bar {
+  width: 70%;
+  max-width: 26px;
+  min-height: 2px;
+  background: linear-gradient(#6abf69, #3f7a3e);
+  border-radius: 2px 2px 0 0;
+  transition: background 0.12s;
+}
+.col:hover .bar {
+  background: linear-gradient(#d4a84b, #b8923f);
+}
+/* Interval bez tržby — neutrální „mrtvá" barva, viditelná, ale ne jako tržba. */
+.barZero {
+  background: #444;
+}
+.col:hover .barZero {
+  background: #555;
+}
+.xlabel {
+  height: 0.9rem;
+  margin-top: 4px;
+  font-size: 0.6rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+  font-style: italic;
+  font-size: 0.85rem;
+}
