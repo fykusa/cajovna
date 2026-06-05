@@ -89,16 +89,12 @@ export default function HistoryPanel({
                 })}
               </div>
               <div className={styles.colUser} data-testid="col-user">{sale.username}</div>
-              {bagPriceNum > 0 && (
-                <div className={styles.colBag} data-testid="col-bag">
-                  {bagPriceNum} Kč
-                </div>
-              )}
-              {bagPriceNum > 0 && goodsPriceNum > 0 && (
-                <div className={styles.colGoods} data-testid="col-goods">
-                  {goodsPriceNum} Kč
-                </div>
-              )}
+              <div className={styles.colBag} data-testid="col-bag">
+                {bagPriceNum > 0 ? `${bagPriceNum} Kč` : ''}
+              </div>
+              <div className={styles.colGoods} data-testid="col-goods">
+                {bagPriceNum > 0 && goodsPriceNum > 0 ? `${goodsPriceNum} Kč` : ''}
+              </div>
               <div className={styles.colTotal} data-testid="col-total">
                 {totalNum} Kč
               </div>
