@@ -84,9 +84,9 @@ export default function HistoryPanel({
                 })}
               </div>
               <div className={styles.colUser} data-testid="col-user">{sale.username}</div>
-              <div className={styles.colGoods} data-testid="col-goods">{goodsPrice} Kč</div>
-              <div className={styles.colBag} data-testid="col-bag">{bagPrice} Kč</div>
-              <div className={styles.colTotal} data-testid="col-total">{Math.round(sale.total_amount)} Kč</div>
+              <div className={styles.colGoods} data-testid="col-goods">{(goodsPrice / 100).toFixed(2)} Kč</div>
+              <div className={styles.colBag} data-testid="col-bag">{(bagPrice / 100).toFixed(2)} Kč</div>
+              <div className={styles.colTotal} data-testid="col-total">{(sale.total_amount / 100).toFixed(2)} Kč</div>
             </div>
           )
         })}
