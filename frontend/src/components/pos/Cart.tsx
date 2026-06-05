@@ -1,21 +1,28 @@
 // frontend/src/components/pos/Cart.tsx
-import type { CartItem } from '../../types'
+import type { CartItem, Sale, SaleItem } from '../../types'
 import { bagLineTotal, cartTotal } from './cartTotals'
+import SaleDetailView from './SaleDetailView'
 import styles from './Cart.module.css'
 
 interface Props {
   items: CartItem[]
+  selectedSale?: Sale | null
+  saleItems?: SaleItem[]
   onRemove: (localId: string) => void
   onCheckout: () => void
 }
 
-export default function Cart({ items, onRemove, onCheckout }: Props) {
+export default function Cart({ items, selectedSale, saleItems, onRemove, onCheckout }: Props) {
   const total = cartTotal(items)
 
   return (
     <div className={styles.cart}>
       <h2 className={styles.title}>Košík</h2>
-      {items.length === 0 ? (
+      {selectedSale ? (
+        <>
+          <SaleDetailView sale={selectedSale} items={saleItems || []} />
+        </>
+      ) : items.length === 0 ? (
         <p className={styles.empty}>Košík je prázdný</p>
       ) : (
         <>
