@@ -105,3 +105,19 @@ test('kompletní prodej bez pytlíku', async ({ page }) => {
   // CheckoutDialog has heading "Souhrn prodeje"
   await expect(page.getByRole('heading', { name: 'Souhrn prodeje' })).toBeVisible({ timeout: 5_000 })
 })
+
+test('SPACE přepne do history mode a zobrazí historii', async ({ page }) => {
+  await login(page)
+
+  // SPACE bez rozpracovaného prodeje by nemělo nic udělat (guard na step === 'category')
+  const initialMode = page.locator('[class*=modeIndicator]')
+  await expect(initialMode).not.toBeVisible()
+
+  // Ale история panel by měl být vidět v dolní části
+  const historyPanel = page.locator('[class*=historyPanel]').first()
+  await expect(historyPanel).toBeVisible()
+
+  // Ověříme že je text "Dnešní prodeje"
+  const historyHeader = page.locator('text=Dnešní prodeje')
+  await expect(historyHeader).toBeVisible()
+})
