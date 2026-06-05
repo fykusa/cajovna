@@ -47,5 +47,23 @@ check('UTF-8 vstup zůstane beze změny', dbtToUtf8($utf8) === $utf8);
 check('UTF-8 s BOM zůstane beze změny', dbtToUtf8("\xEF\xBB\xBF" . $utf8) === "\xEF\xBB\xBF" . $utf8);
 check('čisté ASCII zůstane beze změny', dbtToUtf8('id;name;30,0') === 'id;name;30,0');
 
+// normalizace datumů — Excel CZ formáty → MySQL
+check('MySQL formát projde beze změny',
+    dbtNormalizeDateTime('2026-05-28 17:44:39') === '2026-05-28 17:44:39');
+check('28.05.2026 17:44 → 2026-05-28 17:44:00 (doplní sekundy)',
+    dbtNormalizeDateTime('28.05.2026 17:44') === '2026-05-28 17:44:00');
+check('28.5.2026 17:44 (bez leading zero)',
+    dbtNormalizeDateTime('28.5.2026 17:44') === '2026-05-28 17:44:00');
+check('28. 5. 2026 17:44 (mezery kolem teček)',
+    dbtNormalizeDateTime('28. 5. 2026 17:44') === '2026-05-28 17:44:00');
+check('28.05.2026 17:44:39 (se sekundami)',
+    dbtNormalizeDateTime('28.05.2026 17:44:39') === '2026-05-28 17:44:39');
+check('date-only 28.05.2026 → 2026-05-28',
+    dbtNormalizeDateTime('28.05.2026', true) === '2026-05-28');
+check('null → null', dbtNormalizeDateTime(null) === null);
+check('prázdné → null', dbtNormalizeDateTime('') === null);
+check('nepoznané vrací beze změny (chytí DB)',
+    dbtNormalizeDateTime('nesmysl') === 'nesmysl');
+
 echo $failed === 0 ? "\nVŠE OK\n" : "\n$failed SELHALO\n";
 exit($failed === 0 ? 0 : 1);

@@ -40,6 +40,55 @@ function dbtNumericColumns(PDO $pdo, string $table): array {
     return array_fill_keys(array_column($stmt->fetchAll(), 'COLUMN_NAME'), true);
 }
 
+// Datumové sloupce tabulky jako mapa [col => dataType] (datetime|timestamp|date).
+function dbtDatetimeColumns(PDO $pdo, string $table): array {
+    $stmt = $pdo->prepare(
+        "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+           AND DATA_TYPE IN ('datetime', 'timestamp', 'date')"
+    );
+    $stmt->execute([$table]);
+    $out = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $out[$r['COLUMN_NAME']] = $r['DATA_TYPE'];
+    }
+    return $out;
+}
+
+// Převede běžné (i české / Excelem rozbité) zápisy data na MySQL formát.
+// Excel CZ ukládá "28.05.2026 17:44" (bez sekund) místo "2026-05-28 17:44:39".
+// $dateOnly = true pro sloupce typu DATE. Nepoznaný formát vrací beze změny,
+// ať DB vyhodí chybu s kontextem. Chybějící sekundy → :00 (Excel je zahodil).
+function dbtNormalizeDateTime(?string $value, bool $dateOnly = false): ?string {
+    if ($value === null || $value === '') return null;
+    $v = trim($value);
+
+    // Už v MySQL formátu (Y-m-d [H:i[:s]]) → nech být.
+    if (preg_match('/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}(:\d{2})?)?$/', $v)) {
+        return $v;
+    }
+
+    // Sjednoť mezery kolem teček ("28. 5. 2026" → "28.5.2026").
+    $v = preg_replace('/\s*\.\s*/', '.', $v);
+
+    // '!' resetuje nespecifikované složky (sekundy) na 0 místo aktuálního času.
+    $formats = $dateOnly
+        ? ['!d.m.Y', '!j.n.Y']
+        : ['!d.m.Y H:i:s', '!d.m.Y H:i', '!j.n.Y H:i:s', '!j.n.Y H:i', '!d.m.Y', '!j.n.Y'];
+
+    foreach ($formats as $fmt) {
+        $dt = DateTime::createFromFormat($fmt, $v);
+        if ($dt === false) continue;
+        $err = DateTime::getLastErrors();
+        // PHP 8.2+ vrací při bezchybném parsování false; PHP 7.4 vrací pole.
+        if ($err === false || ($err['warning_count'] === 0 && $err['error_count'] === 0)) {
+            return $dt->format($dateOnly ? 'Y-m-d' : 'Y-m-d H:i:s');
+        }
+    }
+
+    return $value; // nepoznáno → ať si poradí DB (sdílná chyba s kontextem)
+}
+
 // Serializace řádků do CSV stringu (BOM + ;). escape='' → standardní CSV
 // (zdvojení uvozovek), aby round-trip přes fgetcsv seděl. $numeric = množina
 // [colName => true] sloupců, u kterých se tečka mění na desetinnou čárku.
@@ -156,8 +205,10 @@ function dbtCleanup(string $dir): void {
 function dbtInsertRows(PDO $pdo, string $table, array $header, array $rows): int {
     if (empty($rows)) return 0;
     $numeric = dbtNumericColumns($pdo, $table);
-    // Poziční mapa: je sloupec na indexu i číselný?
-    $isNum = array_map(fn($c) => isset($numeric[$c]), $header);
+    $datetime = dbtDatetimeColumns($pdo, $table);
+    // Poziční mapy podle indexu sloupce v hlavičce.
+    $isNum  = array_map(fn($c) => isset($numeric[$c]), $header);
+    $dtType = array_map(fn($c) => $datetime[$c] ?? null, $header);
     $colList = '`' . implode('`,`', $header) . '`';
     $ph = '(' . implode(',', array_fill(0, count($header), '?')) . ')';
     $stmt = $pdo->prepare("INSERT INTO `$table` ($colList) VALUES $ph");
@@ -165,7 +216,11 @@ function dbtInsertRows(PDO $pdo, string $table, array $header, array $rows): int
     foreach ($rows as $rowIdx => $row) {
         $vals = [];
         foreach ($row as $i => $cell) {
-            $vals[] = dbtDecode((string) $cell, $isNum[$i] ?? false);
+            $val = dbtDecode((string) $cell, $isNum[$i] ?? false);
+            if (($dtType[$i] ?? null) !== null && $val !== null) {
+                $val = dbtNormalizeDateTime($val, $dtType[$i] === 'date');
+            }
+            $vals[] = $val;
         }
         try {
             $stmt->execute($vals);
