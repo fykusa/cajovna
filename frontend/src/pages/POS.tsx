@@ -5,8 +5,8 @@ import { getSales, getSaleItems } from '../api/sales'
 import CategoryPanel from '../components/pos/CategoryPanel'
 import TeaPanel from '../components/pos/TeaPanel'
 import SearchResults from '../components/pos/SearchResults'
-import QuantityModal from '../components/pos/QuantityModal'
-import BagSelector from '../components/pos/BagSelector'
+import ConfigurePanel from '../components/pos/ConfigurePanel'
+import { getPackagingOptions, getBagList } from '../hooks/usePOS'
 import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
 import { useToast } from '../components/toast/useToast'
@@ -60,8 +60,8 @@ export default function POS() {
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
-      // When in quantity/bag steps, handle modal-like behavior
-      if (['quantity', 'bag_yn', 'bag_material', 'bag_volume'].includes(state.step)) {
+      // When in configure step, handle all arrows + Enter/Escape
+      if (state.step === 'configure') {
         if (e.key === 'Enter') {
           e.preventDefault()
           confirm()
@@ -80,6 +80,16 @@ export default function POS() {
         if (e.key === 'ArrowDown') {
           e.preventDefault()
           moveDown()
+          return
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault()
+          moveLeft()
+          return
+        }
+        if (e.key === 'ArrowRight') {
+          e.preventDefault()
+          moveRight()
           return
         }
         return
@@ -145,7 +155,7 @@ export default function POS() {
           }
       }
     },
-    [state, moveUp, moveDown, moveLeft, moveRight, confirm, setQuantity, startSearch, cancelItem, activeTab, handleHistoryNavigation],
+    [state, moveUp, moveDown, moveLeft, moveRight, confirm, startSearch, cancelItem, activeTab, handleHistoryNavigation],
   )
 
   useEffect(() => {
@@ -250,32 +260,21 @@ export default function POS() {
       )
     }
 
-    // Quantity modal — just show empty split layout, modal is rendered separately
-    if (state.step === 'quantity') {
+    // Configure panel — balení, množství, pytlík
+    if (state.step === 'configure' && state.selectedTea) {
+      const packagingOptions = getPackagingOptions(state.selectedTea)
+      const bagList = getBagList(state.bags)
       return (
         <div className={styles.splitLayout}>
-          <div className={styles.panelPlaceholder} />
-          <div className={styles.mainContent} />
-        </div>
-      )
-    }
-
-    // Bag selector
-    if (state.step === 'bag_yn' || state.step === 'bag_material' || state.step === 'bag_volume') {
-      return (
-        <div className={styles.splitLayout}>
-          <div className={styles.panelPlaceholder} />
-          <div className={styles.mainContent}>
-            <BagSelector
-              step={state.step}
-              wantBag={state.wantBag}
-              materials={state.bagMaterials}
-              materialIndex={state.materialIndex}
-              volumes={state.bagVolumes}
-              volumeIndex={state.volumeIndex}
-              onToggleWantBag={() => moveDown()}
-            />
-          </div>
+          <ConfigurePanel
+            tea={state.selectedTea}
+            packagingOptions={packagingOptions}
+            packagingIndex={state.packagingIndex}
+            quantity={state.quantity}
+            bagList={bagList}
+            bagIndex={state.bagIndex}
+            activePanel={state.configPanel}
+          />
         </div>
       )
     }
@@ -355,16 +354,6 @@ export default function POS() {
           </>
         )}
       </main>
-
-      {state.step === 'quantity' && state.selectedTea && (
-        <QuantityModal
-          tea={state.selectedTea}
-          quantity={state.quantity}
-          onQuantityChange={setQuantity}
-          onConfirm={confirm}
-          onCancel={cancelItem}
-        />
-      )}
 
       {showCheckout && (
         <CheckoutDialog

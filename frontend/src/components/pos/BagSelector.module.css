@@ -1,7 +1,0 @@
-/* frontend/src/components/pos/BagSelector.module.css */
-.container { padding: 24px; }
-.title { font-size: 1.1rem; color: #aaa; margin-bottom: 12px; }
-.list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.item { padding: 10px 16px; border-radius: 4px; cursor: default;
-        border-left: 3px solid transparent; }
-.active { background: #2a2a3a; border-left-color: #d4a84b; color: #d4a84b; font-weight: 600; }

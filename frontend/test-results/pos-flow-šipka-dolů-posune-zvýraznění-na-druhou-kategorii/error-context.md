@@ -16,14 +16,14 @@ Error: expect(locator).toHaveClass(expected) failed
 
 Locator: getByRole('list').first().getByRole('listitem').nth(1)
 Expected pattern: /active/
-Received string:  "_item_bhbx6_37 _selected_bhbx6_49"
+Received string:  "_item_1jaba_38 _selected_1jaba_51"
 Timeout: 5000ms
 
 Call log:
   - Expect "toHaveClass" with timeout 5000ms
   - waiting for getByRole('list').first().getByRole('listitem').nth(1)
-    14 × locator resolved to <li role="listitem" class="_item_bhbx6_37 _selected_bhbx6_49">Bílé</li>
-       - unexpected value "_item_bhbx6_37 _selected_bhbx6_49"
+    14 × locator resolved to <li role="listitem" class="_item_1jaba_38 _selected_1jaba_51">Bílé</li>
+       - unexpected value "_item_1jaba_38 _selected_1jaba_51"
 
 ```
 

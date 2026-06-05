@@ -1,9 +1,0 @@
-/* frontend/src/components/pos/QuantitySelector.module.css */
-.container { padding: 24px; }
-.teaName { font-size: 1.4rem; color: #d4a84b; margin-bottom: 20px; }
-.row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-.label { font-size: 1.1rem; }
-.input { width: 80px; padding: 8px; font-size: 1.3rem; background: #333;
-         border: 2px solid #d4a84b; border-radius: 4px; color: #eee; text-align: center; }
-.variants { list-style: none; margin-top: 8px; }
-.variant { color: #aaa; font-size: 0.9rem; padding: 2px 0; }
