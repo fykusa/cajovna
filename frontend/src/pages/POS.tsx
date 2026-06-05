@@ -120,12 +120,9 @@ export default function POS() {
 
     getSaleItems(selectedSale.id)
       .then((items) => {
-        console.log(`[Selected sale ${selectedSale.id}] Items:`, items)
-        console.log(`[Selected sale ${selectedSale.id}] saleItemsByIndex[${selectedSale.id}]:`, saleItemsByIndex[selectedSale.id])
         setSaleItems(items)
       })
-      .catch((e) => {
-        console.error('Chyba při načítání položek prodeje:', e)
+      .catch(() => {
         setSaleItems([])
       })
   }, [selectedSale, saleItemsByIndex])
@@ -171,16 +168,12 @@ export default function POS() {
     Promise.all(promises)
       .then((results) => {
         const map: Record<number, SaleItem[]> = {}
-        console.log('[History] Results:', results)
         for (const { saleId, items } of results) {
           map[saleId] = items
-          console.log(`[History] Added sale ${saleId} with ${items.length} items`)
         }
-        console.log(`[History] Final map keys:`, Object.keys(map), `Map:`, map)
         setSaleItemsByIndex(map)
       })
-      .catch((e) => {
-        console.error('[History] Error loading all items:', e)
+      .catch(() => {
         setSaleItemsByIndex({})
       })
   }, [history])
