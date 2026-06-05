@@ -2,8 +2,8 @@ import { useEffect, useCallback, useState } from 'react'
 import { usePOS } from '../hooks/usePOS'
 import { useAuthStore } from '../store/authStore'
 import { getSales, getSaleItems } from '../api/sales'
-import CategoryList from '../components/pos/CategoryList'
-import TeaList from '../components/pos/TeaList'
+import CategoryPanel from '../components/pos/CategoryPanel'
+import TeaPanel from '../components/pos/TeaPanel'
 import SearchResults from '../components/pos/SearchResults'
 import QuantitySelector from '../components/pos/QuantitySelector'
 import BagSelector from '../components/pos/BagSelector'
@@ -11,18 +11,32 @@ import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
 import { useToast } from '../components/toast/useToast'
 import HistoryPanel from '../components/pos/HistoryPanel'
+import SalesSummary from '../components/pos/SalesSummary'
+import POSNavbar from '../components/pos/POSNavbar'
 import type { Sale, SaleItem } from '../types'
 import styles from './POS.module.css'
 
 export default function POS() {
-  const { state, moveUp, moveDown, confirm, setQuantity,
-          startSearch, appendSearch, cancelItem, removeFromCart, clearCart } = usePOS()
+  const {
+    state,
+    moveUp,
+    moveDown,
+    moveLeft,
+    moveRight,
+    confirm,
+    setQuantity,
+    startSearch,
+    appendSearch,
+    cancelItem,
+    removeFromCart,
+    clearCart,
+  } = usePOS()
   const logout = useAuthStore((s) => s.logout)
   const user = useAuthStore((s) => s.user)
   const [showCheckout, setShowCheckout] = useState(false)
   const toast = useToast()
 
-  const [posMode, setPosMode] = useState<'sell' | 'history'>('sell')
+  const [activeTab, setActiveTab] = useState<'sell' | 'overview'>('sell')
   const [history, setHistory] = useState<Sale[]>([])
   const [historyIndex, setHistoryIndex] = useState(0)
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
@@ -31,80 +45,108 @@ export default function POS() {
   const [historyLoading, setHistoryLoading] = useState(true)
   const [historyError, setHistoryError] = useState<string | null>(null)
 
-  const handleSpace = useCallback(() => {
-    if (state.step !== 'category') return
-    setPosMode((prev) => (prev === 'sell' ? 'history' : 'sell'))
-  }, [state.step])
 
   const handleHistoryNavigation = useCallback(
     (direction: 'up' | 'down') => {
-      if (posMode !== 'history' || history.length === 0) return
+      if (activeTab !== 'overview' || history.length === 0) return
       const newIndex = direction === 'up'
         ? (historyIndex - 1 + history.length) % history.length
         : (historyIndex + 1) % history.length
       setHistoryIndex(newIndex)
       setSelectedSale(history[newIndex])
     },
-    [posMode, history, historyIndex],
+    [activeTab, history, historyIndex],
   )
 
-  const handleKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      confirm()
-      return
-    }
-
-    // Escape = zruš rozpracovanou položku (funguje i ve kroku quantity, kde je focus v inputu)
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      cancelItem()
-      return
-    }
-
-    // SPACE = přepínání mezi módy
-    if (e.key === ' ') {
-      e.preventDefault()
-      handleSpace()
-      return
-    }
-
-    if ((e.target as HTMLElement).tagName === 'INPUT') return
-
-    switch (e.key) {
-      case 'ArrowUp':
-        e.preventDefault()
-        if (posMode === 'history') {
-          handleHistoryNavigation('up')
-        } else {
+  const handleKey = useCallback(
+    (e: KeyboardEvent) => {
+      // When in quantity/bag steps, handle modal-like behavior
+      if (['quantity', 'bag_yn', 'bag_material', 'bag_volume'].includes(state.step)) {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          confirm()
+          return
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          cancelItem()
+          return
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault()
           moveUp()
+          return
         }
-        break
-      case 'ArrowDown':
-        e.preventDefault()
-        if (posMode === 'history') {
-          handleHistoryNavigation('down')
-        } else {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
           moveDown()
+          return
         }
-        break
-      case 'F10':
-        if (state.cart.length > 0) { e.preventDefault(); setShowCheckout(true) }
-        break
-      case 'Backspace':
-        if (state.step === 'search' && state.searchQuery.length > 0) {
-          startSearch(state.searchQuery.slice(0, -1))
-        }
-        break
-      default:
-        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-          if (state.step === 'category' || state.step === 'tea') {
-            startSearch(e.key)
-          } else if (state.step === 'search') {
-            appendSearch(e.key)
+        return
+      }
+
+      // Normal navigation (category/tea/search steps)
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        confirm()
+        return
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        cancelItem()
+        return
+      }
+
+      if ((e.target as HTMLElement).tagName === 'INPUT') return
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault()
+          if (activeTab === 'overview') {
+            handleHistoryNavigation('up')
+          } else {
+            moveUp()
           }
-        }
-    }
-  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch, cancelItem, posMode, handleSpace, handleHistoryNavigation])
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          if (activeTab === 'overview') {
+            handleHistoryNavigation('down')
+          } else {
+            moveDown()
+          }
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          moveLeft()
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          moveRight()
+          break
+        case 'F10':
+          if (state.cart.length > 0) {
+            e.preventDefault()
+            setShowCheckout(true)
+          }
+          break
+        case 'Backspace':
+          if ((state.step === 'category' || state.step === 'tea') && state.searchQuery.length > 0) {
+            e.preventDefault()
+            startSearch(state.searchQuery.slice(0, -1))
+          }
+          break
+        default:
+          if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (state.step === 'category' || state.step === 'tea') {
+              startSearch(e.key)
+            }
+          }
+      }
+    },
+    [state, moveUp, moveDown, moveLeft, moveRight, confirm, setQuantity, startSearch, cancelItem, activeTab, handleHistoryNavigation],
+  )
 
   useEffect(() => {
     document.addEventListener('keydown', handleKey)
@@ -126,6 +168,13 @@ export default function POS() {
         setSaleItems([])
       })
   }, [selectedSale, saleItemsByIndex])
+
+  // Reset selectedSale když se přepne na pokladnu
+  useEffect(() => {
+    if (activeTab === 'sell') {
+      setSelectedSale(null)
+    }
+  }, [activeTab])
 
   // Načteme dnešní prodeje na mount
   useEffect(() => {
@@ -179,54 +228,65 @@ export default function POS() {
   }, [history])
 
   function renderMainPanel() {
-    if (state.step === 'search') {
+    const displayTeas = state.searchQuery.length > 0 ? state.searchResults : state.teas
+
+    // Split layout for category/tea/search steps
+    if (state.step === 'category' || state.step === 'tea' || state.step === 'search') {
       return (
-        <SearchResults
-          query={state.searchQuery}
-          results={state.searchResults}
-          activeIndex={state.searchIndex}
-          onSelect={() => confirm()}
-        />
+        <div className={styles.splitLayout}>
+          <CategoryPanel
+            categories={state.categories}
+            selectedIndex={state.categoryIndex}
+            isActive={state.activePanel === 'categories' && !state.searchQuery}
+          />
+          <TeaPanel
+            teas={displayTeas}
+            selectedIndex={state.step === 'search' ? state.searchIndex : state.teaIndex}
+            isActive={state.activePanel === 'teas' || state.searchQuery.length > 0}
+            isFilterActive={state.searchQuery.length > 0}
+            filterQuery={state.searchQuery}
+          />
+        </div>
       )
     }
-    if (state.step === 'tea') {
-      return (
-        <TeaList
-          teas={state.teas}
-          activeIndex={state.teaIndex}
-          onSelect={() => {}}
-        />
-      )
-    }
+
+    // Quantity selector
     if (state.step === 'quantity' && state.selectedTea) {
       return (
-        <QuantitySelector
-          tea={state.selectedTea}
-          quantity={state.quantity}
-          onChange={setQuantity}
-        />
+        <div className={styles.splitLayout}>
+          <div className={styles.panelPlaceholder} />
+          <div className={styles.mainContent}>
+            <QuantitySelector
+              tea={state.selectedTea}
+              quantity={state.quantity}
+              onChange={setQuantity}
+            />
+          </div>
+        </div>
       )
     }
+
+    // Bag selector
     if (state.step === 'bag_yn' || state.step === 'bag_material' || state.step === 'bag_volume') {
       return (
-        <BagSelector
-          step={state.step}
-          wantBag={state.wantBag}
-          materials={state.bagMaterials}
-          materialIndex={state.materialIndex}
-          volumes={state.bagVolumes}
-          volumeIndex={state.volumeIndex}
-          onToggleWantBag={() => moveDown()}
-        />
+        <div className={styles.splitLayout}>
+          <div className={styles.panelPlaceholder} />
+          <div className={styles.mainContent}>
+            <BagSelector
+              step={state.step}
+              wantBag={state.wantBag}
+              materials={state.bagMaterials}
+              materialIndex={state.materialIndex}
+              volumes={state.bagVolumes}
+              volumeIndex={state.volumeIndex}
+              onToggleWantBag={() => moveDown()}
+            />
+          </div>
+        </div>
       )
     }
-    return (
-      <CategoryList
-        categories={state.categories}
-        activeIndex={state.categoryIndex}
-        onSelect={() => {}}
-      />
-    )
+
+    return <div>Unknown step</div>
   }
 
   if (state.loading) return <div className={styles.loading}>Načítám data…</div>
@@ -234,32 +294,39 @@ export default function POS() {
 
   return (
     <div className={styles.layout}>
-      <header className={styles.header}>
-        <span className={styles.username}>{user?.username}</span>
-        <span className={styles.step}>Krok: {state.step}</span>
-        <button onClick={logout} className={styles.logoutBtn}>Odhlásit</button>
-      </header>
+      <POSNavbar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        username={user?.username || ''}
+        onLogout={logout}
+      />
 
       <main className={styles.main}>
-        <section className={styles.panel}>
-          <div className={styles.panelGrid}>
-            {/* Kategorie */}
-            <div className={styles.categoriesPanel}>
-              <div className={styles.categoriesPanelHeader}>Kategorie</div>
-              <div className={styles.categoriesPanelContent}>
-                {renderMainPanel()}
-              </div>
-            </div>
+        {/* Pokladna (prodej) */}
+        {activeTab === 'sell' && (
+          <>
+            <section className={styles.panel}>
+              {renderMainPanel()}
+            </section>
 
-            {/* Historie */}
-            <div className={styles.historyPanel}>
-              <div className={styles.historyPanelHeader}>
-                Dnešní prodeje
-                {posMode === 'history' && (
-                  <span className={styles.modeIndicator}>HISTORY MODE</span>
-                )}
-              </div>
-              <div className={styles.historyPanelContent}>
+            <aside className={styles.cartPanel}>
+              <Cart
+                items={state.cart}
+                selectedSale={selectedSale}
+                saleItems={saleItems}
+                onRemove={removeFromCart}
+                onCheckout={() => setShowCheckout(true)}
+              />
+            </aside>
+          </>
+        )}
+
+        {/* Přehled (história) */}
+        {activeTab === 'overview' && (
+          <>
+            <section className={styles.panel}>
+              {user && <SalesSummary sales={history} currentUsername={user.username} />}
+              <div className={styles.historyPanelFull}>
                 {historyLoading ? (
                   <div style={{ padding: '12px', color: '#666' }}>Načítám...</div>
                 ) : historyError ? (
@@ -275,23 +342,23 @@ export default function POS() {
                       setHistoryIndex(idx)
                       setSelectedSale(sale)
                     }}
-                    isActive={posMode === 'history'}
+                    isActive={true}
                   />
                 )}
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        <aside className={styles.cartPanel}>
-          <Cart
-            items={state.cart}
-            selectedSale={selectedSale}
-            saleItems={saleItems}
-            onRemove={removeFromCart}
-            onCheckout={() => setShowCheckout(true)}
-          />
-        </aside>
+            <aside className={styles.cartPanel}>
+              <Cart
+                items={state.cart}
+                selectedSale={selectedSale}
+                saleItems={saleItems}
+                onRemove={removeFromCart}
+                onCheckout={() => setShowCheckout(true)}
+              />
+            </aside>
+          </>
+        )}
       </main>
 
       {showCheckout && (

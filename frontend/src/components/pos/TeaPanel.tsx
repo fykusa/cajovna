@@ -6,13 +6,18 @@ interface Props {
   selectedIndex: number
   isActive: boolean
   isFilterActive: boolean
+  filterQuery?: string
 }
 
-export default function TeaPanel({ teas, selectedIndex, isActive, isFilterActive }: Props) {
+export default function TeaPanel({ teas, selectedIndex, isActive, isFilterActive, filterQuery = '' }: Props) {
   return (
     <div className={`${styles.panel} ${isActive ? styles.active : styles.inactive}`}>
       <div className={styles.header}>
-        {isFilterActive ? <span className={styles.filterTag}>Filtr</span> : 'Čaje'}
+        {isFilterActive ? (
+          <span className={styles.filterLabel}>Hledám: <strong>{filterQuery}</strong></span>
+        ) : (
+          'Čaje'
+        )}
       </div>
       <ul className={styles.list}>
         {teas.length === 0 ? (
