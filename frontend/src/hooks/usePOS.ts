@@ -49,7 +49,7 @@ type Action =
   | { type: 'REMOVE_FROM_CART'; localId: string }
   | { type: 'CLEAR_CART' }
   | { type: 'SET_ERROR'; message: string }
-  | { type: 'CANCEL_SEARCH' }
+  | { type: 'CANCEL_ITEM' }
 
 const initialState: POSState = {
   step: 'category',
@@ -256,8 +256,24 @@ function reducer(state: POSState, action: Action): POSState {
     case 'CLEAR_CART':
       return { ...state, cart: [] }
 
-    case 'CANCEL_SEARCH':
-      return { ...state, step: 'category', searchQuery: '', searchResults: [], searchIndex: 0 }
+    case 'CANCEL_ITEM':
+      // Zruší rozpracovanou položku a vrátí na čistý výběr kategorie. Košík i data zůstávají.
+      return {
+        ...state,
+        step: 'category',
+        categoryIndex: 0,
+        teaIndex: 0,
+        selectedCategory: null,
+        selectedTea: null,
+        quantity: 1,
+        wantBag: true,
+        materialIndex: 0,
+        bagVolumes: [],
+        volumeIndex: 0,
+        searchQuery: '',
+        searchResults: [],
+        searchIndex: 0,
+      }
 
     case 'SET_ERROR':
       return { ...state, error: action.message }
@@ -274,7 +290,7 @@ export interface POSActions {
   setQuantity: (v: number) => void
   startSearch: (query: string) => void
   appendSearch: (char: string) => void
-  cancelSearch: () => void
+  cancelItem: () => void
   removeFromCart: (localId: string) => void
   clearCart: () => void
   loadTeasForCategory: (categoryId: number) => Promise<void>
@@ -305,7 +321,7 @@ export function usePOS(): { state: POSState } & POSActions {
   const setQuantity = useCallback((v: number) => dispatch({ type: 'SET_QUANTITY', value: v }), [])
   const startSearch = useCallback((query: string) => dispatch({ type: 'START_SEARCH', query }), [])
   const appendSearch = useCallback((char: string) => dispatch({ type: 'APPEND_SEARCH', char }), [])
-  const cancelSearch = useCallback(() => dispatch({ type: 'CANCEL_SEARCH' }), [])
+  const cancelItem = useCallback(() => dispatch({ type: 'CANCEL_ITEM' }), [])
   const removeFromCart = useCallback((localId: string) => dispatch({ type: 'REMOVE_FROM_CART', localId }), [])
   const clearCart = useCallback(() => dispatch({ type: 'CLEAR_CART' }), [])
   const loadTeasForCategory = useCallback(async (categoryId: number) => {
@@ -317,5 +333,5 @@ export function usePOS(): { state: POSState } & POSActions {
     }
   }, [])
 
-  return { state, moveUp, moveDown, confirm, setQuantity, startSearch, appendSearch, cancelSearch, removeFromCart, clearCart, loadTeasForCategory }
+  return { state, moveUp, moveDown, confirm, setQuantity, startSearch, appendSearch, cancelItem, removeFromCart, clearCart, loadTeasForCategory }
 }

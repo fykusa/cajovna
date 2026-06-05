@@ -13,7 +13,7 @@ import styles from './POS.module.css'
 
 export default function POS() {
   const { state, moveUp, moveDown, confirm, setQuantity,
-          startSearch, appendSearch, cancelSearch, removeFromCart, clearCart } = usePOS()
+          startSearch, appendSearch, cancelItem, removeFromCart, clearCart } = usePOS()
   const logout = useAuthStore((s) => s.logout)
   const user = useAuthStore((s) => s.user)
   const [showCheckout, setShowCheckout] = useState(false)
@@ -25,14 +25,18 @@ export default function POS() {
       return
     }
 
+    // Escape = zruš rozpracovanou položku (funguje i ve kroku quantity, kde je focus v inputu)
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      cancelItem()
+      return
+    }
+
     if ((e.target as HTMLElement).tagName === 'INPUT') return
 
     switch (e.key) {
       case 'ArrowUp':   e.preventDefault(); moveUp(); break
       case 'ArrowDown': e.preventDefault(); moveDown(); break
-      case 'Escape':
-        if (state.step === 'search') cancelSearch()
-        break
       case 'F10':
         if (state.cart.length > 0) { e.preventDefault(); setShowCheckout(true) }
         break
@@ -50,7 +54,7 @@ export default function POS() {
           }
         }
     }
-  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch, cancelSearch])
+  }, [state, moveUp, moveDown, confirm, startSearch, appendSearch, cancelItem])
 
   useEffect(() => {
     document.addEventListener('keydown', handleKey)

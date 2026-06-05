@@ -211,6 +211,64 @@ describe('usePOS – search', () => {
   })
 })
 
+describe('usePOS – cancelItem (Escape)', () => {
+  it('z kroku tea vrátí na čistý výběr kategorie', async () => {
+    const { result } = renderHook(() => usePOS())
+    await act(async () => {})
+    act(() => result.current.confirm()) // category → tea
+    await act(async () => {})
+    expect(result.current.state.step).toBe('tea')
+    act(() => result.current.cancelItem())
+    expect(result.current.state.step).toBe('category')
+    expect(result.current.state.selectedTea).toBeNull()
+    expect(result.current.state.categoryIndex).toBe(0)
+  })
+
+  it('z kroku quantity zahodí rozpracovaný čaj a množství', async () => {
+    const { result } = renderHook(() => usePOS())
+    await act(async () => {})
+    act(() => result.current.confirm()) // → tea
+    await act(async () => {})
+    act(() => result.current.confirm()) // → quantity
+    act(() => result.current.setQuantity(5))
+    act(() => result.current.cancelItem())
+    expect(result.current.state.step).toBe('category')
+    expect(result.current.state.selectedTea).toBeNull()
+    expect(result.current.state.quantity).toBe(1)
+  })
+
+  it('zachová již přidané položky v košíku', async () => {
+    const { result } = renderHook(() => usePOS())
+    await act(async () => {})
+    // přidá první položku bez pytlíku
+    act(() => result.current.confirm()) // → tea
+    await act(async () => {})
+    act(() => result.current.confirm()) // → quantity
+    act(() => result.current.confirm()) // → bag_yn
+    act(() => result.current.moveDown()) // wantBag=false
+    act(() => result.current.confirm()) // přidá do košíku, → category
+    expect(result.current.state.cart).toHaveLength(1)
+    // začne druhou položku a zruší ji
+    act(() => result.current.confirm()) // → tea
+    await act(async () => {})
+    act(() => result.current.confirm()) // → quantity
+    act(() => result.current.cancelItem())
+    expect(result.current.state.step).toBe('category')
+    expect(result.current.state.cart).toHaveLength(1)
+  })
+
+  it('z kroku search zruší hledání a vrátí na category', async () => {
+    const { result } = renderHook(() => usePOS())
+    await act(async () => {})
+    act(() => result.current.startSearch('show'))
+    expect(result.current.state.step).toBe('search')
+    act(() => result.current.cancelItem())
+    expect(result.current.state.step).toBe('category')
+    expect(result.current.state.searchQuery).toBe('')
+    expect(result.current.state.searchResults).toHaveLength(0)
+  })
+})
+
 describe('usePOS – košík', () => {
   it('removeFromCart smaže položku z košíku', async () => {
     const { result } = renderHook(() => usePOS())
