@@ -44,7 +44,7 @@ describe('ConfigurePanel', () => {
     render(<ConfigurePanel {...defaultProps} />)
     expect(screen.getByText('Balení')).toBeInTheDocument()
     expect(screen.getByText('Množství')).toBeInTheDocument()
-    expect(screen.getByText('Pytlík')).toBeInTheDocument()
+    expect(screen.getByText('Obal')).toBeInTheDocument()
   })
 
   it('zobrazí dostupná balení', () => {

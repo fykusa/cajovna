@@ -13,18 +13,25 @@ interface Props {
 export default function CheckoutDialog({ items, onSuccess, onCancel }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [focusedBtn, setFocusedBtn] = useState<'pay' | 'cancel'>('pay')
 
   const total = cartTotal(items)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (loading) return
-      if (e.key === 'Enter') { e.preventDefault(); handlePay() }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); setFocusedBtn('cancel') }
+      if (e.key === 'ArrowRight') { e.preventDefault(); setFocusedBtn('pay') }
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (focusedBtn === 'pay') handlePay()
+        else onCancel()
+      }
       if (e.key === 'Escape') { e.preventDefault(); onCancel() }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [loading])
+  }, [loading, focusedBtn])
 
   async function handlePay() {
     setLoading(true)
@@ -75,18 +82,26 @@ export default function CheckoutDialog({ items, onSuccess, onCancel }: Props) {
         <ul className={styles.list}>
           {items.map((item) => (
             <li key={item.localId} className={styles.row}>
-              <span>{item.tea.name}</span>
+              <span className={styles.itemName}>{item.tea.name}</span>
               <span className={styles.qty}>×{item.quantity}</span>
-              <span>{item.unitPrice} Kč</span>
+              <span className={styles.price}>{item.unitPrice} Kč</span>
             </li>
           ))}
         </ul>
         <p className={styles.total}>{`Celkem: ${Math.round(total)} Kč`}</p>
         <div className={styles.actions}>
-          <button onClick={onCancel} className={styles.cancelBtn} disabled={loading}>
+          <button
+            onClick={onCancel}
+            className={`${styles.cancelBtn} ${focusedBtn === 'cancel' ? styles.focused : ''}`}
+            disabled={loading}
+          >
             Zrušit
           </button>
-          <button onClick={handlePay} className={styles.payBtn} disabled={loading}>
+          <button
+            onClick={handlePay}
+            className={`${styles.payBtn} ${focusedBtn === 'pay' ? styles.focused : ''}`}
+            disabled={loading}
+          >
             {loading ? 'Odesílám…' : 'Zaplatit'}
           </button>
         </div>

@@ -58,14 +58,15 @@ export default function ConfigurePanel({
         className={`${styles.section} ${activePanel === 'bag' ? styles.active : ''}`}
         data-panel="bag"
       >
-        <div className={styles.header}>Pytlík</div>
+        <div className={styles.header}>Obal</div>
         <ul className={styles.list}>
           {bagList.map((item, i) => (
             <li
               key={i}
               className={`${styles.item} ${i === bagIndex ? styles.selected : ''}`}
             >
-              {item.label}
+              <span>{item.label}</span>
+              {item.bag && <span className={styles.bagPrice}>{item.bag.price_per_piece} Kč</span>}
             </li>
           ))}
         </ul>

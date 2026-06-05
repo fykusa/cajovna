@@ -5,6 +5,7 @@
   height: 100%;
   background: #1a1a1a;
   transition: opacity 0.2s;
+  min-width: 0;
 }
 
 .panel.inactive {
@@ -13,38 +14,80 @@
 
 .panel.active {
   opacity: 1;
+  background: #1e2a1e;
+  border-top: 2px solid #4caf50;
 }
 
+/* Sdílený flex řádek — header i item používají stejné sloupce */
+.colRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 14px;
+}
+
+.colName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colNote {
+  flex: 0 0 90px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 400;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colPrice {
+  flex: 0 0 120px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Header ---- */
 .header {
-  padding: 8px 12px;
-  font-weight: 600;
-  font-size: 0.85rem;
   border-bottom: 1px solid #333;
   background: #222;
+  flex-shrink: 0;
+}
+
+.header.colRow .colName {
+  font-weight: 600;
+  font-size: 0.85rem;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.filterTag {
-  display: inline-block;
-  background: #ff9800;
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 13px;
-  font-weight: 700;
+.header.colRow .colNote,
+.header.colRow .colPrice {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  justify-content: flex-end;
 }
 
+/* Filtr header */
 .filterLabel {
   font-size: 14px;
   color: #ff9800;
   font-weight: 600;
 }
 
+/* ---- List ---- */
 .list {
   list-style: none;
   margin: 0;
@@ -54,17 +97,12 @@
 }
 
 .item {
-  padding: 12px 14px;
   cursor: pointer;
   border-left: 3px solid transparent;
   transition: background 0.1s, border-color 0.1s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
   color: #aaa;
-  font-size: 18px;
-  font-weight: 600;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .item:hover {
@@ -74,18 +112,47 @@
 .item.selected {
   background: #2a5a2a;
   border-left-color: #4caf50;
-  color: #4caf50;
+  color: #fff;
 }
 
-.name {
-  flex: 1;
-}
-
-.price {
-  color: #888;
-  font-size: 16px;
+.item .colName {
+  font-size: 18px;
   font-weight: 600;
-  white-space: nowrap;
+}
+
+.item .colNote {
+  font-size: 13px;
+  color: #666;
+}
+
+.item.selected .colNote {
+  color: #bbb;
+}
+
+.item .colPrice {
+  font-size: 15px;
+  font-weight: 600;
+  color: #888;
+}
+
+.item.selected .colPrice {
+  color: #eee;
+}
+
+.stock {
+  font-size: 12px;
+  font-weight: 400;
+  color: #555;
+}
+
+.item.selected .stock {
+  color: #aaa;
+}
+
+.na {
+  color: #444;
+  font-weight: 400;
+  font-size: 15px;
 }
 
 .empty {
