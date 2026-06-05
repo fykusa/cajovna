@@ -27,6 +27,7 @@ export default function POS() {
   const [historyIndex, setHistoryIndex] = useState(0)
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
   const [saleItems, setSaleItems] = useState<SaleItem[]>([])
+  const [saleItemsByIndex, setSaleItemsByIndex] = useState<Record<number, SaleItem[]>>({})
   const [historyLoading, setHistoryLoading] = useState(true)
   const [historyError, setHistoryError] = useState<string | null>(null)
 
@@ -147,6 +148,32 @@ export default function POS() {
       })
   }, [])
 
+  // Načteme položky pro všechny prodeje v parallel
+  useEffect(() => {
+    if (history.length === 0) {
+      setSaleItemsByIndex({})
+      return
+    }
+
+    const promises = history.map((sale) =>
+      getSaleItems(sale.id)
+        .then((items) => ({ saleId: sale.id, items }))
+        .catch(() => ({ saleId: sale.id, items: [] }))
+    )
+
+    Promise.all(promises)
+      .then((results) => {
+        const map: Record<number, SaleItem[]> = {}
+        for (const { saleId, items } of results) {
+          map[saleId] = items
+        }
+        setSaleItemsByIndex(map)
+      })
+      .catch(() => {
+        setSaleItemsByIndex({})
+      })
+  }, [history])
+
   function renderMainPanel() {
     if (state.step === 'search') {
       return (
@@ -238,6 +265,7 @@ export default function POS() {
                 ) : (
                   <HistoryPanel
                     sales={history}
+                    saleItemsByIndex={saleItemsByIndex}
                     selectedIndex={historyIndex}
                     onSelect={(sale, idx) => {
                       setHistoryIndex(idx)
