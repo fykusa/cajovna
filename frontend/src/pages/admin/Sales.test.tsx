@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Sales from './Sales'
 import { renderWithToast } from '../../test/renderWithToast'
@@ -21,31 +21,39 @@ beforeEach(() => {
 })
 
 describe('Sales', () => {
-  it('zobrazí tabulku prodejů', async () => {
+  it('zobrazí denní pivot s prodavajícími ve sloupcích', async () => {
     renderWithToast(<Sales />)
-    expect(await screen.findByText('boss')).toBeInTheDocument()
-    expect(screen.getAllByText('terka').length).toBeGreaterThan(0)
+    const pivot = await screen.findByRole('table', { name: 'Denní tržby přes prodavající' })
+    expect(within(pivot).getByRole('columnheader', { name: 'terka' })).toBeInTheDocument()
+    expect(within(pivot).getByRole('columnheader', { name: 'boss' })).toBeInTheDocument()
   })
 
-  it('ukáže prodavačku u každého řádku i při opakování po sobě', async () => {
-    // terka má dva prodeje po sobě — jméno se musí zobrazit u OBOU řádků,
-    // ne jen u prvního (regrese: dřív se opakující prodavačka skrývala).
+  it('zobrazí měsíční pivot s prodavajícími ve sloupcích', async () => {
     renderWithToast(<Sales />)
-    await screen.findByText('boss')
-    expect(screen.getAllByText('terka')).toHaveLength(2)
+    const monthly = await screen.findByRole('table', { name: 'Měsíční tržby přes prodavající' })
+    expect(within(monthly).getByRole('columnheader', { name: 'terka' })).toBeInTheDocument()
+    expect(within(monthly).getByRole('columnheader', { name: 'boss' })).toBeInTheDocument()
   })
 
-  it('zobrazí celkovou tržbu', async () => {
+  it('zobrazí souhrnnou tabulku celkových tržeb za prodavajícího', async () => {
     renderWithToast(<Sales />)
-    await screen.findByText('boss')
-    expect(screen.getByText(/890/)).toBeInTheDocument()
+    const summary = await screen.findByRole('table', { name: 'Celkové tržby za prodavajícího' })
+    // terka 260+130 = 390, boss 500
+    expect(within(summary).getByText(/390/)).toBeInTheDocument()
+    expect(within(summary).getByText(/500/)).toBeInTheDocument()
+  })
+
+  it('spočítá celkovou tržbu', async () => {
+    renderWithToast(<Sales />)
+    await screen.findByRole('table', { name: 'Celkové tržby za prodavajícího' })
+    expect(screen.getAllByText('890 Kč').length).toBeGreaterThan(0)
   })
 
   it('filtruje prodeje po kliku na Zobrazit', async () => {
     const user = userEvent.setup()
     renderWithToast(<Sales />)
-    await screen.findByText('boss')
-    const fromInput = screen.getByLabelText(/od/i)
+    await screen.findByRole('table', { name: 'Celkové tržby za prodavajícího' })
+    const fromInput = screen.getByLabelText('od')
     await user.clear(fromInput)
     await user.type(fromInput, '2026-05-28')
     await user.click(screen.getByRole('button', { name: /zobrazit/i }))

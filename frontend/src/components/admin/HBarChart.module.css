@@ -1,0 +1,49 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hlavička lícuje s th sousední tabulky (stejný padding/border). */
+.headRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  border-bottom: 1px solid #333;
+}
+.headRow .value {
+  color: #888;
+  font-weight: 400;
+}
+
+/* Řádek lícuje s td sousední tabulky. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.track {
+  flex: 1;
+  min-width: 0;
+  height: 16px;
+  background: #2a2a2a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3f7a3e, #6abf69);
+  border-radius: 3px;
+}
+
+.value {
+  flex: 0 0 auto;
+  min-width: 76px;
+  text-align: right;
+  color: #6abf69;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
