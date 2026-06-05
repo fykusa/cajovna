@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import type { Tea } from '../../types'
 import styles from './TeaList.module.css'
 
@@ -12,8 +13,19 @@ function primaryPrice(tea: Tea): number | null {
 }
 
 export default function TeaList({ teas, activeIndex, onSelect }: Props) {
+  const listRef = useRef<HTMLUListElement>(null)
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (!listRef.current) return
+      const activeItem = listRef.current.children[activeIndex] as HTMLElement | undefined
+      activeItem?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [activeIndex])
+
   return (
-    <ul className={styles.list} role="list">
+    <ul className={styles.list} ref={listRef} role="list">
       {teas.map((tea, i) => (
         <li
           key={tea.id}

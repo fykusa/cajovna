@@ -1,4 +1,5 @@
 // frontend/src/components/pos/HistoryPanel.tsx
+import { useRef, useEffect } from 'react'
 import type { Sale } from '../../types'
 import styles from './HistoryPanel.module.css'
 
@@ -15,9 +16,22 @@ export default function HistoryPanel({
   onSelect,
   isActive,
 }: Props) {
+  const listRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isActive) return
+
+    const frame = requestAnimationFrame(() => {
+      if (!listRef.current) return
+      const selectedItem = listRef.current.children[selectedIndex] as HTMLElement | undefined
+      selectedItem?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [selectedIndex, isActive])
+
   return (
     <div className={styles.panel}>
-      <div className={styles.list}>
+      <div className={styles.list} ref={listRef}>
         {sales.map((sale, idx) => (
           <div
             key={sale.id}
