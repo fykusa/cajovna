@@ -52,18 +52,16 @@ export default function HistoryPanel({
 
   return (
     <div className={styles.panel}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.colId}>ID</th>
-            <th className={styles.colTime}>Čas</th>
-            <th className={styles.colUser}>Prodavající</th>
-            <th className={styles.colGoods}>Cena za zboží</th>
-            <th className={styles.colBag}>Cena za pytlíky</th>
-            <th className={styles.colTotal}>Celková</th>
-          </tr>
-        </thead>
-      </table>
+      <div className={styles.tableHeader}>
+        <div className={styles.row}>
+          <div className={styles.colId}>ID</div>
+          <div className={styles.colTime}>Čas</div>
+          <div className={styles.colUser}>Prodavající</div>
+          <div className={styles.colGoods}>Cena za zboží</div>
+          <div className={styles.colBag}>Cena za pytlíky</div>
+          <div className={styles.colTotal}>Celková</div>
+        </div>
+      </div>
 
       <div className={styles.tableBody} ref={tableRef}>
         {sales.map((sale, idx) => {
