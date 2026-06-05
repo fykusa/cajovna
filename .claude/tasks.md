@@ -2,7 +2,7 @@
 
 ## Čekající
 
-- [ ] [2026-06-05] **POS — 3-panel redesign: Balení → Množství → Pytlík**: Po výběru kategorie a čaje zůstane stávající flow. Poté se zobrazí nová stránka se 3 vertikálními sekcemi (left-to-right navigace šipkami): (1) Výběr balení (Std/Bal1/Bal2), (2) Výběr množství (input), (3) Výběr pytlíku (typ/objem + možnost "žádný"). Enter potvrdí prodej. Klávesnice: ArrowLeft/Right navigace mezi sekcemi, ArrowUp/Down v rámci sekce, Enter/Escape standardně. Spec/plán: TBD.
+- [x] [2026-06-05] **POS — 3-panel redesign: Balení → Množství → Pytlík**: Nový krok `configure` nahradil sekvenční `quantity→bag_yn→bag_material→bag_volume`. Tři vertikální panely vedle sebe, ArrowLeft/Right přepíná aktivní panel, ArrowUp/Down naviguje uvnitř. Nová komponenta `ConfigurePanel.tsx`. Odstraněny `QuantityModal`, `QuantitySelector`, `BagSelector`. Helper funkce `getPackagingOptions` + `getBagList` exportovány z `usePOS.ts`. 152/152 testů. Merge `e02e26e`. Spec/plán: `docs/superpowers/{specs,plans}/2026-06-05-pos-configure-panel*`.
 
 - [ ] [2026-06-02] **Storno prodejů**: Admin může stornovat (a) **konkrétní položku** v prodeji (`sale_items`) i (b) **celý prodej** (`sales`). DB příprava: přidat sloupec pro storno — návrh `cancelled_at DATETIME NULL` na `sale_items` i `sales` (kdo/proč případně `cancel_reason`/`cancelled_by`). Backend: admin-only endpointy pro storno položky a prodeje. Rozhodnout: (1) zda storno **vrací zboží na sklad** (`stock_*`/`stock_kg`); (2) jak se stornované položky/prodeje promítnou do tržeb (Dashboard/Sales) — vyloučit z součtů, zobrazit přeškrtnuté/zvlášť. UI: akce „Stornovat" u položky i u prodeje (s potvrzením). Udělat jako featuru: brainstorm → spec → plán.
 
