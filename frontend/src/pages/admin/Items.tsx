@@ -193,7 +193,6 @@ export default function AdminItems() {
         <label className={styles.filterLabel}>Kategorie</label>
         <div className={styles.filterGrid}>
           {categories
-            .filter((c) => !c.parent_id)
             .map((cat) => (
               <button
                 key={cat.id}

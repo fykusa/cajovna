@@ -18,9 +18,9 @@ const mockGetProducts = vi.mocked(productsApi.getProducts)
 const mockGetBags = vi.mocked(bagsApi.getBags)
 
 const CATEGORIES = [
-  { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
-  { id: 2, name: 'Zelené', parent_id: null, sort_order: 2 },
-  { id: 3, name: 'Japonské', parent_id: 2, sort_order: 1 },
+  { id: 1, name: 'Bílé' },
+  { id: 2, name: 'Zelené' },
+  { id: 3, name: 'Japonské' },
 ]
 
 const TEAS = [

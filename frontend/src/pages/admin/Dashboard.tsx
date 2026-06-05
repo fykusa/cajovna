@@ -319,7 +319,7 @@ export default function AdminDashboard() {
         <div className={styles.filterSection}>
           <label className={styles.filterLabel}>Kategorie</label>
           <div className={styles.filterGrid}>
-            {categories.filter((c) => !c.parent_id).map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat.id}
                 className={`${styles.filterBtn}${selectedCategories.has(cat.id) ? ' ' + styles.filterActive : ''}`}
@@ -384,8 +384,8 @@ export default function AdminDashboard() {
                     >
                       <span className={styles.itemTime}>
                         {new Date(s.created_at).toLocaleString('cs-CZ', {
-                          day: '2-digit', month: '2-digit',
-                          hour: '2-digit', minute: '2-digit',
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit', second: '2-digit',
                         })}
                       </span>
                       <span className={styles.itemUser}>{s.username}</span>
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                       #{selectedSale.id}&nbsp;·&nbsp;{selectedSale.username}&nbsp;·&nbsp;
                       {new Date(selectedSale.created_at).toLocaleString('cs-CZ', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit',
                       })}
                     </span>
                     <span className={styles.detailTotal}>

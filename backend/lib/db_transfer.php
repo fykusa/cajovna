@@ -245,7 +245,6 @@ function dbtCheckIntegrity(PDO $pdo): void {
         ['sale_items',     'bag_id',      'bags',           'id', true],
         ['sale_items',     'sale_id',     'sales',          'id', false],
         ['sales',          'user_id',     'users',          'id', false],
-        ['tea_categories', 'parent_id',   'tea_categories', 'id', true],
     ];
     foreach ($checks as [$child, $fk, $parent, $pk, $nullable]) {
         $nullClause = $nullable ? "c.`$fk` IS NOT NULL AND " : '';
@@ -287,12 +286,14 @@ function dbtImportTables(PDO $pdo, string $dir, array $tables): array {
         }
         [$header, $rows] = dbtParseCsv(dbtToUtf8(file_get_contents($csvPath)));
         $dbCols = dbtColumns($pdo, $table);
-        if (array_diff($header, $dbCols) || array_diff($dbCols, $header)) {
-            throw new RuntimeException("Sloupce v $table.csv neodpovídají databázi.");
+        // DB sloupce musí být v CSV; extra CSV sloupce (ze starého exportu) se ignorují
+        $missing = array_diff($dbCols, $header);
+        if (!empty($missing)) {
+            throw new RuntimeException(
+                "Sloupce v $table.csv chybí: " . implode(', ', $missing) . '.'
+            );
         }
-        // Počet řádků se proti manifestu NEkontroluje — data lze ručně editovat
-        // (přidávat/mazat řádky). Místo toho hlídáme strukturu: každý datový
-        // řádek musí mít tolik sloupců jako hlavička (chytí useknutý/rozbitý CSV).
+        // Šířku ověř před filtrováním (chytí useknutý/rozbitý CSV)
         $width = count($header);
         foreach ($rows as $i => $row) {
             if (count($row) !== $width) {
@@ -301,6 +302,12 @@ function dbtImportTables(PDO $pdo, string $dir, array $tables): array {
                     . " sloupců místo $width (poškozený soubor?)."
                 );
             }
+        }
+        // Filtruj na sloupce, které DB zná (kompatibilita se starými exporty)
+        if (count($header) !== count($dbCols)) {
+            $keep   = array_keys(array_filter($header, fn($c) => in_array($c, $dbCols, true)));
+            $header = array_values(array_map(fn($i) => $header[$i], $keep));
+            $rows   = array_map(fn($r) => array_values(array_map(fn($i) => $r[$i], $keep)), $rows);
         }
         $parsed[$table] = [$header, $rows];
     }

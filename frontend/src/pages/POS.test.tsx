@@ -6,7 +6,7 @@ import { renderWithToast } from '../test/renderWithToast'
 
 vi.mock('../api/products', () => ({
   getCategories: vi.fn().mockResolvedValue([
-    { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
+    { id: 1, name: 'Bílé' },
   ]),
   getProducts: vi.fn().mockResolvedValue([
     { id: 10, category_id: 1, name: 'Show Mee', note: null, flag: 'active', origin: null,

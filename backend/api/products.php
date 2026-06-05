@@ -53,7 +53,7 @@ if ($method === 'GET' && preg_match('#/api/products/categories$#', $path)) {
 
 function listCategories(): void {
     $rows = getPDO()
-        ->query('SELECT id, name, parent_id, sort_order FROM tea_categories ORDER BY sort_order, name')
+        ->query('SELECT id, name FROM tea_categories ORDER BY name')
         ->fetchAll();
     echo json_encode($rows);
 }

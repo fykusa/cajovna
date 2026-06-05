@@ -14,8 +14,8 @@ vi.mock('../../api/categories', () => ({
 }))
 
 const CATS: Category[] = [
-  { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
-  { id: 2, name: 'Zelené', parent_id: null, sort_order: 2 },
+  { id: 1, name: 'Bílé' },
+  { id: 2, name: 'Zelené' },
 ]
 
 beforeEach(() => {
@@ -34,8 +34,6 @@ describe('Categories', () => {
     vi.mocked(categoriesApi.createCategory).mockResolvedValue({
       id: 3,
       name: 'Nová kategorie',
-      parent_id: null,
-      sort_order: 0,
     })
     const user = userEvent.setup()
     renderWithToast(<Categories />)
@@ -47,8 +45,6 @@ describe('Categories', () => {
     await waitFor(() =>
       expect(categoriesApi.createCategory).toHaveBeenCalledWith({
         name: 'Nová kategorie',
-        parent_id: null,
-        sort_order: 0,
       })
     )
     expect(await screen.findByText('Nová kategorie')).toBeInTheDocument()
@@ -58,8 +54,6 @@ describe('Categories', () => {
     vi.mocked(categoriesApi.updateCategory).mockResolvedValue({
       id: 1,
       name: 'Bílé čaje',
-      parent_id: null,
-      sort_order: 1,
     })
     const user = userEvent.setup()
     renderWithToast(<Categories />)
@@ -89,10 +83,10 @@ describe('Categories', () => {
 
   it('kategorie s čaji nabízí deaktivovat (active → 0)', async () => {
     vi.mocked(categoriesApi.getCategories).mockResolvedValue([
-      { id: 1, name: 'Bílé', parent_id: null, sort_order: 1, active: 1, has_teas: 1 },
+      { id: 1, name: 'Bílé', active: 1, has_teas: 1 },
     ])
     vi.mocked(categoriesApi.updateCategory).mockResolvedValue({
-      id: 1, name: 'Bílé', parent_id: null, sort_order: 1, active: 0,
+      id: 1, name: 'Bílé', active: 0,
     })
     const user = userEvent.setup()
     renderWithToast(<Categories />)

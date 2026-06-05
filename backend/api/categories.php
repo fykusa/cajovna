@@ -37,16 +37,16 @@ if ($method === 'GET' && preg_match('#/api/categories$#', $path)) {
 
 function listCategories(): void {
     $rows = getPDO()
-        ->query('SELECT c.id, c.name, c.parent_id, c.sort_order, c.active,
+        ->query('SELECT c.id, c.name, c.active,
                         EXISTS(SELECT 1 FROM teas t WHERE t.category_id = c.id) AS has_teas
                  FROM tea_categories c
-                 ORDER BY c.sort_order, c.name')
+                 ORDER BY c.name')
         ->fetchAll();
     echo json_encode($rows);
 }
 
 function getCategory(int $id): void {
-    $stmt = getPDO()->prepare('SELECT id, name, parent_id, sort_order, active FROM tea_categories WHERE id = ?');
+    $stmt = getPDO()->prepare('SELECT id, name, active FROM tea_categories WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch();
     if (!$row) {
@@ -60,14 +60,10 @@ function getCategory(int $id): void {
 function createCategory(): void {
     $data = json_decode(file_get_contents('php://input'), true) ?? [];
     $pdo  = getPDO();
-    $stmt = $pdo->prepare('INSERT INTO tea_categories (name, parent_id, sort_order) VALUES (?, ?, ?)');
-    $stmt->execute([
-        $data['name'] ?? 'Nová kategorie',
-        $data['parent_id'] ?? null,
-        $data['sort_order'] ?? 0,
-    ]);
+    $stmt = $pdo->prepare('INSERT INTO tea_categories (name) VALUES (?)');
+    $stmt->execute([$data['name'] ?? 'Nová kategorie']);
     $id   = (int) $pdo->lastInsertId();
-    $stmt = $pdo->prepare('SELECT id, name, parent_id, sort_order, active FROM tea_categories WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, name, active FROM tea_categories WHERE id = ?');
     $stmt->execute([$id]);
     http_response_code(201);
     echo json_encode($stmt->fetch());
@@ -76,7 +72,7 @@ function createCategory(): void {
 function updateCategory(int $id): void {
     $data    = json_decode(file_get_contents('php://input'), true) ?? [];
     $pdo     = getPDO();
-    $allowed = ['name', 'parent_id', 'sort_order', 'active'];
+    $allowed = ['name', 'active'];
     $fields  = [];
     $params  = [];
     foreach ($allowed as $col) {
@@ -92,7 +88,7 @@ function updateCategory(int $id): void {
     }
     $params[] = $id;
     $pdo->prepare('UPDATE tea_categories SET ' . implode(', ', $fields) . ' WHERE id = ?')->execute($params);
-    $stmt = $pdo->prepare('SELECT id, name, parent_id, sort_order, active FROM tea_categories WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, name, active FROM tea_categories WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch();
     if (!$row) {

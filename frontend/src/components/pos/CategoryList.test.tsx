@@ -4,9 +4,9 @@ import CategoryList from './CategoryList'
 import type { Category } from '../../types'
 
 const CATS: Category[] = [
-  { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
-  { id: 2, name: 'Zelené', parent_id: null, sort_order: 2 },
-  { id: 3, name: 'Oolong', parent_id: null, sort_order: 3 },
+  { id: 1, name: 'Bílé' },
+  { id: 2, name: 'Zelené' },
+  { id: 3, name: 'Oolong' },
 ]
 
 describe('CategoryList', () => {

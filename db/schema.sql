@@ -27,15 +27,9 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `tea_categories` (
   `id`         INT          NOT NULL AUTO_INCREMENT,
   `name`       VARCHAR(100) NOT NULL,
-  `parent_id`  INT          NULL DEFAULT NULL,
-  `sort_order` INT          NOT NULL DEFAULT 0,
   `active`     TINYINT      NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  KEY `idx_tea_categories_parent_id` (`parent_id`),
-  KEY `idx_tea_categories_name`      (`name`),
-  CONSTRAINT `fk_tea_categories_parent`
-    FOREIGN KEY (`parent_id`) REFERENCES `tea_categories` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE
+  KEY `idx_tea_categories_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- -------------------------------------------------------------

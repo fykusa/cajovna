@@ -16,8 +16,6 @@ export interface User {
 export interface Category {
   id: number
   name: string
-  parent_id: number | null
-  sort_order: number
   active?: number | string
   /** 1 = kategorie je použita u čajů (nelze hard-smazat, jen deaktivovat). */
   has_teas?: number | string

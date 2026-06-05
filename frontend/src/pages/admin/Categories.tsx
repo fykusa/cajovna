@@ -14,7 +14,7 @@ export default function AdminCategories() {
   const [showInactive, setShowInactive] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const [showAdd, setShowAdd] = useState(false)
-  const [addForm, setAddForm] = useState({ name: '', parent_id: '', sort_order: 0 })
+  const [addForm, setAddForm] = useState({ name: '' })
   const toast = useToast()
 
   const load = useCallback(async () => {
@@ -36,22 +36,9 @@ export default function AdminCategories() {
     showInactive ? Number(c.active) === 0 : Number(c.active) !== 0
   )
 
-  const getCatName = (id: number | null) =>
-    id === null ? '(žádná)' : categories.find((c) => c.id === id)?.name ?? `[${id}]`
-
-  const parentOptions = categories.map((c) => ({ value: String(c.id), label: c.name }))
-
   const columns: ColDef<Category>[] = [
     { key: 'id', label: 'ID', type: 'readonly' },
     { key: 'name', label: 'Název', type: 'text' },
-    {
-      key: 'parent_id',
-      label: 'Nadřazená',
-      type: 'select',
-      options: parentOptions,
-      render: (c) => getCatName(c.parent_id),
-    },
-    { key: 'sort_order', label: 'Pořadí', type: 'number' },
   ]
 
   async function handleSaveCell(cat: Category, col: ColDef<Category>, value: string) {
@@ -60,7 +47,6 @@ export default function AdminCategories() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let parsed: any = value
       if (col.type === 'number') parsed = value === '' ? 0 : parseInt(value, 10)
-      if (col.key === 'parent_id') parsed = value === '' ? null : parseInt(value, 10)
       const updated = await updateCategory(cat.id, { [col.key]: parsed })
       setCategories((prev) => prev.map((c) => (c.id === cat.id ? { ...c, ...updated } : c)))
     } catch (e) {
@@ -71,7 +57,7 @@ export default function AdminCategories() {
   }
 
   function openAdd() {
-    setAddForm({ name: '', parent_id: '', sort_order: 0 })
+    setAddForm({ name: '' })
     setShowAdd(true)
   }
 
@@ -79,11 +65,7 @@ export default function AdminCategories() {
     e.preventDefault()
     setSaving(true)
     try {
-      const created = await createCategory({
-        name: addForm.name,
-        parent_id: addForm.parent_id === '' ? null : Number(addForm.parent_id),
-        sort_order: addForm.sort_order,
-      })
+      const created = await createCategory({ name: addForm.name })
       setCategories((prev) => [...prev, created])
       setShowInactive(false)
       setShowAdd(false)
@@ -201,31 +183,9 @@ export default function AdminCategories() {
               <input
                 className={modal.input}
                 value={addForm.name}
-                onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+                onChange={(e) => setAddForm({ name: e.target.value })}
                 required
                 autoFocus
-              />
-            </div>
-            <div className={modal.field}>
-              <label className={modal.label}>Nadřazená</label>
-              <select
-                className={modal.input}
-                value={addForm.parent_id}
-                onChange={(e) => setAddForm({ ...addForm, parent_id: e.target.value })}
-              >
-                <option value="">(žádná)</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className={modal.field}>
-              <label className={modal.label}>Pořadí</label>
-              <input
-                type="number"
-                className={modal.input}
-                value={addForm.sort_order}
-                onChange={(e) => setAddForm({ ...addForm, sort_order: Number(e.target.value) })}
               />
             </div>
             <div className={modal.actions}>

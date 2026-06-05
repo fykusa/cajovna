@@ -15,6 +15,7 @@ services:
       DB_NAME: ${DB_NAME:-cajovna}
       DB_USER: ${DB_USER:-cajovna}
       DB_PASS: ${DB_PASS:-cajovna}
+      TZ: Europe/Prague
     depends_on:
       mysql:
         condition: service_healthy
@@ -28,6 +29,7 @@ services:
       MYSQL_USER: ${DB_USER:-cajovna}
       MYSQL_PASSWORD: ${DB_PASS:-cajovna}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root}
+      TZ: Europe/Prague
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql

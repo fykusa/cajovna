@@ -18,7 +18,7 @@ vi.mock('../../api/stock', () => ({
 }))
 
 const CATEGORIES: Category[] = [
-  { id: 1, name: 'Bílé', parent_id: null, sort_order: 1 },
+  { id: 1, name: 'Bílé' },
 ]
 
 const mkTea = (id: number, name: string, hasSales: 0 | 1 = 0): Tea => ({
