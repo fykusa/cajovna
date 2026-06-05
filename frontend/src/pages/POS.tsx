@@ -120,13 +120,15 @@ export default function POS() {
 
     getSaleItems(selectedSale.id)
       .then((items) => {
+        console.log(`[Selected sale ${selectedSale.id}] Items:`, items)
+        console.log(`[Selected sale ${selectedSale.id}] saleItemsByIndex[${selectedSale.id}]:`, saleItemsByIndex[selectedSale.id])
         setSaleItems(items)
       })
       .catch((e) => {
         console.error('Chyba při načítání položek prodeje:', e)
         setSaleItems([])
       })
-  }, [selectedSale])
+  }, [selectedSale, saleItemsByIndex])
 
   // Načteme dnešní prodeje na mount
   useEffect(() => {
@@ -158,27 +160,25 @@ export default function POS() {
     const promises = history.map((sale) =>
       getSaleItems(sale.id)
         .then((items) => {
-          console.log(`Loaded items for sale ${sale.id}:`, items)
           return { saleId: sale.id, items }
         })
         .catch((e) => {
-          console.error(`Error loading items for sale ${sale.id}:`, e)
+          console.warn(`[History] Error loading items for sale ${sale.id}:`, e)
           return { saleId: sale.id, items: [] }
         })
     )
 
     Promise.all(promises)
       .then((results) => {
-        console.log('All items loaded:', results)
         const map: Record<number, SaleItem[]> = {}
         for (const { saleId, items } of results) {
           map[saleId] = items
         }
-        console.log('Final saleItemsByIndex:', map)
+        console.log(`[History] Loaded ${Object.keys(map).length} sales with items. Map keys:`, Object.keys(map))
         setSaleItemsByIndex(map)
       })
       .catch((e) => {
-        console.error('Error loading all items:', e)
+        console.error('[History] Error loading all items:', e)
         setSaleItemsByIndex({})
       })
   }, [history])
