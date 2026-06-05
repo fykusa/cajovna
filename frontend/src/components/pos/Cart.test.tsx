@@ -35,9 +35,16 @@ describe('Cart', () => {
     expect(screen.getByText(/papír.*100 ml/)).toBeInTheDocument()
   })
 
-  it('zobrazí celkovou cenu košíku', () => {
+  it('zobrazí cenu pytlíku u položky (cena × množství)', () => {
+    render(<Cart items={[ITEM_WITH_BAG]} onRemove={vi.fn()} onCheckout={vi.fn()} />)
+    // 2.91 Kč × 2 ks = 5.82 Kč
+    expect(screen.getByText(/5[.,]82\s*Kč/)).toBeInTheDocument()
+  })
+
+  it('zobrazí celkovou cenu košíku včetně pytlíků', () => {
     render(<Cart items={[ITEM, ITEM_WITH_BAG]} onRemove={vi.fn()} onCheckout={vi.fn()} />)
-    expect(screen.getByText('390 Kč')).toBeInTheDocument()
+    // 130 + 260 + (2.91 × 2) = 395.82 → 396 Kč
+    expect(screen.getByText('396 Kč')).toBeInTheDocument()
   })
 
   it('zavolá onRemove s localId při Delete kliku', async () => {

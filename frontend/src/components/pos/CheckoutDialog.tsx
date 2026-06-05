@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { CartItem, SalePayload } from '../../types'
 import { createSale } from '../../api/sales'
+import { cartTotal } from './cartTotals'
 import styles from './CheckoutDialog.module.css'
 
 interface Props {
@@ -13,7 +14,7 @@ export default function CheckoutDialog({ items, onSuccess, onCancel }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const total = items.reduce((s, i) => s + i.totalPrice, 0)
+  const total = cartTotal(items)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

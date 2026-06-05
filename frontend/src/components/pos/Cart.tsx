@@ -1,5 +1,6 @@
 // frontend/src/components/pos/Cart.tsx
 import type { CartItem } from '../../types'
+import { bagLineTotal, cartTotal } from './cartTotals'
 import styles from './Cart.module.css'
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
 }
 
 export default function Cart({ items, onRemove, onCheckout }: Props) {
-  const total = items.reduce((sum, i) => sum + i.totalPrice, 0)
+  const total = cartTotal(items)
 
   return (
     <div className={styles.cart}>
@@ -35,7 +36,11 @@ export default function Cart({ items, onRemove, onCheckout }: Props) {
                 </div>
                 {item.bag && (
                   <div className={styles.bag}>
-                    {item.bag.surface_type} {item.bag.volume_ml} ml
+                    <span className={styles.bagName}>
+                      {item.bag.surface_type} {item.bag.volume_ml} ml
+                    </span>
+                    <span className={styles.bagQty}>×{item.quantity}</span>
+                    <span className={styles.bagPrice}>{bagLineTotal(item)} Kč</span>
                   </div>
                 )}
               </li>

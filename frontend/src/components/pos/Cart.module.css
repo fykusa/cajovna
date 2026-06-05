@@ -11,7 +11,11 @@
 .remove { background: none; border: none; color: #888; cursor: pointer;
           font-size: 1.2rem; padding: 0 4px; }
 .remove:hover { color: #f87171; }
-.bag { font-size: 0.8rem; color: #888; margin-top: 2px; }
+.bag { display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
+       color: #888; margin-top: 2px; padding-left: 12px; }
+.bagName { flex: 1; }
+.bagQty { color: #888; }
+.bagPrice { color: #b9914a; white-space: nowrap; padding-right: 20px; }
 .footer { padding: 12px 16px; border-top: 1px solid #333;
           display: flex; justify-content: space-between; align-items: center; }
 .total { font-size: 1.3rem; color: #6abf69; }
