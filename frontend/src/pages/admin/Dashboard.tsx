@@ -81,13 +81,13 @@ export default function AdminDashboard() {
   const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set())
   const [categories, setCategories]     = useState<Category[]>([])
   const [teas, setTeas]                 = useState<Tea[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
-  const [selectedTea, setSelectedTea]   = useState<number | null>(null)
+  const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set())
+  const [selectedTeas, setSelectedTeas] = useState<Set<number>>(new Set())
   const [showImport, setShowImport]     = useState(false)
 
   const toast = useToast()
 
-  const load = useCallback(async (f: string, t: string, catId?: number | null, teaId?: number | null) => {
+  const load = useCallback(async (f: string, t: string, catIds: number[] = [], teaIds: number[] = []) => {
     setLoading(true)
     setSelectedId(null)
     setItems([])
@@ -95,8 +95,8 @@ export default function AdminDashboard() {
       setSales(await getSales({
         from: f + ' 00:00:00',
         to: t + ' 23:59:59',
-        category_id: catId || undefined,
-        tea_id: teaId || undefined,
+        category_ids: catIds.length ? catIds : undefined,
+        tea_ids: teaIds.length ? teaIds : undefined,
       }))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
@@ -120,27 +120,34 @@ export default function AdminDashboard() {
     setFrom(range.from)
     setTo(range.to)
     setActivePeriod(p)
-    load(range.from, range.to, selectedCategory, selectedTea)
+    load(range.from, range.to, Array.from(selectedCategories), Array.from(selectedTeas))
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    load(from, to, selectedCategory, selectedTea)
+    load(from, to, Array.from(selectedCategories), Array.from(selectedTeas))
   }
 
   function toggleCategory(id: number) {
-    setSelectedCategory(selectedCategory === id ? null : id)
-    setSelectedTea(null)
+    const next = new Set(selectedCategories)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setSelectedCategories(next)
+    // Změna kategorií → vyčistit výběr čajů (pod-filtr se váže na jednu kategorii).
+    setSelectedTeas(new Set())
     setSelectedId(null)
     setItems([])
-    load(from, to, selectedCategory === id ? null : id, null)
+    load(from, to, Array.from(next), [])
   }
 
   function toggleTea(id: number) {
-    setSelectedTea(selectedTea === id ? null : id)
+    const next = new Set(selectedTeas)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setSelectedTeas(next)
     setSelectedId(null)
     setItems([])
-    load(from, to, selectedCategory, selectedTea === id ? null : id)
+    load(from, to, Array.from(selectedCategories), Array.from(next))
   }
 
   async function selectSale(id: number) {
@@ -336,7 +343,7 @@ export default function AdminDashboard() {
             {categories.filter((c) => !c.parent_id).map((cat) => (
               <button
                 key={cat.id}
-                className={`${styles.filterBtn}${selectedCategory === cat.id ? ' ' + styles.filterActive : ''}`}
+                className={`${styles.filterBtn}${selectedCategories.has(cat.id) ? ' ' + styles.filterActive : ''}`}
                 onClick={() => toggleCategory(cat.id)}
               >
                 <span className={styles.filterId}>{String(cat.id).padStart(2, '0')}</span>
@@ -348,14 +355,14 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {selectedCategory && teas.length > 0 && (
+      {selectedCategories.size === 1 && teas.length > 0 && (
         <div className={styles.filterSection}>
           <label className={styles.filterLabel}>Čaje</label>
           <div className={styles.filterGrid}>
-            {teas.filter((t) => t.category_id === selectedCategory).map((tea) => (
+            {teas.filter((t) => t.category_id === Array.from(selectedCategories)[0]).map((tea) => (
               <button
                 key={tea.id}
-                className={`${styles.filterBtn}${selectedTea === tea.id ? ' ' + styles.filterActive : ''}`}
+                className={`${styles.filterBtn}${selectedTeas.has(tea.id) ? ' ' + styles.filterActive : ''}`}
                 onClick={() => toggleTea(tea.id)}
               >
                 <span className={styles.filterId}>{String(tea.id).padStart(3, '0')}</span>
@@ -467,7 +474,7 @@ export default function AdminDashboard() {
       {showImport && (
         <ImportDialog
           onClose={() => setShowImport(false)}
-          onDone={() => load(from, to, selectedCategory, selectedTea)}
+          onDone={() => load(from, to, Array.from(selectedCategories), Array.from(selectedTeas))}
         />
       )}
     </div>

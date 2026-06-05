@@ -160,19 +160,35 @@ function listSales(): void {
         $params[] = (int) $_GET['user_id'];
     }
 
-    if (!empty($_GET['category_id']) || !empty($_GET['tea_id'])) {
+    // Filtr kategorií/čajů: podpora jedné (category_id) i více (category_ids=1,2,3).
+    $categoryIds = [];
+    if (!empty($_GET['category_ids'])) {
+        $categoryIds = array_values(array_filter(array_map('intval', explode(',', $_GET['category_ids']))));
+    } elseif (!empty($_GET['category_id'])) {
+        $categoryIds = [(int) $_GET['category_id']];
+    }
+    $teaIds = [];
+    if (!empty($_GET['tea_ids'])) {
+        $teaIds = array_values(array_filter(array_map('intval', explode(',', $_GET['tea_ids']))));
+    } elseif (!empty($_GET['tea_id'])) {
+        $teaIds = [(int) $_GET['tea_id']];
+    }
+
+    if ($categoryIds || $teaIds) {
         $joins .= ' JOIN sale_items si ON si.sale_id = s.id';
         $joins .= ' LEFT JOIN teas t ON t.id = si.tea_id';
     }
 
-    if (!empty($_GET['category_id'])) {
-        $where[]  = 't.category_id = ?';
-        $params[] = (int) $_GET['category_id'];
+    if ($categoryIds) {
+        $ph = implode(',', array_fill(0, count($categoryIds), '?'));
+        $where[] = "t.category_id IN ($ph)";
+        foreach ($categoryIds as $cid) $params[] = $cid;
     }
 
-    if (!empty($_GET['tea_id'])) {
-        $where[]  = 't.id = ?';
-        $params[] = (int) $_GET['tea_id'];
+    if ($teaIds) {
+        $ph = implode(',', array_fill(0, count($teaIds), '?'));
+        $where[] = "t.id IN ($ph)";
+        foreach ($teaIds as $tid) $params[] = $tid;
     }
 
     $stmt = $pdo->prepare(
