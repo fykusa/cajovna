@@ -1,0 +1,70 @@
+.navbar {
+  background: #1e1e1e;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #333;
+  padding: 12px 20px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tab {
+  display: block;
+  padding: 8px 14px;
+  color: #aaa;
+  background: none;
+  border: none;
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: #2a2a2a;
+  color: #eee;
+}
+
+.tab.active {
+  background: #2a2a2a;
+  color: #d4a84b;
+  font-weight: 500;
+}
+
+.footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.username {
+  font-size: 0.85rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  background: none;
+  border: 1px solid #555;
+  color: #aaa;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.logoutBtn:hover {
+  border-color: #888;
+  color: #bbb;
+}

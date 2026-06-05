@@ -126,6 +126,7 @@ function reducer(state: POSState, action: Action): POSState {
   switch (action.type) {
     case 'LOAD_DATA': {
       const materials = uniqueMaterials(action.bags)
+      const firstCategory = action.categories[0] ?? null
       return {
         ...state,
         categories: action.categories,
@@ -134,6 +135,7 @@ function reducer(state: POSState, action: Action): POSState {
         bagMaterials: materials,
         step: 'category',
         activePanel: 'categories',
+        selectedCategory: firstCategory,
         loading: false,
       }
     }
@@ -144,7 +146,9 @@ function reducer(state: POSState, action: Action): POSState {
     case 'MOVE_UP': {
       if (state.step === 'category') {
         const len = state.categories.length
-        return { ...state, categoryIndex: (state.categoryIndex - 1 + len) % len }
+        const newIdx = (state.categoryIndex - 1 + len) % len
+        const cat = state.categories[newIdx] ?? null
+        return { ...state, categoryIndex: newIdx, selectedCategory: cat, teaIndex: 0 }
       }
       if (state.step === 'tea') {
         const len = state.teas.length
@@ -174,7 +178,9 @@ function reducer(state: POSState, action: Action): POSState {
     case 'MOVE_DOWN': {
       if (state.step === 'category') {
         const len = state.categories.length
-        return { ...state, categoryIndex: (state.categoryIndex + 1) % len }
+        const newIdx = (state.categoryIndex + 1) % len
+        const cat = state.categories[newIdx] ?? null
+        return { ...state, categoryIndex: newIdx, selectedCategory: cat, teaIndex: 0 }
       }
       if (state.step === 'tea') {
         const len = state.teas.length
@@ -220,8 +226,8 @@ function reducer(state: POSState, action: Action): POSState {
 
     case 'CONFIRM': {
       if (state.step === 'category') {
-        const cat = state.categories[state.categoryIndex] ?? null
-        return { ...state, step: 'tea', activePanel: 'teas', selectedCategory: cat, teaIndex: 0 }
+        // In category step, CONFIRM does nothing — use MOVE_RIGHT to go to teas
+        return state
       }
       if (state.step === 'tea') {
         const tea = state.teas[state.teaIndex] ?? null
@@ -331,7 +337,7 @@ export function usePOS(): { state: POSState } & POSActions {
   }, [])
 
   useEffect(() => {
-    if (state.step === 'tea' && state.selectedCategory) {
+    if ((state.step === 'category' || state.step === 'tea') && state.selectedCategory) {
       getProducts({ category_id: state.selectedCategory.id })
         .then((teas) => dispatch({ type: 'LOAD_TEAS', teas }))
         .catch((e) => dispatch({ type: 'SET_ERROR', message: (e as Error).message }))

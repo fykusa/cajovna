@@ -77,10 +77,10 @@ describe('usePOS – navigace kategorií', () => {
     expect(result.current.state.categoryIndex).toBe(2)
   })
 
-  it('confirm na kategorii přejde na krok tea', async () => {
+  it('moveRight na kategorii přejde na krok tea', async () => {
     const { result } = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => result.current.confirm())
+    act(() => result.current.moveRight())
     expect(result.current.state.step).toBe('tea')
     expect(result.current.state.selectedCategory).toEqual(CATEGORIES[0])
   })
@@ -90,7 +90,7 @@ describe('usePOS – výběr čaje', () => {
   async function atTeaStep() {
     const hook = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => hook.result.current.confirm())
+    act(() => hook.result.current.moveRight())
     await act(async () => {})
     return hook
   }
@@ -108,7 +108,7 @@ describe('usePOS – množství', () => {
   async function atQuantityStep() {
     const hook = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => hook.result.current.confirm())
+    act(() => hook.result.current.moveRight())
     await act(async () => {})
     act(() => hook.result.current.confirm())
     return hook
@@ -144,7 +144,7 @@ describe('usePOS – pytlík', () => {
   async function atBagYnStep() {
     const hook = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => hook.result.current.confirm())
+    act(() => hook.result.current.moveRight())
     await act(async () => {})
     act(() => hook.result.current.confirm())
     act(() => hook.result.current.confirm())
@@ -215,7 +215,7 @@ describe('usePOS – cancelItem (Escape)', () => {
   it('z kroku tea vrátí na čistý výběr kategorie', async () => {
     const { result } = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => result.current.confirm()) // category → tea
+    act(() => result.current.moveRight()) // category → tea
     await act(async () => {})
     expect(result.current.state.step).toBe('tea')
     act(() => result.current.cancelItem())
@@ -241,7 +241,7 @@ describe('usePOS – cancelItem (Escape)', () => {
     const { result } = renderHook(() => usePOS())
     await act(async () => {})
     // přidá první položku bez pytlíku
-    act(() => result.current.confirm()) // → tea
+    act(() => result.current.moveRight()) // → tea
     await act(async () => {})
     act(() => result.current.confirm()) // → quantity
     act(() => result.current.confirm()) // → bag_yn
@@ -249,7 +249,7 @@ describe('usePOS – cancelItem (Escape)', () => {
     act(() => result.current.confirm()) // přidá do košíku, → category
     expect(result.current.state.cart).toHaveLength(1)
     // začne druhou položku a zruší ji
-    act(() => result.current.confirm()) // → tea
+    act(() => result.current.moveRight()) // → tea
     await act(async () => {})
     act(() => result.current.confirm()) // → quantity
     act(() => result.current.cancelItem())
@@ -273,7 +273,7 @@ describe('usePOS – košík', () => {
   it('removeFromCart smaže položku z košíku', async () => {
     const { result } = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => result.current.confirm())
+    act(() => result.current.moveRight())
     await act(async () => {})
     act(() => result.current.confirm())
     act(() => result.current.confirm())
@@ -288,7 +288,7 @@ describe('usePOS – košík', () => {
   it('clearCart vyprázdní celý košík', async () => {
     const { result } = renderHook(() => usePOS())
     await act(async () => {})
-    act(() => result.current.confirm())
+    act(() => result.current.moveRight())
     await act(async () => {})
     act(() => result.current.confirm())
     act(() => result.current.confirm())

@@ -60,7 +60,7 @@ export default function HistoryPanel({
           <div className={styles.colUser}>Prodavající</div>
           <div className={styles.colBag}>Cena za pytlíky</div>
           <div className={styles.colGoods}>Cena za zboží</div>
-          <div className={styles.colTotal}>Celková</div>
+          <div className={styles.colTotal}>Celková cena</div>
         </div>
       </div>
 
