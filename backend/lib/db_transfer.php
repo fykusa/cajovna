@@ -13,24 +13,44 @@ const DBT_GROUPS = [
     'sales'      => ['sales', 'sale_items'],
 ];
 
-// NULL ↔ marker. Prázdný string zůstává "".
-function dbtEncode($value): string {
-    return $value === null ? '\\N' : (string) $value;
+// Lidsky čitelný formát pro Excel:
+//   NULL  ↔ prázdná buňka  (v DB nikde není prázdný string, takže bijektivní)
+//   čísla ↔ desetinná čárka (jen u číselných sloupců; textu se to nedotkne)
+function dbtEncode($value, bool $numeric = false): string {
+    if ($value === null) return '';
+    $s = (string) $value;
+    return $numeric ? str_replace('.', ',', $s) : $s;
 }
-function dbtDecode(string $value) {
-    return $value === '\\N' ? null : $value;
+function dbtDecode(string $value, bool $numeric = false) {
+    if ($value === '') return null;
+    if (!$numeric) return $value;
+    // Otrkat oddělovače tisíců (mezera / NBSP), které může Excel přidat.
+    $v = str_replace([' ', "\xC2\xA0"], '', $value);
+    return str_replace(',', '.', $v);
+}
+
+// Názvy číselných (decimal/float/double) sloupců tabulky jako množina [col => true].
+function dbtNumericColumns(PDO $pdo, string $table): array {
+    $stmt = $pdo->prepare(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+           AND DATA_TYPE IN ('decimal', 'float', 'double')"
+    );
+    $stmt->execute([$table]);
+    return array_fill_keys(array_column($stmt->fetchAll(), 'COLUMN_NAME'), true);
 }
 
 // Serializace řádků do CSV stringu (BOM + ;). escape='' → standardní CSV
-// (zdvojení uvozovek), aby round-trip přes fgetcsv seděl.
-function dbtRowsToCsv(array $cols, array $rows): string {
+// (zdvojení uvozovek), aby round-trip přes fgetcsv seděl. $numeric = množina
+// [colName => true] sloupců, u kterých se tečka mění na desetinnou čárku.
+function dbtRowsToCsv(array $cols, array $rows, array $numeric = []): string {
     $fh = fopen('php://temp', 'r+');
     fwrite($fh, "\xEF\xBB\xBF");
     fputcsv($fh, $cols, ';', '"', '');
     foreach ($rows as $row) {
         $line = [];
         foreach ($cols as $c) {
-            $line[] = dbtEncode(array_key_exists($c, $row) ? $row[$c] : null);
+            $line[] = dbtEncode(array_key_exists($c, $row) ? $row[$c] : null, isset($numeric[$c]));
         }
         fputcsv($fh, $line, ';', '"', '');
     }
@@ -72,8 +92,9 @@ function dbtColumns(PDO $pdo, string $table): array {
 // CSV jedné tabulky z DB (řazeno dle id pro determinismus). Vrací [csv, count].
 function dbtTableCsv(PDO $pdo, string $table): array {
     $cols = dbtColumns($pdo, $table);
+    $numeric = dbtNumericColumns($pdo, $table);
     $rows = $pdo->query('SELECT * FROM `' . $table . '` ORDER BY `id`')->fetchAll();
-    return [dbtRowsToCsv($cols, $rows), count($rows)];
+    return [dbtRowsToCsv($cols, $rows, $numeric), count($rows)];
 }
 
 // Vytvoří ZIP se všemi tabulkami + manifest.json. Vrací manifest pole.
@@ -115,14 +136,22 @@ function dbtCleanup(string $dir): void {
     rmdir($dir);
 }
 
-// Vloží řádky (poziční pole dle $header) do tabulky. \N → NULL, explicitní id.
+// Vloží řádky (poziční pole dle $header) do tabulky. Prázdno → NULL, u číselných
+// sloupců čárka → tečka. Explicitní id.
 function dbtInsertRows(PDO $pdo, string $table, array $header, array $rows): int {
     if (empty($rows)) return 0;
+    $numeric = dbtNumericColumns($pdo, $table);
+    // Poziční mapa: je sloupec na indexu i číselný?
+    $isNum = array_map(fn($c) => isset($numeric[$c]), $header);
     $colList = '`' . implode('`,`', $header) . '`';
     $ph = '(' . implode(',', array_fill(0, count($header), '?')) . ')';
     $stmt = $pdo->prepare("INSERT INTO `$table` ($colList) VALUES $ph");
     foreach ($rows as $row) {
-        $stmt->execute(array_map('dbtDecode', $row));
+        $vals = [];
+        foreach ($row as $i => $cell) {
+            $vals[] = dbtDecode((string) $cell, $isNum[$i] ?? false);
+        }
+        $stmt->execute($vals);
     }
     return count($rows);
 }
