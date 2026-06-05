@@ -26,9 +26,8 @@ if ($method === 'POST' && preg_match('#/api/sales$#', $path)) {
     requireAdmin();
     listSales();
 
-// GET /api/sales/:id/items – položky prodeje (admin only)
+// GET /api/sales/:id/items – položky prodeje
 } elseif ($method === 'GET' && preg_match('#/api/sales/(\d+)/items$#', $path, $m)) {
-    requireAdmin();
     listSaleItems((int) $m[1]);
 
 } else {

@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react'
 import { usePOS } from '../hooks/usePOS'
 import { useAuthStore } from '../store/authStore'
-import { getSales } from '../api/sales'
+import { getSales, getSaleItems } from '../api/sales'
 import CategoryList from '../components/pos/CategoryList'
 import TeaList from '../components/pos/TeaList'
 import SearchResults from '../components/pos/SearchResults'
@@ -11,7 +11,7 @@ import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
 import { useToast } from '../components/toast/useToast'
 import HistoryPanel from '../components/pos/HistoryPanel'
-import type { Sale } from '../types'
+import type { Sale, SaleItem } from '../types'
 import styles from './POS.module.css'
 
 export default function POS() {
@@ -26,6 +26,7 @@ export default function POS() {
   const [history, setHistory] = useState<Sale[]>([])
   const [historyIndex, setHistoryIndex] = useState(0)
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
+  const [saleItems, setSaleItems] = useState<SaleItem[]>([])
   const [historyLoading, setHistoryLoading] = useState(true)
   const [historyError, setHistoryError] = useState<string | null>(null)
 
@@ -108,6 +109,23 @@ export default function POS() {
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
   }, [handleKey])
+
+  // Načteme položky vybraného prodeje
+  useEffect(() => {
+    if (!selectedSale) {
+      setSaleItems([])
+      return
+    }
+
+    getSaleItems(selectedSale.id)
+      .then((items) => {
+        setSaleItems(items)
+      })
+      .catch((e) => {
+        console.error('Chyba při načítání položek prodeje:', e)
+        setSaleItems([])
+      })
+  }, [selectedSale])
 
   // Načteme dnešní prodeje na mount
   useEffect(() => {
@@ -236,6 +254,8 @@ export default function POS() {
         <aside className={styles.cartPanel}>
           <Cart
             items={state.cart}
+            selectedSale={selectedSale}
+            saleItems={saleItems}
             onRemove={removeFromCart}
             onCheckout={() => setShowCheckout(true)}
           />
