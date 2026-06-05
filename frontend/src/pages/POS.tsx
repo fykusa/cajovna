@@ -157,19 +157,28 @@ export default function POS() {
 
     const promises = history.map((sale) =>
       getSaleItems(sale.id)
-        .then((items) => ({ saleId: sale.id, items }))
-        .catch(() => ({ saleId: sale.id, items: [] }))
+        .then((items) => {
+          console.log(`Loaded items for sale ${sale.id}:`, items)
+          return { saleId: sale.id, items }
+        })
+        .catch((e) => {
+          console.error(`Error loading items for sale ${sale.id}:`, e)
+          return { saleId: sale.id, items: [] }
+        })
     )
 
     Promise.all(promises)
       .then((results) => {
+        console.log('All items loaded:', results)
         const map: Record<number, SaleItem[]> = {}
         for (const { saleId, items } of results) {
           map[saleId] = items
         }
+        console.log('Final saleItemsByIndex:', map)
         setSaleItemsByIndex(map)
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error('Error loading all items:', e)
         setSaleItemsByIndex({})
       })
   }, [history])
