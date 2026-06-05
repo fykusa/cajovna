@@ -34,7 +34,9 @@ export default function RevenueChart({ data, title = 'Tržby v čase' }: Props) 
                 <div
                   className={`${styles.bar}${d.value === 0 ? ' ' + styles.barZero : ''}`}
                   style={{ height: `${(d.value / max) * 100}%` }}
-                />
+                >
+                  {d.value > 0 && <span className={styles.barValue}>{fmtKc(d.value)}</span>}
+                </div>
               </div>
               <span className={styles.xlabel}>{i % step === 0 ? d.label : ''}</span>
             </div>

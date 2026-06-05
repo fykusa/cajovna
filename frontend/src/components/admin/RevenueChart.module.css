@@ -32,7 +32,8 @@
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  padding: 12px 10px 4px;
+  /* Větší horní odsazení, ať se nad nejvyšší sloupec vejde hodnota. */
+  padding: 22px 10px 4px;
   min-height: 0;
 }
 .col {
@@ -52,6 +53,7 @@
   min-height: 0;
 }
 .bar {
+  position: relative;
   width: 70%;
   max-width: 26px;
   min-height: 2px;
@@ -61,6 +63,20 @@
 }
 .col:hover .bar {
   background: linear-gradient(#d4a84b, #b8923f);
+}
+/* Hodnota nad sloupcem. */
+.barValue {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  font-size: 0.55rem;
+  line-height: 1;
+  color: #aaa;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 /* Interval bez tržby — neutrální „mrtvá" barva, viditelná, ale ne jako tržba. */
 .barZero {
