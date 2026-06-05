@@ -39,5 +39,13 @@ check('řádek 2: escaping ; " newline', dbtDecode($r[1][1]) === 'a;b "c"' . "\n
 check('řádek 2: weight 0.000 → "0,000" → decode "0.000"', dbtDecode($r[1][2], true) === '0.000');
 check('počet řádků 2', count($r) === 2);
 
+// detekce kódování — Windows-1250 (české Excel CSV) → UTF-8
+$utf8 = 'Bílý čaj – příchuť';
+$win1250 = iconv('UTF-8', 'Windows-1250', $utf8);
+check('Windows-1250 vstup → převede na UTF-8', dbtToUtf8($win1250) === $utf8);
+check('UTF-8 vstup zůstane beze změny', dbtToUtf8($utf8) === $utf8);
+check('UTF-8 s BOM zůstane beze změny', dbtToUtf8("\xEF\xBB\xBF" . $utf8) === "\xEF\xBB\xBF" . $utf8);
+check('čisté ASCII zůstane beze změny', dbtToUtf8('id;name;30,0') === 'id;name;30,0');
+
 echo $failed === 0 ? "\nVŠE OK\n" : "\n$failed SELHALO\n";
 exit($failed === 0 ? 0 : 1);

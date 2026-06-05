@@ -60,6 +60,21 @@ function dbtRowsToCsv(array $cols, array $rows, array $numeric = []): string {
     return $out;
 }
 
+// Převede obsah CSV na UTF-8. Excel ve Windows ukládá „CSV" ve Windows-1250,
+// což by jinak rozbilo diakritiku. UTF-8 (s BOM i bez) necháme být, jinak
+// předpokládáme české Windows-1250.
+function dbtToUtf8(string $content): string {
+    if (strncmp($content, "\xEF\xBB\xBF", 3) === 0) {
+        return $content; // UTF-8 BOM — parser ho odstraní sám
+    }
+    if ($content === '' || mb_check_encoding($content, 'UTF-8')) {
+        return $content; // platné UTF-8 (vč. čistého ASCII)
+    }
+    // iconv (na rozdíl od mbstring v této buildu) umí Windows-1250.
+    $converted = @iconv('Windows-1250', 'UTF-8', $content);
+    return $converted !== false ? $converted : $content;
+}
+
 // Parsování CSV stringu → [header[], rows[][]] (řádky jako poziční pole).
 function dbtParseCsv(string $csv): array {
     $fh = fopen('php://temp', 'r+');
@@ -205,7 +220,7 @@ function dbtImportTables(PDO $pdo, string $dir, array $tables): array {
         if (!is_file($csvPath)) {
             throw new RuntimeException("V archivu chybí $table.csv.");
         }
-        [$header, $rows] = dbtParseCsv(file_get_contents($csvPath));
+        [$header, $rows] = dbtParseCsv(dbtToUtf8(file_get_contents($csvPath)));
         $dbCols = dbtColumns($pdo, $table);
         if (array_diff($header, $dbCols) || array_diff($dbCols, $header)) {
             throw new RuntimeException("Sloupce v $table.csv neodpovídají databázi.");
