@@ -161,12 +161,22 @@ function dbtInsertRows(PDO $pdo, string $table, array $header, array $rows): int
     $colList = '`' . implode('`,`', $header) . '`';
     $ph = '(' . implode(',', array_fill(0, count($header), '?')) . ')';
     $stmt = $pdo->prepare("INSERT INTO `$table` ($colList) VALUES $ph");
-    foreach ($rows as $row) {
+    $idPos = array_search('id', $header, true);
+    foreach ($rows as $rowIdx => $row) {
         $vals = [];
         foreach ($row as $i => $cell) {
             $vals[] = dbtDecode((string) $cell, $isNum[$i] ?? false);
         }
-        $stmt->execute($vals);
+        try {
+            $stmt->execute($vals);
+        } catch (PDOException $e) {
+            // Doplň kontext: tabulka, fyzický řádek v CSV (hlavička = 1), id.
+            $idVal = $idPos !== false ? ($row[$idPos] ?? '?') : '?';
+            throw new RuntimeException(sprintf(
+                '%s.csv, řádek %d (id=%s): %s',
+                $table, $rowIdx + 2, $idVal, $e->getMessage()
+            ), 0, $e);
+        }
     }
     return count($rows);
 }
