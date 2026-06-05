@@ -3,10 +3,11 @@
 ## Čekající
 
 - [ ] [2026-06-02] **Storno prodejů**: Admin může stornovat (a) **konkrétní položku** v prodeji (`sale_items`) i (b) **celý prodej** (`sales`). DB příprava: přidat sloupec pro storno — návrh `cancelled_at DATETIME NULL` na `sale_items` i `sales` (kdo/proč případně `cancel_reason`/`cancelled_by`). Backend: admin-only endpointy pro storno položky a prodeje. Rozhodnout: (1) zda storno **vrací zboží na sklad** (`stock_*`/`stock_kg`); (2) jak se stornované položky/prodeje promítnou do tržeb (Dashboard/Sales) — vyloučit z součtů, zobrazit přeškrtnuté/zvlášť. UI: akce „Stornovat" u položky i u prodeje (s potvrzením). Udělat jako featuru: brainstorm → spec → plán.
-- [ ] [2026-06-05] **POS — Scroll do viditelnosti aktivní položky**: Když se naveguje šipkami v kategoriích/čajích, aktivní prvek se nestane viditelný (seznam se nescrolluje). Řešení: JavaScript `scrollIntoView()` + guardování v dependency array NEBO CSS `scroll-snap-align: center` + `scroll-behavior: smooth`. Problém: `useEffect` se straví s testem. Přístup: Implementovat scroll v onKeyDown handleru (ne v useEffect) nebo přes MutationObserver.
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
 ## Hotovo
+
+- [x] [2026-06-05] **POS — Scroll do viditelnosti**: Šipky navigaci v kategoriích/čajích/historii scrollují aktivní prvek do viditelnosti. Implementace: `requestAnimationFrame` + `scrollIntoView({ behavior: 'smooth', block: 'nearest' })`. Řešení `requestAnimationFrame` je bezpečné pro testy (na rozdíl od `useEffect`/`useLayoutEffect`). 140/140 testů. Commit: `23c811c`.
 
 - [x] [2026-06-05] **POS — Historia bug fixnuta (Forbidden)**: getSales a getSaleItems teď vyžadují `requireAuth()` místo `requireAdmin()`. Prodavačka si může prohlížet historii dnešních prodejů. Commity: `21ceab2`, `38bf9d1`.
 
