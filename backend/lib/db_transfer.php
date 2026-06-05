@@ -225,9 +225,17 @@ function dbtImportTables(PDO $pdo, string $dir, array $tables): array {
         if (array_diff($header, $dbCols) || array_diff($dbCols, $header)) {
             throw new RuntimeException("Sloupce v $table.csv neodpovídají databázi.");
         }
-        $expected = $manifest['row_counts'][$table] ?? null;
-        if ($expected !== null && count($rows) !== (int) $expected) {
-            throw new RuntimeException("$table.csv: počet řádků nesedí s manifestem.");
+        // Počet řádků se proti manifestu NEkontroluje — data lze ručně editovat
+        // (přidávat/mazat řádky). Místo toho hlídáme strukturu: každý datový
+        // řádek musí mít tolik sloupců jako hlavička (chytí useknutý/rozbitý CSV).
+        $width = count($header);
+        foreach ($rows as $i => $row) {
+            if (count($row) !== $width) {
+                throw new RuntimeException(
+                    "$table.csv: řádek " . ($i + 2) . " má " . count($row)
+                    . " sloupců místo $width (poškozený soubor?)."
+                );
+            }
         }
         $parsed[$table] = [$header, $rows];
     }
