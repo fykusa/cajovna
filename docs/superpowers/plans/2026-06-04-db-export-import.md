@@ -1,5 +1,7 @@
 # Export / Import kompletní DB — Implementation Plan
 
+> ✅ **DOKONČENO (2026-06-05, zmergováno do master, merge `adbf961`).** Všech 8 tasků hotovo. Navíc oproti plánu (na žádost uživatele): lidsky čitelný/editovatelný CSV formát (desetinná čárka u číselných sloupců, prázdné buňky místo `\N`), autodetekce kódování Windows-1250→UTF-8 přes `iconv`, tolerance českých/Excel formátů data při importu, kontrola struktury místo počtu řádků proti manifestu (umožní ruční přidávání/mazání řádků), kontextové chybové hlášky. Self-test rozšířen na 29 kontrol. Viz `.claude/tasks.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Admin může z Přehledu exportovat celou DB do ZIPu (CSV na tabulku) a selektivně ji importovat zpět s transakční bezpečností a kontrolou integrity FK.
