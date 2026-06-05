@@ -21,9 +21,9 @@ $auth = requireAuth();
 if ($method === 'POST' && preg_match('#/api/sales$#', $path)) {
     createSale($auth);
 
-// GET /api/sales – přehled (admin only)
+// GET /api/sales – přehled
 } elseif ($method === 'GET' && preg_match('#/api/sales$#', $path)) {
-    requireAdmin();
+    requireAuth();
     listSales();
 
 // GET /api/sales/:id/items – položky prodeje
