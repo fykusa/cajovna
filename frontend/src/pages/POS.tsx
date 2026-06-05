@@ -10,6 +10,7 @@ import BagSelector from '../components/pos/BagSelector'
 import Cart from '../components/pos/Cart'
 import CheckoutDialog from '../components/pos/CheckoutDialog'
 import { useToast } from '../components/toast/useToast'
+import HistoryPanel from '../components/pos/HistoryPanel'
 import type { Sale } from '../types'
 import styles from './POS.module.css'
 
@@ -192,7 +193,44 @@ export default function POS() {
 
       <main className={styles.main}>
         <section className={styles.panel}>
-          {renderMainPanel()}
+          <div className={styles.panelGrid}>
+            {/* Kategorie */}
+            <div className={styles.categoriesPanel}>
+              <div className={styles.categoriesPanelHeader}>Kategorie</div>
+              <div className={styles.categoriesPanelContent}>
+                {renderMainPanel()}
+              </div>
+            </div>
+
+            {/* Historie */}
+            <div className={styles.historyPanel}>
+              <div className={styles.historyPanelHeader}>
+                Dnešní prodeje
+                {posMode === 'history' && (
+                  <span className={styles.modeIndicator}>HISTORY MODE</span>
+                )}
+              </div>
+              <div className={styles.historyPanelContent}>
+                {historyLoading ? (
+                  <div style={{ padding: '12px', color: '#666' }}>Načítám...</div>
+                ) : historyError ? (
+                  <div style={{ padding: '12px', color: '#e67e7e' }}>{historyError}</div>
+                ) : history.length === 0 ? (
+                  <div style={{ padding: '12px', color: '#666' }}>Není k dispozici</div>
+                ) : (
+                  <HistoryPanel
+                    sales={history}
+                    selectedIndex={historyIndex}
+                    onSelect={(sale, idx) => {
+                      setHistoryIndex(idx)
+                      setSelectedSale(sale)
+                    }}
+                    isActive={posMode === 'history'}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         </section>
 
         <aside className={styles.cartPanel}>
