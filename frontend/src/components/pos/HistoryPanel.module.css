@@ -113,14 +113,14 @@
 }
 
 .row .colGoods {
-  color: #a8e6a1;
+  color: #666;
   flex: 0 0 90px;
   text-align: right;
   font-weight: 500;
 }
 
 .row .colBag {
-  color: #a8e6a1;
+  color: #666;
   flex: 0 0 90px;
   text-align: right;
   font-weight: 500;

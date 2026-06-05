@@ -58,8 +58,8 @@ export default function HistoryPanel({
           <div className={styles.colId}>ID</div>
           <div className={styles.colTime}>Čas</div>
           <div className={styles.colUser}>Prodavající</div>
-          <div className={styles.colGoods}>Cena za zboží</div>
           <div className={styles.colBag}>Cena za pytlíky</div>
+          <div className={styles.colGoods}>Cena za zboží</div>
           <div className={styles.colTotal}>Celková</div>
         </div>
       </div>
@@ -89,12 +89,16 @@ export default function HistoryPanel({
                 })}
               </div>
               <div className={styles.colUser} data-testid="col-user">{sale.username}</div>
-              <div className={styles.colGoods} data-testid="col-goods">
-                {goodsPriceNum} Kč
-              </div>
-              <div className={styles.colBag} data-testid="col-bag">
-                {bagPriceNum} Kč
-              </div>
+              {bagPriceNum > 0 && (
+                <div className={styles.colBag} data-testid="col-bag">
+                  {bagPriceNum} Kč
+                </div>
+              )}
+              {bagPriceNum > 0 && goodsPriceNum > 0 && (
+                <div className={styles.colGoods} data-testid="col-goods">
+                  {goodsPriceNum} Kč
+                </div>
+              )}
               <div className={styles.colTotal} data-testid="col-total">
                 {totalNum} Kč
               </div>
