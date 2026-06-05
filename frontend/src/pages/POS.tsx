@@ -299,6 +299,7 @@ export default function POS() {
         onTabChange={setActiveTab}
         username={user?.username || ''}
         onLogout={logout}
+        step={state.step}
       />
 
       <main className={styles.main}>
