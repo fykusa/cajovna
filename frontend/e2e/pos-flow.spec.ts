@@ -36,8 +36,8 @@ test('šipka dolů posune zvýraznění na druhou kategorii', async ({ page }) =
 
   const firstItem = list.getByRole('listitem').first()
   const secondItem = list.getByRole('listitem').nth(1)
-  await expect(firstItem).not.toHaveClass(/active/)
-  await expect(secondItem).toHaveClass(/active/)
+  await expect(firstItem).not.toHaveClass(/selected/)
+  await expect(secondItem).toHaveClass(/selected/)
 })
 
 test('Enter vybere kategorii a zobrazí čaje', async ({ page }) => {
@@ -75,34 +75,25 @@ test('kompletní prodej bez pytlíku', async ({ page }) => {
   // Step 2: tea — wait for teas to load, then confirm first tea
   const teaList = page.getByRole('list').first()
   await expect(teaList.getByRole('listitem').first()).toBeVisible({ timeout: 10_000 })
+  await page.waitForTimeout(500)
   await page.keyboard.press('Enter')
-  await expect(page.locator('text=Krok: quantity')).toBeVisible({ timeout: 5_000 })
+  await expect(page.locator('text=Krok: configure')).toBeVisible({ timeout: 5_000 })
 
-  // Step 3: quantity — Enter funguje i když je input focusnutý
-  await page.keyboard.press('Enter')
-  await expect(page.locator('text=Krok: bag_yn')).toBeVisible({ timeout: 5_000 })
-
-  // Step 4: bag_yn — default is wantBag=true (Ano active).
-  // ArrowDown toggles to wantBag=false (Ne active), then Enter confirms no bag
-  await page.keyboard.press('ArrowDown')
-  const neOption = page.getByRole('list').first().getByRole('listitem').nth(1)
-  await expect(neOption).toHaveClass(/active/)
+  // Step 3: configure — výchozí stav: Balení aktivní, množství 1, pytlík Žádný
+  // Enter rovnou potvrdí prodej
   await page.keyboard.press('Enter')
 
-  // Should return to category step with 1 cart item
+  // Should return to category step
   await expect(page.locator('text=Krok: category')).toBeVisible({ timeout: 5_000 })
 
-  // Cart must have exactly 1 item (li in the cart list)
-  // Cart heading is "Košík" — find the cart section by heading
+  // Cart must have 1 item — Zaplatit button should be visible
   const cartHeading = page.getByRole('heading', { name: 'Košík' })
   await expect(cartHeading).toBeVisible()
-  // The checkout button "Zaplatit" should now be visible
   const payBtn = page.getByRole('button', { name: 'Zaplatit' })
   await expect(payBtn).toBeVisible()
 
   // Click Zaplatit — opens CheckoutDialog
   await payBtn.click()
-  // CheckoutDialog has heading "Souhrn prodeje"
   await expect(page.getByRole('heading', { name: 'Souhrn prodeje' })).toBeVisible({ timeout: 5_000 })
 })
 
