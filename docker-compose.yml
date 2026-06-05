@@ -8,6 +8,7 @@ services:
     volumes:
       - ./backend:/var/www/html
       - ./_srcfiles_:/var/www/srcfiles:ro
+      - ./db:/var/www/db:ro
     environment:
       DB_HOST: mysql
       DB_PORT: 3306

@@ -4,6 +4,8 @@ import { getUsers } from '../../api/users'
 import { getCategories, getProducts } from '../../api/products'
 import type { Sale, SaleItem, User, Category, Tea } from '../../types'
 import { useToast } from '../../components/toast/useToast'
+import ImportDialog from '../../components/admin/ImportDialog'
+import { exportDatabase } from '../../api/admin'
 import styles from './Dashboard.module.css'
 
 type Period = 'month' | 'lastmonth' | 'year'
@@ -81,6 +83,7 @@ export default function AdminDashboard() {
   const [teas, setTeas]                 = useState<Tea[]>([])
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedTea, setSelectedTea]   = useState<number | null>(null)
+  const [showImport, setShowImport]     = useState(false)
 
   const toast = useToast()
 
@@ -270,6 +273,14 @@ export default function AdminDashboard() {
     link.click()
   }
 
+  async function handleExportDb() {
+    try {
+      await exportDatabase()
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Export DB se nezdařil')
+    }
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -299,6 +310,8 @@ export default function AdminDashboard() {
           />
           <button type="submit" className={styles.applyBtn}>Zobrazit</button>
           <button type="button" className={styles.exportBtn} onClick={handleExport}>Export CSV</button>
+          <button type="button" className={styles.dbBtn} onClick={handleExportDb}>Export DB</button>
+          <button type="button" className={styles.dbBtn} onClick={() => setShowImport(true)}>Import DB</button>
         </form>
       </div>
 
@@ -449,6 +462,13 @@ export default function AdminDashboard() {
             </div>
           </div>
         </>
+      )}
+
+      {showImport && (
+        <ImportDialog
+          onClose={() => setShowImport(false)}
+          onDone={() => load(from, to, selectedCategory, selectedTea)}
+        />
       )}
     </div>
   )

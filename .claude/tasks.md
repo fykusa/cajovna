@@ -8,6 +8,8 @@
 
 ## Hotovo
 
+- [x] [2026-06-05] **Export / Import celé DB** (branch `feat/db-export-import`): Admin v Přehledu exportuje celou DB do ZIPu (CSV per tabulka + manifest) a selektivně importuje zpět. Čisté PHP přes PDO (bez `mysqldump`), sdílené jádro `backend/lib/db_transfer.php`, HTTP endpointy `/api/admin/export` + `/import` (`backend/api/admin.php`), transakce + FK kontrola integrity, `users` se nikdy neimportuje. Frontend: `api/admin.ts`, `ImportDialog` (potvrzení „NAHRADIT", výběr skupin), tlačítka Export DB / Import DB v Dashboardu. CLI ověření: `test_db_transfer.php` (9/9), `verify_roundtrip.php` (1:1 shoda 6 tabulek). 118/118 frontend testů. Spec/plán: `docs/superpowers/{specs,plans}/2026-06-04-db-export-import*`.
+
 - [x] [2026-06-02] **Edit kategorií/pytlíků + EditableGrid + toasty** (merge `7e810da` do master): Edit kategorií a pytlíků (CRUD, FK-guard 409, dvoukrokové potvrzení mazání), sdílený `EditableGrid` (inline edit, keyboard nav, sortování sloupců, Ctrl+C kopírování), „+ Přidat" nového čaje + sjednocená zelená přidávací tlačítka vpravo, fix 204 prázdného těla u DELETE, globální toast notifikace napříč stránkami. 109/109 testů. Spec/plán: `docs/superpowers/{specs,plans}/2026-06-01-edit-kategorie-pytliky*` a `2026-06-02-toast-notifikace*`.
 
 - [x] [2026-05-31] **Task 18 — Admin Layout Redesign**: AdminLayout změněno z vertikálního sidebaru na horizontální header. Menu items běží vedle "Čajovna Admin" nahoře. CSS refactor (flexbox layout). TypeScript fixes (import type, removed erasableSyntaxOnly, created vitest.config.ts). Všechny testy: 81/81 pass. Commit: 345d0ed.
