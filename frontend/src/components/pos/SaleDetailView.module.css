@@ -1,0 +1,79 @@
+/* frontend/src/components/pos/SaleDetailView.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.header {
+  padding: 12px;
+  background: #222;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+
+.time {
+  color: #aaa;
+  font-size: 0.8rem;
+}
+
+.user {
+  color: #d4a84b;
+  font-weight: 600;
+}
+
+.total {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6abf69;
+}
+
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  padding: 8px;
+  background: #2a2a2a;
+  border-radius: 3px;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+.itemMain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name {
+  flex: 1;
+}
+
+.qty {
+  color: #aaa;
+}
+
+.price {
+  font-weight: 600;
+  color: #d4a84b;
+  white-space: nowrap;
+}
