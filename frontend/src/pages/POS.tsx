@@ -4,7 +4,6 @@ import { useAuthStore } from '../store/authStore'
 import { getSales, getSaleItems } from '../api/sales'
 import CategoryPanel from '../components/pos/CategoryPanel'
 import TeaPanel from '../components/pos/TeaPanel'
-import SearchResults from '../components/pos/SearchResults'
 import ConfigurePanel from '../components/pos/ConfigurePanel'
 import { getPackagingOptions, getBagList } from '../hooks/usePOS'
 import Cart from '../components/pos/Cart'
@@ -24,7 +23,6 @@ export default function POS() {
     moveLeft,
     moveRight,
     confirm,
-    setQuantity,
     startSearch,
     appendSearch,
     cancelItem,
