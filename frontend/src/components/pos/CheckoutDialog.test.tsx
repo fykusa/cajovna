@@ -16,7 +16,7 @@ const TEA: Tea = { id: 1, category_id: 1, name: 'Show Mee', note: null, flag: 'a
   pkg2_weight_g: null, pkg2_price_moc: null, stock_std_pcs: 5, stock_pkg1_pcs: 0,
   stock_pkg2_pcs: 0, stock_kg: 0 }
 
-const BAG: Bag = { id: 1, surface_type: 'papír', volume_ml: 100, dimensions: null, price_per_piece: 2.91 }
+const BAG: Bag = { id: 1, surface_type: 'papír', volume_ml: 100, dimensions: null, price_per_piece: 2.91, var1_qty: 10, var1_price: 60 }
 
 const ITEMS: CartItem[] = [
   { localId: 'a', tea: TEA, itemType: 'std', weightG: null,
@@ -41,7 +41,7 @@ describe('CheckoutDialog', () => {
         quantity: 2, unitPrice: 130, totalPrice: 260, bag: BAG },
     ]
     render(<CheckoutDialog items={itemsWithBag} onSuccess={vi.fn()} onCancel={vi.fn()} />)
-    // 260 + (2.91 × 2) = 265.82 → 266 Kč
+    // 260 + 6 (60/10, 1 pytlík) = 266 Kč
     expect(screen.getByText(/Celkem: 266 Kč/)).toBeInTheDocument()
   })
 

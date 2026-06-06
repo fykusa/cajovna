@@ -1,0 +1,4 @@
+.bar { display: flex; gap: 3px; padding: 6px 16px 0; flex-shrink: 0; }
+.seg { flex: 1; height: 3px; border-radius: 2px; background: var(--mob-border); transition: background 0.2s; }
+.done { background: var(--mob-accent-mid); }
+.active { background: var(--mob-accent); }

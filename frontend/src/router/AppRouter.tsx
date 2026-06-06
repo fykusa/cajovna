@@ -7,6 +7,7 @@ import NotAuthorized from '../pages/NotAuthorized'
 import AdminLayout from '../components/admin/AdminLayout'
 
 const POS = lazy(() => import('../pages/POS'))
+const MobilePOS = lazy(() => import('../pages/MobilePOS'))
 const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'))
 const AdminItems = lazy(() => import('../pages/admin/Items'))
 const AdminCategories = lazy(() => import('../pages/admin/Categories'))
@@ -23,6 +24,15 @@ export default function AppRouter() {
 
         <Route
           path="/pos"
+          element={
+            <ProtectedRoute requiredRole="prodavacka">
+              <MobilePOS />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/pos-desktop"
           element={
             <ProtectedRoute requiredRole="prodavacka">
               <POS />

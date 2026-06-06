@@ -1,0 +1,19 @@
+.bar {
+  display: flex; gap: 10px;
+  padding: 12px 16px calc(env(safe-area-inset-bottom) + 12px);
+  background: var(--mob-surface); border-top: 1px solid var(--mob-border);
+  flex-shrink: 0;
+}
+.primary {
+  flex: 1; padding: 14px; border-radius: var(--mob-r); border: none;
+  background: var(--mob-accent); color: #fff; font-size: 16px; font-weight: 600;
+  cursor: pointer;
+}
+.primary:active:not(:disabled) { transform: scale(0.985); opacity: 0.85; }
+.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.secondary {
+  flex: 1; padding: 14px; border-radius: var(--mob-r);
+  background: var(--mob-surface-alt); color: var(--mob-fg-2);
+  border: 1px solid var(--mob-border); font-size: 15px; cursor: pointer;
+}
+.secondary:active { transform: scale(0.985); opacity: 0.85; }

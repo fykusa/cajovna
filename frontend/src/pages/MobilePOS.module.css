@@ -1,0 +1,84 @@
+/* frontend/src/pages/MobilePOS.module.css */
+
+.root {
+  --mob-bg:           oklch(93% 0.025 68);
+  --mob-surface:      oklch(97% 0.018 70);
+  --mob-surface-alt:  oklch(89% 0.032 66);
+  --mob-fg:           oklch(20% 0.06 32);
+  --mob-fg-2:         oklch(36% 0.07 34);
+  --mob-muted:        oklch(54% 0.055 38);
+  --mob-border:       oklch(83% 0.035 64);
+  --mob-border-strong: oklch(72% 0.048 58);
+  --mob-accent:       oklch(36% 0.11 28);
+  --mob-accent-mid:   oklch(50% 0.10 30);
+  --mob-accent-bg:    oklch(90% 0.04 52);
+  --mob-success:      oklch(46% 0.13 148);
+  --mob-success-bg:   oklch(91% 0.05 132);
+  --mob-danger:       oklch(50% 0.15 22);
+  --mob-danger-bg:    oklch(93% 0.04 20);
+  --mob-r:            12px;
+  --mob-r-sm:         8px;
+  --mob-r-lg:         16px;
+
+  background: var(--mob-bg);
+  color: var(--mob-fg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  font-size: 15px;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+.frame {
+  width: 100%;
+  max-width: 430px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 100dvh;
+  background: var(--mob-bg);
+}
+
+.view {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--mob-bg);
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 16px 16px;
+}
+
+/* Slide animace */
+.slideFwd {
+  animation: slideFwd 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.slideBack {
+  animation: slideBack 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes slideFwd {
+  from { transform: translateX(100%); opacity: 0.7; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideBack {
+  from { transform: translateX(-30%); opacity: 0.7; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* Loading / error stav */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  color: var(--mob-muted);
+  font-size: 14px;
+}

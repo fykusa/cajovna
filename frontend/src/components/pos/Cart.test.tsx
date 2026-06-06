@@ -10,7 +10,7 @@ const TEA: Tea = { id: 1, category_id: 1, name: 'Show Mee', note: null, flag: 'a
   pkg2_weight_g: null, pkg2_price_moc: null, stock_std_pcs: 5, stock_pkg1_pcs: 0,
   stock_pkg2_pcs: 0, stock_kg: 0 }
 
-const BAG: Bag = { id: 1, surface_type: 'papír', volume_ml: 100, dimensions: null, price_per_piece: 2.91 }
+const BAG: Bag = { id: 1, surface_type: 'papír', volume_ml: 100, dimensions: null, price_per_piece: 2.91, var1_qty: 10, var1_price: 60 }
 
 const ITEM: CartItem = {
   localId: 'abc', tea: TEA, itemType: 'std', weightG: null,
@@ -35,15 +35,15 @@ describe('Cart', () => {
     expect(screen.getByText(/papír.*100 ml/)).toBeInTheDocument()
   })
 
-  it('zobrazí cenu pytlíku u položky (cena × množství)', () => {
+  it('zobrazí cenu pytlíku u položky (var1_price/var1_qty, vždy 1 ks)', () => {
     render(<Cart items={[ITEM_WITH_BAG]} onRemove={vi.fn()} onCheckout={vi.fn()} />)
-    // 2.91 Kč × 2 ks = 5.82 Kč
-    expect(screen.getByText(/5[.,]82\s*Kč/)).toBeInTheDocument()
+    // 60 / 10 = 6 Kč, vždy 1 pytlík
+    expect(screen.getByText(/^6\s*Kč$/)).toBeInTheDocument()
   })
 
   it('zobrazí celkovou cenu košíku včetně pytlíků', () => {
     render(<Cart items={[ITEM, ITEM_WITH_BAG]} onRemove={vi.fn()} onCheckout={vi.fn()} />)
-    // 130 + 260 + (2.91 × 2) = 395.82 → 396 Kč
+    // 130 + 260 + 6 = 396 Kč
     expect(screen.getByText('396 Kč')).toBeInTheDocument()
   })
 

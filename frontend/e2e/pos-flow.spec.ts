@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-// Credentials: prodavacka / prodavacka123 (role=prodavacka → /pos)
+// Credentials: prodavacka / prodavacka123 (role=prodavacka → /pos → redirect to /pos-desktop for keyboard POS)
 const USERNAME = 'prodavacka'
 const PASSWORD = 'prodavacka123'
 
@@ -9,6 +9,8 @@ async function login(page: import('@playwright/test').Page) {
   await page.getByPlaceholder('Uživatelské jméno').fill(USERNAME)
   await page.getByPlaceholder('Heslo').fill(PASSWORD)
   await page.getByRole('button', { name: 'Přihlásit' }).click()
+  await page.waitForURL(/\/pos(-desktop)?/, { timeout: 10_000 })
+  await page.goto('/pos-desktop')
   // Wait for POS to load — header contains step indicator
   await expect(page.locator('text=Krok: category')).toBeVisible({ timeout: 15_000 })
 }
