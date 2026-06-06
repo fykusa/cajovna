@@ -19,7 +19,7 @@ import MobileSuccess from '../components/pos-mobile/MobileSuccess'
 import styles from './MobilePOS.module.css'
 
 const VIEW_TITLES: Record<MobileView, string> = {
-  home: 'Čajovna POS',
+  home: 'TAO čajovna',
   categories: 'Kategorie',
   teas: 'Vyberte čaj',
   packaging: 'Typ balení',

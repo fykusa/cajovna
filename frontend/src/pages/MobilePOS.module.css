@@ -1,17 +1,18 @@
 /* frontend/src/pages/MobilePOS.module.css */
 
 .root {
-  --mob-bg:           oklch(93% 0.025 68);
-  --mob-surface:      oklch(97% 0.018 70);
-  --mob-surface-alt:  oklch(89% 0.032 66);
-  --mob-fg:           oklch(20% 0.06 32);
-  --mob-fg-2:         oklch(36% 0.07 34);
-  --mob-muted:        oklch(54% 0.055 38);
-  --mob-border:       oklch(83% 0.035 64);
-  --mob-border-strong: oklch(72% 0.048 58);
-  --mob-accent:       oklch(36% 0.11 28);
-  --mob-accent-mid:   oklch(50% 0.10 30);
-  --mob-accent-bg:    oklch(90% 0.04 52);
+  /* TAO čajovna palette — olivová zelená #9cba21, krémová béžová #e5e2ba */
+  --mob-bg:           oklch(91% 0.04 95);   /* #e5e2ba krém */
+  --mob-surface:      oklch(96% 0.025 95);  /* světlejší krém */
+  --mob-surface-alt:  oklch(86% 0.05 95);   /* tmavší krém */
+  --mob-fg:           oklch(22% 0.05 110);  /* tmavě olivová (text) */
+  --mob-fg-2:         oklch(36% 0.06 110);
+  --mob-muted:        oklch(54% 0.05 105);
+  --mob-border:       oklch(81% 0.04 100);
+  --mob-border-strong: oklch(70% 0.05 105);
+  --mob-accent:       oklch(40% 0.13 127);  /* tmavá olivová #9cba21 derivát */
+  --mob-accent-mid:   oklch(54% 0.13 127);
+  --mob-accent-bg:    oklch(90% 0.06 117);  /* světlá olivová tinta */
   --mob-success:      oklch(46% 0.13 148);
   --mob-success-bg:   oklch(91% 0.05 132);
   --mob-danger:       oklch(50% 0.15 22);

@@ -39,7 +39,7 @@ export default function Login() {
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <h1 className={styles.title}>Čajovna</h1>
+        <h1 className={styles.title}>TAO čajovna</h1>
         {error && (
           <p role="alert" className={styles.error}>
             {error}
