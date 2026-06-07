@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { to: '/admin/sales', label: 'Tržby', end: false },
   { to: '/admin/categories', label: 'Kategorie', end: false },
   { to: '/admin/products', label: 'Čaje', end: false },
-  { to: '/admin/bags', label: 'Pytlíky', end: false },
+  { to: '/admin/bags', label: 'Obaly', end: false },
   { to: '/admin/users', label: 'Uživatelé', end: false },
 ]
 

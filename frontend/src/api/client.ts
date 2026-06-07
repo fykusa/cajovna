@@ -22,7 +22,8 @@ export async function apiFetch<T>(
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const res = await fetch(`/api${path}`, { ...options, headers })
+  const apiBase = import.meta.env.VITE_API_BASE ?? '/api'
+  const res = await fetch(`${apiBase}${path}`, { ...options, headers })
 
   if (!res.ok) {
     // Expirovaný/neplatný token → odhlásit a poslat na login. Spustí se jen když

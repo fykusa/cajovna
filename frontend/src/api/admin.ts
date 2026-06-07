@@ -10,9 +10,11 @@ function authHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+const apiBase = import.meta.env.VITE_API_BASE ?? '/api'
+
 /** Stáhne ZIP zálohy celé DB. */
 export async function exportDatabase(): Promise<void> {
-  const res = await fetch('/api/admin/export', { headers: { ...authHeader() } })
+  const res = await fetch(`${apiBase}/admin/export`, { headers: { ...authHeader() } })
   if (!res.ok) {
     throw new ApiError(res.status, 'Export se nezdařil')
   }
@@ -33,7 +35,7 @@ export async function importDatabase(file: File, tables: string[]): Promise<Impo
   const fd = new FormData()
   fd.append('file', file)
   fd.append('tables', JSON.stringify(tables))
-  const res = await fetch('/api/admin/import', {
+  const res = await fetch(`${apiBase}/admin/import`, {
     method: 'POST',
     headers: { ...authHeader() }, // bez Content-Type → browser nastaví multipart boundary
     body: fd,

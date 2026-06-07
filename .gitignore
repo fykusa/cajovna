@@ -8,6 +8,7 @@ phpMyAdmin_themes/
 
 # DB credentials – NIKDY do gitu!
 backend/config.php
+backend/config_Forpsi.php
 
 # Node
 node_modules/

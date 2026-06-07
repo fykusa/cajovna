@@ -244,3 +244,36 @@
 
 .loading { color: #666; font-style: italic; padding: 24px; }
 .error   { color: #f87171; padding: 8px 0; }
+
+@media (max-width: 768px) {
+  .page {
+    height: auto;
+  }
+
+  .panels {
+    grid-template-columns: 1fr;
+    overflow: visible;
+    flex: none;
+  }
+
+  .listPanel   { max-height: 360px; }
+  .detailPanel { max-height: 360px; }
+  .chartPanel  { min-height: 240px; }
+
+  .listItem {
+    grid-template-columns: 1fr auto;
+  }
+  .itemTime { display: none; }
+}
+
+@media (max-height: 600px) {
+  .page {
+    height: auto;
+  }
+
+  .panels {
+    flex: none;
+    overflow: visible;
+    height: 400px;
+  }
+}
