@@ -32,7 +32,8 @@ export async function apiFetch<T>(
     if (res.status === 401 && token) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.assign('/login')
+      const base = (import.meta.env.VITE_BASE_PATH ?? '').replace(/\/$/, '')
+      window.location.assign(`${base}/login`)
     }
     const body = await res.json().catch(() => ({ error: res.statusText }))
     throw new ApiError(res.status, body.error ?? body.message ?? res.statusText)
