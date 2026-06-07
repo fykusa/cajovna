@@ -1,12 +1,12 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "0.92.0",
+  "version": "0.93.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:testovaci": "tsc -b && vite build --base /testovaci/ --mode testovaci",
+    "build": "tsc -b && vite build --base /testovaci/ --mode testovaci",
+    "build:production": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",

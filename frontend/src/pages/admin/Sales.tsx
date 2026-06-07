@@ -130,15 +130,17 @@ export default function Sales() {
             </button>
           ))}
         </div>
-        <label>
-          Od: <input aria-label="od" type="date" value={from}
-            onChange={(e) => { setFrom(e.target.value); setActivePeriod(null) }} className={styles.dateInput} />
-        </label>
-        <label>
-          Do: <input aria-label="do" type="date" value={to}
-            onChange={(e) => { setTo(e.target.value); setActivePeriod(null) }} className={styles.dateInput} />
-        </label>
-        <button type="submit" className={styles.filterBtn}>Zobrazit</button>
+        <div className={styles.dateRow}>
+          <label>
+            Od: <input aria-label="od" type="date" value={from}
+              onChange={(e) => { setFrom(e.target.value); setActivePeriod(null) }} className={styles.dateInput} />
+          </label>
+          <label>
+            Do: <input aria-label="do" type="date" value={to}
+              onChange={(e) => { setTo(e.target.value); setActivePeriod(null) }} className={styles.dateInput} />
+          </label>
+          <button type="submit" className={styles.filterBtn}>Zobrazit</button>
+        </div>
       </form>
 
 
