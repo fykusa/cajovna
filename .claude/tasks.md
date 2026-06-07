@@ -8,6 +8,8 @@
 
 - [ ] [2026-05-28] **Fáze 4 — Deploy**: Build, upload na Forpsi, .htaccess, import DB, test live.
 
+- [ ] [2026-06-07] **POS Desktop — přístup na /pos-desktop**: Stránka `/pos-desktop` (klávesnicový POS) je v routeru definována, ale není odkaz v navigaci ani jasný způsob jak se tam dostat. Vyřešit přístup — buď přidat odkaz v POS menu / admin panelu, nebo jinak zpřístupnit pro obsluhu.
+
 ## Hotovo
 
 - [x] [2026-06-05] **Úprava History panelu — tabulkový přehled**: Přepracován HistoryPanel z jednoduchého seznamu na **tabulkový přehled s 6 sloupci**: ID (doleva) | Čas | Prodavající | Cena za zboží | Cena za pytlíky | Celková (doprava). Implementace: (1) Helper `calculatePrices()` — parseFloat na stringy z API, dělí items na zboží (nem-bag, sčítá ceny) a pytlíky (bag items); (2) CSS flex layout — header sticky, body scrollable s `gap: 4px`; (3) Props: `saleItemsByIndex: Record<number, SaleItem[]>` mapuje sale_id na items; (4) V POS.tsx effect nahrává items pro všechny dnešní prodeje v parallel (`Promise.all`). Ceny v Kč (bez dělení 100, API vrací již v Kč). Opravy během dev: stringy na čísla v calculatePrices (API vrací unit_price jako stringy '680.00'), zarovnání header/body (header jako div místo table). 146/146 testů pass. Commity: `c7dbb47`, `7d37004`, `fa53d5e`, `fe3c1c8`, `6bf2fe0`, `45f3fd4`, `7da8b85`.

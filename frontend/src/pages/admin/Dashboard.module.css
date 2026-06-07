@@ -25,25 +25,25 @@
 .applyBtn {
   padding: 6px 14px;
   border-radius: 6px;
-  border: 1px solid #444;
-  background: #2a2a2a;
-  color: #ccc;
+  border: 1px solid #d4a84b;
+  background: #d4a84b;
+  color: #1a1a1a;
   cursor: pointer;
   font-size: 0.85rem;
+  font-weight: 700;
 }
-.applyBtn:hover { background: #333; color: #fff; }
+.applyBtn:hover { background: #e0b85a; border-color: #e0b85a; }
 
 .exportBtn {
   padding: 6px 14px;
   border-radius: 6px;
-  border: 1px solid #6abf69;
-  background: #1e2e1e;
-  color: #6abf69;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #ddd;
   cursor: pointer;
   font-size: 0.85rem;
-  font-weight: 500;
 }
-.exportBtn:hover { background: #243324; }
+.exportBtn:hover { background: #333; color: #fff; }
 
 .dbBtn {
   padding: 6px 14px;
