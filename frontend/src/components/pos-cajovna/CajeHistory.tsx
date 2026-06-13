@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 import { getCajovnaProdeje } from '../../api/cajovna'
 import type { CajovnaProdej } from '../../types'
+import { useAuthStore } from '../../store/authStore'
 import styles from './CajeHistory.module.css'
 
 export default function CajeHistory() {
+  const user = useAuthStore((s) => s.user)
   const [prodeje, setProdeje] = useState<CajovnaProdej[]>([])
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState<string | null>(null)
 
   useEffect(() => {
-    getCajovnaProdeje()
-      .then(setProdeje)
+    const today = new Date().toISOString().slice(0, 10)
+    getCajovnaProdeje({ from: today + ' 00:00:00', to: today + ' 23:59:59' })
+      .then((data) => setProdeje(user ? data.filter((p) => p.user_id === user.id) : data))
       .catch((e) => setError(e instanceof Error ? e.message : 'Chyba načítání'))
       .finally(() => setLoading(false))
   }, [])
@@ -34,7 +37,6 @@ export default function CajeHistory() {
             <span className={styles.saleTime}>
               {new Date(p.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
             </span>
-            <span className={styles.saleUser}>{p.username}</span>
             <span className={styles.saleTotal}>{p.total_kc.toLocaleString('cs-CZ')} Kč</span>
           </div>
         ))}
