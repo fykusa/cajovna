@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react'
-import { getCajovnaProdeje } from '../../api/cajovna'
-import type { CajovnaProdej } from '../../types'
+import { getCajovnaProdeje, getCajovnaPolozky } from '../../api/cajovna'
+import type { CajovnaProdej, CajePolozkaSale } from '../../types'
 import { useAuthStore } from '../../store/authStore'
 import styles from './CajeHistory.module.css'
 
+const BALENI: Record<number, string> = { 1: 'Standard', 2: 'Větší', 3: 'Největší', 4: 'Čajovna' }
+
 export default function CajeHistory() {
   const user = useAuthStore((s) => s.user)
-  const [prodeje, setProdeje] = useState<CajovnaProdej[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState<string | null>(null)
+  const [prodeje, setProdeje]         = useState<CajovnaProdej[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [error, setError]             = useState<string | null>(null)
+  const [selectedId, setSelectedId]   = useState<number | null>(null)
+  const [items, setItems]             = useState<CajePolozkaSale[]>([])
+  const [itemsLoading, setItemsLoading] = useState(false)
 
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10)
@@ -17,6 +22,15 @@ export default function CajeHistory() {
       .catch((e) => setError(e instanceof Error ? e.message : 'Chyba načítání'))
       .finally(() => setLoading(false))
   }, [])
+
+  async function toggleSale(id: number) {
+    if (selectedId === id) { setSelectedId(null); setItems([]); return }
+    setSelectedId(id)
+    setItems([])
+    setItemsLoading(true)
+    try { setItems(await getCajovnaPolozky(id)) } catch { /* tiché */ }
+    finally { setItemsLoading(false) }
+  }
 
   const total = prodeje.reduce((s, p) => s + p.total_kc, 0)
   const count = prodeje.length
@@ -33,11 +47,33 @@ export default function CajeHistory() {
       </div>
       <div className={styles.list}>
         {prodeje.map((p) => (
-          <div key={p.id} className={styles.sale}>
-            <span className={styles.saleTime}>
-              {new Date(p.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-            <span className={styles.saleTotal}>{p.total_kc.toLocaleString('cs-CZ')} Kč</span>
+          <div key={p.id}>
+            <div
+              className={`${styles.sale}${selectedId === p.id ? ' ' + styles.saleSelected : ''}`}
+              onClick={() => toggleSale(p.id)}
+            >
+              <span className={styles.saleTime}>
+                {new Date(p.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <span className={styles.saleTotal}>{p.total_kc.toLocaleString('cs-CZ')} Kč</span>
+            </div>
+            {selectedId === p.id && (
+              <div className={styles.items}>
+                {itemsLoading
+                  ? <div className={styles.itemsLoading}>Načítám…</div>
+                  : items.map((it) => (
+                    <div key={it.id} className={styles.item}>
+                      <span className={styles.itemQty}>{it.kusu}×</span>
+                      <span className={styles.itemName}>
+                        {it.nazev ?? `Čaj #${it.caje_id}`}
+                        <span className={styles.itemBaleni}> · {BALENI[it.baleni]}</span>
+                      </span>
+                      <span className={styles.itemPrice}>{it.celk_cena.toLocaleString('cs-CZ')} Kč</span>
+                    </div>
+                  ))
+                }
+              </div>
+            )}
           </div>
         ))}
       </div>

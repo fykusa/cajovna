@@ -2,7 +2,17 @@
 .wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .summary { padding: 10px 16px; font-size: 13px; color: var(--mob-fg-dim, #888); border-bottom: 1px solid var(--mob-border); }
 .list { display: flex; flex-direction: column; padding: 8px 16px 16px; gap: 4px; }
-.sale { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--mob-r); background: var(--mob-surface); border: 1px solid var(--mob-border); }
+
+.sale { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--mob-r); background: var(--mob-surface); border: 1px solid var(--mob-border); cursor: pointer; }
+.sale:active { opacity: 0.75; }
+.saleSelected { border-color: var(--mob-accent); background: color-mix(in srgb, var(--mob-accent) 10%, var(--mob-surface)); }
 .saleTime { font-size: 13px; color: var(--mob-fg-dim, #888); min-width: 40px; }
-.saleUser { flex: 1; font-size: 13px; }
-.saleTotal { font-size: 14px; font-weight: 600; color: var(--mob-accent); white-space: nowrap; }
+.saleTotal { font-size: 14px; font-weight: 600; color: var(--mob-accent); white-space: nowrap; margin-left: auto; }
+
+.items { margin: -2px 0 2px; padding: 6px 12px 8px; background: var(--mob-bg); border: 1px solid var(--mob-accent); border-top: none; border-radius: 0 0 var(--mob-r) var(--mob-r); display: flex; flex-direction: column; gap: 4px; }
+.itemsLoading { font-size: 13px; color: var(--mob-fg-dim, #888); padding: 4px 0; }
+.item { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.itemQty { color: var(--mob-fg-dim, #888); min-width: 20px; }
+.itemName { flex: 1; }
+.itemBaleni { color: var(--mob-fg-dim, #888); font-size: 12px; }
+.itemPrice { white-space: nowrap; font-weight: 600; }
