@@ -10,6 +10,9 @@ phpMyAdmin_themes/
 backend/config.php
 backend/config_Forpsi.php
 
+# Google Sheets sync config (citlivé údaje)
+backend/config/sheets.php
+
 # Node
 node_modules/
 frontend/dist/

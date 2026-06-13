@@ -64,6 +64,23 @@ export interface Bag {
   has_sales?: number | string
 }
 
+export interface TeaRow {
+  id: number
+  KATEGORIE: string | null
+  ZEME: string | null
+  AKTIV: string | null
+  NAZEV: string | null
+  POZNAMKA: string | null
+  MN1: number | null
+  CENA1: number | null
+  MN2: number | null
+  CENA2: number | null
+  MN3: number | null
+  CENA3: number | null
+  MN4: number | null
+  CENA4: number | null
+}
+
 export type ItemType = 'std' | 'pkg1' | 'pkg2' | 'custom'
 
 export interface CartItem {

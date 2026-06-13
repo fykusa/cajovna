@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
 require_once __DIR__ . '/../lib/db_transfer.php';
+require_once __DIR__ . '/../lib/sheets_sync.php';
 
 // CORS hlavičky bezpodmínečně (i na GET/POST odpovědích), jako ostatní api soubory.
 header('Access-Control-Allow-Origin: *');
@@ -13,6 +14,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'OPTIONS') {
     http_response_code(204);
+    exit;
+}
+
+// Sheets sync — vlastní auth (token NEBO admin session)
+if ($method === 'POST' && preg_match('#/api/admin/sheets-sync$#', $path)) {
+    header('Content-Type: application/json; charset=utf-8');
+    handleSheetsSync();
     exit;
 }
 
@@ -43,6 +51,39 @@ function handleExport(): void {
         echo json_encode(['error' => $e->getMessage()]);
     } finally {
         @unlink($zipPath);
+    }
+}
+
+function handleSheetsSync(): void {
+    $configPath = __DIR__ . '/../config/sheets.php';
+    if (!is_file($configPath)) {
+        http_response_code(503);
+        echo json_encode(['ok' => false, 'error' => 'Konfigurace Sheets chybí (config/sheets.php).']);
+        return;
+    }
+    $config = require $configPath;
+
+    // Auth: token (Apps Script) nebo admin session (ruční sync z Dashboardu)
+    $incomingToken = $_SERVER['HTTP_X_SYNC_TOKEN'] ?? '';
+    $tokenOk       = $incomingToken !== '' && hash_equals($config['sync_token'] ?? '', $incomingToken);
+    if (!$tokenOk) {
+        requireAdmin(); // hodí 401/403 pokud není admin session
+    }
+
+    $url = $config['caje_csv_url'] ?? '';
+    if ($url === '') {
+        http_response_code(503);
+        echo json_encode(['ok' => false, 'error' => 'CSV URL není nakonfigurována.']);
+        return;
+    }
+
+    try {
+        $result = sheetsSyncCaje(getPDO(), $url);
+        echo json_encode(['ok' => true, 'synced' => $result]);
+    } catch (Throwable $e) {
+        error_log('Sheets sync error: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
     }
 }
 

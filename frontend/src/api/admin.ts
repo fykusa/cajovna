@@ -30,6 +30,23 @@ export async function exportDatabase(): Promise<void> {
   URL.revokeObjectURL(url)
 }
 
+export interface SyncResult {
+  inserted: number
+}
+
+/** Spustí sync záložky CAJE ze Google Sheets → 01_caje v DB. */
+export async function syncFromSheets(): Promise<SyncResult> {
+  const res = await fetch(`${apiBase}/admin/sheets-sync`, {
+    method: 'POST',
+    headers: { ...authHeader() },
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new ApiError(res.status, (data as { error?: string }).error || 'Sync se nezdařil')
+  }
+  return (data as { synced: SyncResult }).synced
+}
+
 /** Nahraje ZIP a naimportuje vybrané skupiny (categories|teas|bags|sales). */
 export async function importDatabase(file: File, tables: string[]): Promise<ImportResult> {
   const fd = new FormData()
