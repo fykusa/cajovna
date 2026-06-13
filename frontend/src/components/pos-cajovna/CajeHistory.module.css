@@ -1,0 +1,8 @@
+.state { display: flex; align-items: center; justify-content: center; padding: 40px 16px; color: var(--mob-fg-dim, #888); font-size: 14px; }
+.wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.summary { padding: 10px 16px; font-size: 13px; color: var(--mob-fg-dim, #888); border-bottom: 1px solid var(--mob-border); }
+.list { display: flex; flex-direction: column; padding: 8px 16px 16px; gap: 4px; }
+.sale { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--mob-r); background: var(--mob-surface); border: 1px solid var(--mob-border); }
+.saleTime { font-size: 13px; color: var(--mob-fg-dim, #888); min-width: 40px; }
+.saleUser { flex: 1; font-size: 13px; }
+.saleTotal { font-size: 14px; font-weight: 600; color: var(--mob-accent); white-space: nowrap; }
