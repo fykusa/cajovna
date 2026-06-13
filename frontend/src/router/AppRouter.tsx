@@ -8,6 +8,7 @@ import AdminLayout from '../components/admin/AdminLayout'
 
 const POS = lazy(() => import('../pages/POS'))
 const MobilePOS = lazy(() => import('../pages/MobilePOS'))
+const CajovnaPOS = lazy(() => import('../pages/CajovnaPOS'))
 const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'))
 const AdminItems = lazy(() => import('../pages/admin/Items'))
 const AdminCategories = lazy(() => import('../pages/admin/Categories'))
@@ -37,6 +38,15 @@ export default function AppRouter() {
           element={
             <ProtectedRoute requiredRole="prodavacka">
               <POS />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cajovna"
+          element={
+            <ProtectedRoute requiredRole="prodavacka">
+              <CajovnaPOS />
             </ProtectedRoute>
           }
         />
