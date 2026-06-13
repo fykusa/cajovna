@@ -138,3 +138,30 @@ export interface SaleItem {
   surface_type: string | null
   volume_ml: number | null
 }
+
+export interface CajeCategory {
+  kategorie: string
+  zeme: string | null
+}
+
+export interface CajeBaleni {
+  cislo: 1 | 2 | 3 | 4
+  label: 'Standard' | 'Větší' | 'Největší' | 'Čajovna'
+  mn: number    // gramáž
+  cena: number  // MOC v Kč
+}
+
+export interface CajeCartItem {
+  localId: string
+  caj: TeaRow
+  baleni: CajeBaleni
+  kusu: number
+  celkCena: number
+}
+
+export interface CajovnaProdej {
+  id: number
+  created_at: string
+  total_kc: number
+  username: string
+}
