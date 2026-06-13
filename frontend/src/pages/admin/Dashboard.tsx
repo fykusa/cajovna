@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
-import { getCajovnaProdeje, getCajovnaPolozky } from '../../api/cajovna'
+import { getCajovnaProdeje, getCajovnaPolozky, getCajovnaKategorie } from '../../api/cajovna'
 import { getUsers } from '../../api/users'
-import type { CajovnaProdej, CajePolozkaSale, User } from '../../types'
+import type { CajovnaProdej, CajePolozkaSale, CajeCategory, User } from '../../types'
 import { useToast } from '../../components/toast/useToast'
 import ImportDialog from '../../components/admin/ImportDialog'
 import RevenueChart from '../../components/admin/RevenueChart'
@@ -29,16 +29,22 @@ export default function AdminDashboard() {
   const [itemsLoading, setItemsLoading] = useState(false)
   const [users, setUsers]               = useState<User[]>([])
   const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set())
+  const [kategorie, setKategorie]       = useState<CajeCategory[]>([])
+  const [selectedKat, setSelectedKat]   = useState<string | null>(null)
   const [showImport, setShowImport]     = useState(false)
 
   const toast = useToast()
 
-  const load = useCallback(async (f: string, t: string) => {
+  const load = useCallback(async (f: string, t: string, kat: string | null = null) => {
     setLoading(true)
     setSelectedId(null)
     setItems([])
     try {
-      setSales(await getCajovnaProdeje({ from: f + ' 00:00:00', to: t + ' 23:59:59' }))
+      setSales(await getCajovnaProdeje({
+        from: f + ' 00:00:00',
+        to: t + ' 23:59:59',
+        ...(kat ? { kategorie: kat } : {}),
+      }))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
@@ -52,6 +58,7 @@ export default function AdminDashboard() {
       setUsers(us)
       setSelectedUsers(new Set(us.map((u) => u.id)))
     }).catch(() => {})
+    getCajovnaKategorie().then(setKategorie).catch(() => {})
   }, [])
 
   function selectPeriod(p: Period) {
@@ -59,12 +66,20 @@ export default function AdminDashboard() {
     setFrom(range.from)
     setTo(range.to)
     setActivePeriod(p)
-    load(range.from, range.to)
+    load(range.from, range.to, selectedKat)
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    load(from, to)
+    load(from, to, selectedKat)
+  }
+
+  function toggleKat(kat: string) {
+    const next = selectedKat === kat ? null : kat
+    setSelectedKat(next)
+    setSelectedId(null)
+    setItems([])
+    load(from, to, next)
   }
 
   async function selectSale(id: number) {
@@ -194,6 +209,32 @@ export default function AdminDashboard() {
               {u.username}
             </button>
           ))}
+        </div>
+      )}
+
+      {kategorie.length > 0 && (
+        <div className={styles.filterSection}>
+          <label className={styles.filterLabel}>Kategorie</label>
+          <div className={styles.filterGrid}>
+            <button
+              className={`${styles.filterBtn}${selectedKat === null ? ' ' + styles.filterActive : ''}`}
+              onClick={() => { setSelectedKat(null); setSelectedId(null); setItems([]); load(from, to, null) }}
+            >
+              Vše
+            </button>
+            {kategorie.map((k) => {
+              const label = k.zeme ? `${k.kategorie} — ${k.zeme}` : k.kategorie
+              return (
+                <button
+                  key={`${k.kategorie}||${k.zeme ?? ''}`}
+                  className={`${styles.filterBtn}${selectedKat === k.kategorie ? ' ' + styles.filterActive : ''}`}
+                  onClick={() => toggleKat(k.kategorie)}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
         </div>
       )}
 

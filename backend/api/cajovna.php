@@ -23,6 +23,8 @@ if ($method === 'POST' && preg_match('#/api/cajovna/prodej$#', $path)) {
     listPolozky((int) $m[1]);
 } elseif ($method === 'GET' && preg_match('#/api/cajovna/prodeje$#', $path)) {
     listProdeje();
+} elseif ($method === 'GET' && preg_match('#/api/cajovna/kategorie$#', $path)) {
+    listKategorie();
 } else {
     http_response_code(404);
     echo json_encode(['error' => 'Not found']);
@@ -84,26 +86,49 @@ function createProdej(array $auth): void {
 }
 
 function listProdeje(): void {
-    $pdo    = getPDO();
-    $from   = isset($_GET['from']) ? trim($_GET['from']) : null;
-    $to     = isset($_GET['to'])   ? trim($_GET['to'])   : null;
-    $sql    = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id
-               FROM `00_prodej` p
-               JOIN users u ON u.id = p.user_id';
+    $pdo       = getPDO();
+    $from      = isset($_GET['from'])      ? trim($_GET['from'])      : null;
+    $to        = isset($_GET['to'])        ? trim($_GET['to'])        : null;
+    $kategorie = isset($_GET['kategorie']) ? trim($_GET['kategorie']) : null;
+
+    $where  = [];
     $params = [];
+
     if ($from && $to) {
-        $sql .= ' WHERE p.created_at BETWEEN ? AND ?';
-        $params = [$from, $to];
+        $where[]  = 'p.created_at BETWEEN ? AND ?';
+        $params[] = $from;
+        $params[] = $to;
     } elseif ($from) {
-        $sql .= ' WHERE p.created_at >= ?';
-        $params = [$from];
+        $where[]  = 'p.created_at >= ?';
+        $params[] = $from;
     } elseif ($to) {
-        $sql .= ' WHERE p.created_at <= ?';
-        $params = [$to];
+        $where[]  = 'p.created_at <= ?';
+        $params[] = $to;
     }
-    $sql .= ' ORDER BY p.created_at DESC LIMIT 500';
+
+    if ($kategorie !== null && $kategorie !== '') {
+        $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.id = pp.caje_id WHERE pp.prodej_id = p.id AND c.KATEGORIE = ?)';
+        $params[] = $kategorie;
+    }
+
+    $sql = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id
+            FROM `00_prodej` p
+            JOIN users u ON u.id = p.user_id'
+         . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
+         . ' ORDER BY p.created_at DESC LIMIT 500';
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+function listKategorie(): void {
+    $pdo  = getPDO();
+    $stmt = $pdo->query(
+        "SELECT DISTINCT KATEGORIE, ZEME FROM \`01_caje\`
+         WHERE AKTIV = 'x' AND KATEGORIE IS NOT NULL
+         ORDER BY KATEGORIE, ZEME"
+    );
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
