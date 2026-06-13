@@ -24,7 +24,8 @@ export default function Login() {
     try {
       const { user, token } = await login(username, password)
       setAuth(user, token)
-      navigate(user.role === 'admin' ? '/admin' : '/pos', { replace: true })
+      const dest = user.role === 'admin' ? '/admin' : '/cajovna'
+      navigate(dest, { replace: true })
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
