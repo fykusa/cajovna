@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { Sale } from '../../types'
-import { getSales } from '../../api/sales'
+import type { CajovnaProdej } from '../../types'
+import { getCajovnaProdeje } from '../../api/cajovna'
 import { useToast } from '../../components/toast/useToast'
 import { periodRange, PERIODS, type Period } from './periodRange'
 import HBarChart from '../../components/admin/HBarChart'
@@ -8,12 +8,12 @@ import { fmtKc } from './format'
 import styles from './Sales.module.css'
 
 // Pivot: klíč období (den/měsíc) → { prodavající → součet tržeb }.
-function pivotByKey(sales: Sale[], keyFn: (s: Sale) => string): Map<string, Record<string, number>> {
+function pivotByKey(sales: CajovnaProdej[], keyFn: (s: CajovnaProdej) => string): Map<string, Record<string, number>> {
   const map = new Map<string, Record<string, number>>()
   for (const s of sales) {
     const key = keyFn(s)
     const row = map.get(key) ?? {}
-    row[s.username] = (row[s.username] ?? 0) + Number(s.total_amount)
+    row[s.username] = (row[s.username] ?? 0) + s.total_kc
     map.set(key, row)
   }
   return map
@@ -31,14 +31,14 @@ export default function Sales() {
   const [from, setFrom] = useState(initRange.from)
   const [to, setTo] = useState(initRange.to)
   const [activePeriod, setActivePeriod] = useState<Period | null>('month')
-  const [sales, setSales] = useState<Sale[]>([])
+  const [sales, setSales] = useState<CajovnaProdej[]>([])
   const [loading, setLoading] = useState(true)
   const toast = useToast()
 
   async function load(f = from, t = to) {
     setLoading(true)
     try {
-      const data = await getSales({ from: f + ' 00:00:00', to: t + ' 23:59:59' })
+      const data = await getCajovnaProdeje({ from: f + ' 00:00:00', to: t + ' 23:59:59' })
       setSales(data)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Chyba načítání')
@@ -57,11 +57,11 @@ export default function Sales() {
     load(range.from, range.to)
   }
 
-  const total = sales.reduce((s, sale) => s + Number(sale.total_amount), 0)
+  const total = sales.reduce((s, sale) => s + sale.total_kc, 0)
 
   const perUser: Record<string, number> = {}
   sales.forEach((s) => {
-    perUser[s.username] = (perUser[s.username] ?? 0) + Number(s.total_amount)
+    perUser[s.username] = (perUser[s.username] ?? 0) + s.total_kc
   })
 
   // Prodavající seřazení dle celkové tržby (sloupce pivotu i řádky souhrnu).

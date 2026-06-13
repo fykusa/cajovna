@@ -1,5 +1,5 @@
 import { apiFetch } from './client'
-import type { CajovnaProdej } from '../types'
+import type { CajovnaProdej, CajePolozkaSale } from '../types'
 
 export interface CajePolozkaSend {
   caje_id: number
@@ -20,5 +20,13 @@ export const createCajovnaSale = (polozky: CajePolozkaSend[]): Promise<CajovnaSa
     body: JSON.stringify({ polozky }),
   })
 
-export const getCajovnaProdeje = (): Promise<CajovnaProdej[]> =>
-  apiFetch<CajovnaProdej[]>('/cajovna/prodeje')
+export const getCajovnaProdeje = (params?: { from?: string; to?: string }): Promise<CajovnaProdej[]> => {
+  const parts: string[] = []
+  if (params?.from) parts.push(`from=${encodeURIComponent(params.from)}`)
+  if (params?.to)   parts.push(`to=${encodeURIComponent(params.to)}`)
+  const qs = parts.length ? `?${parts.join('&')}` : ''
+  return apiFetch<CajovnaProdej[]>(`/cajovna/prodeje${qs}`)
+}
+
+export const getCajovnaPolozky = (prodejId: number): Promise<CajePolozkaSale[]> =>
+  apiFetch<CajePolozkaSale[]>(`/cajovna/prodeje/${prodejId}/polozky`)

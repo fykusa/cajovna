@@ -3,21 +3,23 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Sales from './Sales'
 import { renderWithToast } from '../../test/renderWithToast'
-import * as salesApi from '../../api/sales'
+import * as cajovnaApi from '../../api/cajovna'
 
-vi.mock('../../api/sales', () => ({
-  getSales: vi.fn(),
+vi.mock('../../api/cajovna', () => ({
+  getCajovnaProdeje: vi.fn(),
+  getCajovnaPolozky: vi.fn(),
+  createCajovnaSale: vi.fn(),
 }))
 
 const SALES = [
-  { id: 1, user_id: 1, username: 'terka', total_amount: 260, note: null, created_at: '2026-05-28 10:00:00' },
-  { id: 2, user_id: 1, username: 'terka', total_amount: 130, note: null, created_at: '2026-05-28 11:00:00' },
-  { id: 3, user_id: 2, username: 'boss', total_amount: 500, note: null, created_at: '2026-05-28 12:00:00' },
+  { id: 1, user_id: 1, username: 'terka', total_kc: 260, created_at: '2026-05-28 10:00:00' },
+  { id: 2, user_id: 1, username: 'terka', total_kc: 130, created_at: '2026-05-28 11:00:00' },
+  { id: 3, user_id: 2, username: 'boss',  total_kc: 500, created_at: '2026-05-28 12:00:00' },
 ]
 
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.mocked(salesApi.getSales).mockResolvedValue(SALES)
+  vi.mocked(cajovnaApi.getCajovnaProdeje).mockResolvedValue(SALES)
 })
 
 describe('Sales', () => {
@@ -57,6 +59,6 @@ describe('Sales', () => {
     await user.clear(fromInput)
     await user.type(fromInput, '2026-05-28')
     await user.click(screen.getByRole('button', { name: /zobrazit/i }))
-    await waitFor(() => expect(vi.mocked(salesApi.getSales)).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(vi.mocked(cajovnaApi.getCajovnaProdeje)).toHaveBeenCalledTimes(2))
   })
 })

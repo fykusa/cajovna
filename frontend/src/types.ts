@@ -164,4 +164,17 @@ export interface CajovnaProdej {
   created_at: string
   total_kc: number
   username: string
+  user_id: number
+}
+
+export interface CajePolozkaSale {
+  id: number
+  caje_id: number
+  baleni: 1 | 2 | 3 | 4
+  kusu: number
+  jedn_cena: number
+  celk_cena: number
+  nazev: string | null
+  kategorie: string | null
+  zeme: string | null
 }
