@@ -34,6 +34,7 @@ function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
 
     [$allRows] = parseCajeRows($utf);
 
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
     $pdo->beginTransaction();
     try {
         $pdo->exec('TRUNCATE TABLE `01_caje`');
@@ -42,6 +43,8 @@ function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
     } catch (Throwable $e) {
         $pdo->rollBack();
         throw $e;
+    } finally {
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
     }
 
     return ['inserted' => $inserted];

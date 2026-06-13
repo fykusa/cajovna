@@ -19,5 +19,6 @@ CREATE TABLE IF NOT EXISTS `00_prodej_polozky` (
   `celk_cena` INT      NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`prodej_id`) REFERENCES `00_prodej`(`id`),
-  FOREIGN KEY (`caje_id`)   REFERENCES `01_caje`(`id`)
+  -- caje_id záměrně bez FK: 01_caje je sync tabulka (TRUNCATE při každém syncu)
+  INDEX (`caje_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
