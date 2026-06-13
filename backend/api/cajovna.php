@@ -90,6 +90,7 @@ function listProdeje(): void {
     $from      = isset($_GET['from'])      ? trim($_GET['from'])      : null;
     $to        = isset($_GET['to'])        ? trim($_GET['to'])        : null;
     $kategorie = isset($_GET['kategorie']) ? trim($_GET['kategorie']) : null;
+    $zeme      = isset($_GET['zeme'])      ? trim($_GET['zeme'])      : null;
 
     $where  = [];
     $params = [];
@@ -107,8 +108,14 @@ function listProdeje(): void {
     }
 
     if ($kategorie !== null && $kategorie !== '') {
-        $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.id = pp.caje_id WHERE pp.prodej_id = p.id AND c.KATEGORIE = ?)';
-        $params[] = $kategorie;
+        if ($zeme !== null && $zeme !== '') {
+            $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.id = pp.caje_id WHERE pp.prodej_id = p.id AND c.KATEGORIE = ? AND c.ZEME = ?)';
+            $params[] = $kategorie;
+            $params[] = $zeme;
+        } else {
+            $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.id = pp.caje_id WHERE pp.prodej_id = p.id AND c.KATEGORIE = ?)';
+            $params[] = $kategorie;
+        }
     }
 
     $sql = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id
@@ -125,7 +132,7 @@ function listProdeje(): void {
 function listKategorie(): void {
     $pdo  = getPDO();
     $stmt = $pdo->query(
-        "SELECT DISTINCT KATEGORIE, ZEME FROM \`01_caje\`
+        "SELECT DISTINCT KATEGORIE as kategorie, ZEME as zeme FROM `01_caje`
          WHERE AKTIV = 'x' AND KATEGORIE IS NOT NULL
          ORDER BY KATEGORIE, ZEME"
     );

@@ -30,12 +30,12 @@ export default function AdminDashboard() {
   const [users, setUsers]               = useState<User[]>([])
   const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set())
   const [kategorie, setKategorie]       = useState<CajeCategory[]>([])
-  const [selectedKat, setSelectedKat]   = useState<string | null>(null)
+  const [selectedKat, setSelectedKat]   = useState<CajeCategory | null>(null)
   const [showImport, setShowImport]     = useState(false)
 
   const toast = useToast()
 
-  const load = useCallback(async (f: string, t: string, kat: string | null = null) => {
+  const load = useCallback(async (f: string, t: string, kat: CajeCategory | null = null) => {
     setLoading(true)
     setSelectedId(null)
     setItems([])
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
       setSales(await getCajovnaProdeje({
         from: f + ' 00:00:00',
         to: t + ' 23:59:59',
-        ...(kat ? { kategorie: kat } : {}),
+        ...(kat ? { kategorie: kat.kategorie, zeme: kat.zeme } : {}),
       }))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
@@ -58,7 +58,9 @@ export default function AdminDashboard() {
       setUsers(us)
       setSelectedUsers(new Set(us.map((u) => u.id)))
     }).catch(() => {})
-    getCajovnaKategorie().then(setKategorie).catch(() => {})
+    getCajovnaKategorie().then(setKategorie).catch((e) => {
+      toast.error('Filtry: ' + (e instanceof Error ? e.message : String(e)))
+    })
   }, [])
 
   function selectPeriod(p: Period) {
@@ -74,8 +76,9 @@ export default function AdminDashboard() {
     load(from, to, selectedKat)
   }
 
-  function toggleKat(kat: string) {
-    const next = selectedKat === kat ? null : kat
+  function toggleKat(k: CajeCategory) {
+    const isSame = selectedKat?.kategorie === k.kategorie && selectedKat?.zeme === k.zeme
+    const next = isSame ? null : k
     setSelectedKat(next)
     setSelectedId(null)
     setItems([])
@@ -224,11 +227,12 @@ export default function AdminDashboard() {
             </button>
             {kategorie.map((k) => {
               const label = k.zeme ? `${k.kategorie} — ${k.zeme}` : k.kategorie
+              const isActive = selectedKat?.kategorie === k.kategorie && selectedKat?.zeme === k.zeme
               return (
                 <button
                   key={`${k.kategorie}||${k.zeme ?? ''}`}
-                  className={`${styles.filterBtn}${selectedKat === k.kategorie ? ' ' + styles.filterActive : ''}`}
-                  onClick={() => toggleKat(k.kategorie)}
+                  className={`${styles.filterBtn}${isActive ? ' ' + styles.filterActive : ''}`}
+                  onClick={() => toggleKat(k)}
                 >
                   {label}
                 </button>

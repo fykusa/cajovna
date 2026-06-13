@@ -5,10 +5,7 @@ import styles from './AdminLayout.module.css'
 const NAV_ITEMS = [
   { to: '/admin', label: 'Přehled', end: true },
   { to: '/admin/sales', label: 'Tržby', end: false },
-  { to: '/admin/categories', label: 'Kategorie', end: false },
-  { to: '/admin/products', label: 'Čaje', end: false },
-  { to: '/admin/bags', label: 'Obaly', end: false },
-  { to: '/admin/teas', label: 'TEAs', end: false },
+  { to: '/admin/teas', label: 'Čaje', end: false },
   { to: '/admin/users', label: 'Uživatelé', end: false },
 ]
 

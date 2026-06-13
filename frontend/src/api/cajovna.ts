@@ -20,11 +20,12 @@ export const createCajovnaSale = (polozky: CajePolozkaSend[]): Promise<CajovnaSa
     body: JSON.stringify({ polozky }),
   })
 
-export const getCajovnaProdeje = (params?: { from?: string; to?: string; kategorie?: string }): Promise<CajovnaProdej[]> => {
+export const getCajovnaProdeje = (params?: { from?: string; to?: string; kategorie?: string; zeme?: string | null }): Promise<CajovnaProdej[]> => {
   const parts: string[] = []
   if (params?.from)      parts.push(`from=${encodeURIComponent(params.from)}`)
   if (params?.to)        parts.push(`to=${encodeURIComponent(params.to)}`)
   if (params?.kategorie) parts.push(`kategorie=${encodeURIComponent(params.kategorie)}`)
+  if (params?.zeme)      parts.push(`zeme=${encodeURIComponent(params.zeme)}`)
   const qs = parts.length ? `?${parts.join('&')}` : ''
   return apiFetch<CajovnaProdej[]>(`/cajovna/prodeje${qs}`)
 }
