@@ -1,0 +1,14 @@
+RewriteEngine On
+
+# Existující soubory a složky servíruj přímo (assets, favicon, atd.)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# /api/<endpoint>[/cokoli] → api/<endpoint>.php
+# Např. /api/products → api/products.php
+#        /api/admin/import → api/admin.php
+RewriteRule ^api/([^/]+)(/.*)?$ api/$1.php [L,QSA]
+
+# Vše ostatní → index.html (React Router)
+RewriteRule ^ index.html [L]
