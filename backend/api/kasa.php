@@ -133,7 +133,7 @@ function handleListMovements(): void {
 function handleClose(array $auth): void {
     $data             = json_decode(file_get_contents('php://input'), true);
     $confirmedBalance = $data['confirmed_balance'] ?? null;
-    $note             = $data['note'] ?? null;
+    $note             = isset($data['note']) ? trim($data['note']) : null;
 
     if ($confirmedBalance === null || !is_numeric($confirmedBalance)) {
         http_response_code(400);
@@ -144,36 +144,48 @@ function handleClose(array $auth): void {
     $pdo   = getPDO();
     $today = date('Y-m-d');
 
-    $stmt = $pdo->prepare(
-        'SELECT COALESCE(SUM(total_amount), 0) FROM sales WHERE DATE(created_at) = ?'
-    );
-    $stmt->execute([$today]);
-    $trzbyDnes = (float) $stmt->fetchColumn();
+    $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare(
-        'SELECT COALESCE(SUM(amount), 0) FROM 90_cashflow WHERE date = ?'
-    );
-    $stmt->execute([$today]);
-    $pohybySum = (float) $stmt->fetchColumn();
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT COALESCE(SUM(total_amount), 0) FROM sales WHERE DATE(created_at) = ?'
+        );
+        $stmt->execute([$today]);
+        $trzbyDnes = (float) $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare(
-        'SELECT confirmed_balance FROM 91_zaverka WHERE date < ? ORDER BY date DESC LIMIT 1'
-    );
-    $stmt->execute([$today]);
-    $lastBalance = (float) ($stmt->fetchColumn() ?: 0);
+        $stmt = $pdo->prepare(
+            'SELECT COALESCE(SUM(amount), 0) FROM 90_cashflow WHERE date = ?'
+        );
+        $stmt->execute([$today]);
+        $pohybySum = (float) $stmt->fetchColumn();
 
-    $calculatedBalance = $lastBalance + $trzbyDnes + $pohybySum;
+        $stmt = $pdo->prepare(
+            'SELECT confirmed_balance FROM 91_zaverka WHERE date < ? ORDER BY date DESC LIMIT 1'
+        );
+        $stmt->execute([$today]);
+        $lastBalance = (float) ($stmt->fetchColumn() ?: 0);
 
-    $pdo->prepare(
-        'INSERT INTO 91_zaverka (date, calculated_balance, confirmed_balance, note, created_by)
-         VALUES (?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           calculated_balance = VALUES(calculated_balance),
-           confirmed_balance  = VALUES(confirmed_balance),
-           note               = VALUES(note),
-           created_by         = VALUES(created_by),
-           updated_at         = CURRENT_TIMESTAMP'
-    )->execute([$today, $calculatedBalance, (float) $confirmedBalance, $note, $auth['user_id']]);
+        $calculatedBalance = $lastBalance + $trzbyDnes + $pohybySum;
+
+        $pdo->prepare(
+            'INSERT INTO 91_zaverka (date, calculated_balance, confirmed_balance, note, created_by)
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               calculated_balance = VALUES(calculated_balance),
+               confirmed_balance  = VALUES(confirmed_balance),
+               note               = VALUES(note),
+               created_by         = VALUES(created_by),
+               updated_at         = CURRENT_TIMESTAMP'
+        )->execute([$today, $calculatedBalance, (float) $confirmedBalance, $note, $auth['user_id']]);
+
+        $pdo->commit();
+
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        http_response_code(500);
+        echo json_encode(['error' => 'Chyba při uzavírání kasy']);
+        return;
+    }
 
     $row = $pdo->prepare(
         'SELECT cc.id, cc.date, cc.calculated_balance, cc.confirmed_balance,
