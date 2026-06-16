@@ -10,8 +10,13 @@ export const addKasaMovement = (amount: number, note: string): Promise<CashMovem
     body: JSON.stringify({ amount, note }),
   })
 
-export const getKasaMovements = (date?: string): Promise<CashMovement[]> =>
-  apiFetch<CashMovement[]>(`/kasa/movements${date ? `?date=${date}` : ''}`)
+export const getKasaMovements = (date?: string, from?: string, to?: string): Promise<CashMovement[]> => {
+  const parts: string[] = []
+  if (date) parts.push(`date=${date}`)
+  if (from) parts.push(`from=${from}`)
+  if (to)   parts.push(`to=${to}`)
+  return apiFetch<CashMovement[]>(`/kasa/movements${parts.length ? `?${parts.join('&')}` : ''}`)
+}
 
 export const closeKasa = (confirmed_balance: number, note?: string): Promise<CashClosing> =>
   apiFetch<CashClosing>('/kasa/close', {

@@ -67,7 +67,10 @@ function handleStatus(): void {
          ORDER BY cm.created_at ASC'
     );
     $stmt->execute([$today]);
-    $movements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $movements = array_map(function($row) {
+        $row['amount'] = (float) $row['amount'];
+        return $row;
+    }, $stmt->fetchAll(PDO::FETCH_ASSOC));
     $pohybySum = (float) array_sum(array_column($movements, 'amount'));
 
     $stavKasy = $lastClosing !== null
@@ -113,21 +116,43 @@ function handleAddMovement(array $auth): void {
          FROM 90_cashflow cm JOIN users u ON u.id = cm.created_by WHERE cm.id = ?'
     );
     $row->execute([$id]);
+    $fetched = $row->fetch(PDO::FETCH_ASSOC);
+    $fetched['amount'] = (float) $fetched['amount'];
     http_response_code(201);
-    echo json_encode($row->fetch(PDO::FETCH_ASSOC));
+    echo json_encode($fetched);
 }
 
 function handleListMovements(): void {
-    $pdo  = getPDO();
-    $date = $_GET['date'] ?? date('Y-m-d');
-    $stmt = $pdo->prepare(
-        'SELECT cm.id, cm.date, cm.amount, cm.note, cm.created_by,
-                u.username AS created_by_username, cm.created_at
-         FROM 90_cashflow cm JOIN users u ON u.id = cm.created_by
-         WHERE cm.date = ? ORDER BY cm.created_at ASC'
-    );
-    $stmt->execute([$date]);
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $pdo = getPDO();
+
+    if (isset($_GET['from']) || isset($_GET['to'])) {
+        // range mode for admin history
+        $from = $_GET['from'] ?? '1900-01-01';
+        $to   = $_GET['to']   ?? date('Y-m-d');
+        $stmt = $pdo->prepare(
+            'SELECT cm.id, cm.date, cm.amount, cm.note, cm.created_by,
+                    u.username AS created_by_username, cm.created_at
+             FROM 90_cashflow cm JOIN users u ON u.id = cm.created_by
+             WHERE cm.date BETWEEN :from AND :to ORDER BY cm.created_at ASC'
+        );
+        $stmt->execute(['from' => $from, 'to' => $to]);
+    } else {
+        // single-date mode (backward compat for POS status)
+        $date = $_GET['date'] ?? date('Y-m-d');
+        $stmt = $pdo->prepare(
+            'SELECT cm.id, cm.date, cm.amount, cm.note, cm.created_by,
+                    u.username AS created_by_username, cm.created_at
+             FROM 90_cashflow cm JOIN users u ON u.id = cm.created_by
+             WHERE cm.date = ? ORDER BY cm.created_at ASC'
+        );
+        $stmt->execute([$date]);
+    }
+
+    $movements = array_map(function($row) {
+        $row['amount'] = (float) $row['amount'];
+        return $row;
+    }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    echo json_encode($movements);
 }
 
 function handleClose(array $auth): void {
@@ -194,7 +219,10 @@ function handleClose(array $auth): void {
          FROM 91_zaverka cc JOIN users u ON u.id = cc.created_by WHERE cc.date = ?'
     );
     $row->execute([$today]);
-    echo json_encode($row->fetch(PDO::FETCH_ASSOC));
+    $fetched = $row->fetch(PDO::FETCH_ASSOC);
+    $fetched['calculated_balance'] = (float) $fetched['calculated_balance'];
+    $fetched['confirmed_balance']  = (float) $fetched['confirmed_balance'];
+    echo json_encode($fetched);
 }
 
 function handleListClosings(): void {
@@ -214,5 +242,10 @@ function handleListClosings(): void {
          ORDER BY cc.date DESC LIMIT 100'
     );
     $stmt->execute($params);
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $rows = array_map(function($r) {
+        $r['calculated_balance'] = (float) $r['calculated_balance'];
+        $r['confirmed_balance']  = (float) $r['confirmed_balance'];
+        return $r;
+    }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    echo json_encode($rows);
 }

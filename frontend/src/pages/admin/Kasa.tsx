@@ -102,13 +102,10 @@ export default function Kasa() {
     try {
       const [c, allMovements] = await Promise.all([
         getKasaClosings(historyFrom, historyTo),
-        getKasaMovements(),
+        getKasaMovements(undefined, historyFrom, historyTo),
       ])
-      const filtered = allMovements.filter(m => {
-        return (!historyFrom || m.date >= historyFrom) && (!historyTo || m.date <= historyTo)
-      })
       setClosings(c)
-      setMovements(filtered)
+      setMovements(allMovements)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chyba načítání historie')
     }

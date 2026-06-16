@@ -44,6 +44,12 @@ describe('getKasaMovements', () => {
     await getKasaMovements('2026-06-15')
     expect(mockFetch).toHaveBeenCalledWith('/kasa/movements?date=2026-06-15')
   })
+
+  it('s from a to sestaví správnou URL', async () => {
+    mockFetch.mockResolvedValue([])
+    await getKasaMovements(undefined, '2026-06-01', '2026-06-15')
+    expect(mockFetch).toHaveBeenCalledWith('/kasa/movements?from=2026-06-01&to=2026-06-15')
+  })
 })
 
 describe('closeKasa', () => {
@@ -77,5 +83,17 @@ describe('getKasaClosings', () => {
     mockFetch.mockResolvedValue([])
     await getKasaClosings('2026-06-01', '2026-06-16')
     expect(mockFetch).toHaveBeenCalledWith('/kasa/closings?from=2026-06-01&to=2026-06-16')
+  })
+
+  it('s pouze from připojí jen from', async () => {
+    mockFetch.mockResolvedValue([])
+    await getKasaClosings('2026-06-01')
+    expect(mockFetch).toHaveBeenCalledWith('/kasa/closings?from=2026-06-01')
+  })
+
+  it('s pouze to připojí jen to', async () => {
+    mockFetch.mockResolvedValue([])
+    await getKasaClosings(undefined, '2026-06-16')
+    expect(mockFetch).toHaveBeenCalledWith('/kasa/closings?to=2026-06-16')
   })
 })
