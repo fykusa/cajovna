@@ -26,17 +26,21 @@ export default function CajeKasa() {
       <div className={styles.stats}>
         <div className={styles.stat}>
           <div className={styles.label}>Uzávěrka předchozí den</div>
-          <div className={styles.value}>
+          <div className={styles.value} data-testid="stat-uzaverka">
             {status.last_closing ? fmtKc(status.last_closing.confirmed_balance) : '—'}
           </div>
         </div>
         <div className={styles.stat}>
           <div className={styles.label}>Tržby dnes</div>
-          <div className={styles.value}>{fmtKc(status.trzby_dnes)}</div>
+          <div className={styles.value} data-testid="stat-trzby">{fmtKc(status.trzby_dnes)}</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.label}>Pohyby dnes</div>
+          <div className={styles.value} data-testid="stat-pohyby">{fmtKc(status.pohyby_dnes)}</div>
         </div>
         <div className={`${styles.stat} ${styles.statTotal}`}>
           <div className={styles.label}>Aktuální stav kasy</div>
-          <div className={styles.value}>
+          <div className={styles.value} data-testid="stat-stav">
             {status.stav_kasy !== null
               ? fmtKc(status.stav_kasy)
               : `— + ${fmtKc(status.trzby_dnes + status.pohyby_dnes)}`}
@@ -45,7 +49,7 @@ export default function CajeKasa() {
       </div>
 
       {status.movements.length > 0 && (
-        <div className={styles.movements}>
+        <div className={styles.movements} data-testid="movements-section">
           <div className={styles.movTitle}>Pohyby dnes</div>
           {status.movements.map((m) => (
             <div key={m.id} className={styles.movement}>

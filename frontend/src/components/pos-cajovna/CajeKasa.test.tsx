@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import CajeKasa from './CajeKasa'
 import type { KasaStatus } from '../../types'
 
@@ -38,9 +38,10 @@ describe('CajeKasa', () => {
     mockGet.mockResolvedValue(STATUS_WITH_CLOSING)
     render(<CajeKasa />)
     await waitFor(() => {
-      expect(screen.getByText(/1\s*000/)).toBeInTheDocument()  // uzávěrka
-      expect(screen.getByText(/500/)).toBeInTheDocument()       // tržby
-      expect(screen.getByText(/1\s*300/)).toBeInTheDocument()  // stav
+      expect(screen.getByText(/1\s*000/)).toBeInTheDocument()  // uzávěrka 1000 Kč
+      expect(screen.getByText(/500/)).toBeInTheDocument()       // tržby 500 Kč
+      expect(within(screen.getByTestId('stat-pohyby')).getByText(/-200/)).toBeInTheDocument()  // pohyby -200 Kč
+      expect(screen.getByText(/1\s*300/)).toBeInTheDocument()  // stav 1300 Kč
     })
   })
 
@@ -56,8 +57,9 @@ describe('CajeKasa', () => {
     mockGet.mockResolvedValue(STATUS_WITH_CLOSING)
     render(<CajeKasa />)
     await waitFor(() => {
+      const section = screen.getByTestId('movements-section')
       expect(screen.getByText('výběr')).toBeInTheDocument()
-      expect(screen.getByText(/-200/)).toBeInTheDocument()
+      expect(within(section).getByText(/-200/)).toBeInTheDocument()
     })
   })
 
@@ -65,7 +67,7 @@ describe('CajeKasa', () => {
     mockGet.mockResolvedValue(STATUS_NO_CLOSING)
     render(<CajeKasa />)
     await waitFor(() => {
-      expect(screen.queryByText('Pohyby dnes')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('movements-section')).not.toBeInTheDocument()
     })
   })
 
