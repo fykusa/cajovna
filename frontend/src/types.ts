@@ -178,3 +178,33 @@ export interface CajePolozkaSale {
   kategorie: string | null
   zeme: string | null
 }
+
+export interface CashMovement {
+  id: number
+  date: string
+  amount: number
+  note: string
+  created_by: number
+  created_by_username: string
+  created_at: string
+}
+
+export interface KasaStatus {
+  last_closing: { date: string; confirmed_balance: number } | null
+  trzby_dnes: number
+  pohyby_dnes: number
+  stav_kasy: number | null
+  movements: CashMovement[]
+}
+
+export interface CashClosing {
+  id: number
+  date: string
+  calculated_balance: number
+  confirmed_balance: number
+  note: string | null
+  created_by: number
+  created_by_username: string
+  created_at: string
+  updated_at: string
+}
