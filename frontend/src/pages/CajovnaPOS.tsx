@@ -13,6 +13,7 @@ import CajeQuantity from '../components/pos-cajovna/CajeQuantity'
 import CajeHome from '../components/pos-cajovna/CajeHome'
 import CajeCheckout from '../components/pos-cajovna/CajeCheckout'
 import CajeHistory from '../components/pos-cajovna/CajeHistory'
+import CajeKasa from '../components/pos-cajovna/CajeKasa'
 import styles from './MobilePOS.module.css'
 
 const VIEW_TITLES: Record<CajeView, string> = {
@@ -27,7 +28,7 @@ const VIEW_TITLES: Record<CajeView, string> = {
 
 export default function CajovnaPOS() {
   const pos      = useCajovnaPOS()
-  const [mode, setMode]           = useState<'pos' | 'history'>('pos')
+  const [mode, setMode]           = useState<'pos' | 'history' | 'kasa'>('pos')
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const user     = useAuthStore((s) => s.user)
   const logout   = useAuthStore((s) => s.logout)
@@ -129,6 +130,7 @@ export default function CajovnaPOS() {
         )}
 
         {mode === 'history' && <CajeHistory />}
+        {mode === 'kasa' && <CajeKasa />}
       </div>
     </div>
   )

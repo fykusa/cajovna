@@ -2,8 +2,8 @@
 import styles from './MobileTopBar.module.css'
 
 interface Props {
-  mode: 'pos' | 'history'
-  onModeChange: (mode: 'pos' | 'history') => void
+  mode: 'pos' | 'history' | 'kasa'
+  onModeChange: (mode: 'pos' | 'history' | 'kasa') => void
   username: string
   onLogout: () => void
 }
@@ -23,6 +23,12 @@ export default function MobileTopBar({ mode, onModeChange, username, onLogout }:
           onClick={() => onModeChange('history')}
         >
           Přehled
+        </button>
+        <button
+          className={`${styles.tab} ${mode === 'kasa' ? styles.active : ''}`}
+          onClick={() => onModeChange('kasa')}
+        >
+          Pokladna
         </button>
       </div>
       <div className={styles.user}>
