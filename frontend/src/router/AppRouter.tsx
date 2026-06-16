@@ -16,6 +16,7 @@ const AdminUsers = lazy(() => import('../pages/admin/Users'))
 const AdminBags = lazy(() => import('../pages/admin/Bags'))
 const AdminSales = lazy(() => import('../pages/admin/Sales'))
 const AdminTeas = lazy(() => import('../pages/admin/Teas'))
+const AdminKasa = lazy(() => import('../pages/admin/Kasa'))
 
 export default function AppRouter() {
   return (
@@ -66,6 +67,7 @@ export default function AppRouter() {
           <Route path="bags" element={<AdminBags />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="teas" element={<AdminTeas />} />
+          <Route path="kasa" element={<AdminKasa />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />

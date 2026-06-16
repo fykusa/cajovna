@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/admin/sales', label: 'Tržby', end: false },
   { to: '/admin/teas', label: 'Čaje', end: false },
   { to: '/admin/users', label: 'Uživatelé', end: false },
+  { to: '/admin/kasa', label: 'Kasa', end: false },
 ]
 
 export default function AdminLayout() {
