@@ -185,6 +185,36 @@ $tables = [
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
+'91_zaverka' => "CREATE TABLE IF NOT EXISTS `91_zaverka` (
+  `id`                  INT           NOT NULL AUTO_INCREMENT,
+  `date`                DATE          NOT NULL,
+  `calculated_balance`  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `confirmed_balance`   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `note`                TEXT          NULL DEFAULT NULL,
+  `created_by`          INT           NOT NULL,
+  `created_at`          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_zaverka_date` (`date`),
+  CONSTRAINT `fk_zaverka_user`
+    FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+'90_cashflow' => "CREATE TABLE IF NOT EXISTS `90_cashflow` (
+  `id`          INT           NOT NULL AUTO_INCREMENT,
+  `date`        DATE          NOT NULL,
+  `amount`      DECIMAL(10,2) NOT NULL,
+  `note`        TEXT          NOT NULL,
+  `created_by`  INT           NOT NULL,
+  `created_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_cashflow_date` (`date`),
+  CONSTRAINT `fk_cashflow_user`
+    FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
 ];
 
 foreach ($tables as $name => $sql) {
