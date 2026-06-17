@@ -87,7 +87,7 @@ $limit = new DateTime('2026-07-01');
 while ($cur < $limit) {
     $y    = (int)$cur->format('Y');
     $m    = (int)$cur->format('m');
-    $days = cal_days_in_month(CAL_GREGORIAN, $m, $y);
+    $days = (int)date('t', mktime(0, 0, 0, $m, 1, $y));
     $cnt  = rand(20, 50);
 
     $monthInserted = 0;

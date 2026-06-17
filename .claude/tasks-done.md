@@ -1,5 +1,11 @@
 # Tasks — Cajovna (hotovo)
 
+- [x] [2026-06-17] **POS Desktop — přístup na /pos-desktop** (#4): Desktop POS je dostupný přímo přes URL `/pos-desktop`. Prodavačka se po přihlášení routuje na `/cajovna`. Žádná select obrazovka.
+
+- [x] [2026-06-17] **Google Sheets → DB Sync (fáze 2 — sync logika)** (#3): Záložka CAJE v Google Sheets → tabulka `01_caje` v DB. Sync logika implementována, merge do masteru.
+
+- [x] [2026-06-17] **Fáze 4 — Deploy** (#2): Build, upload na Forpsi, .htaccess, import DB, test live. Produkce funkční.
+
 - [x] [2026-06-13] **DB migrace — spustit `01_caje`**: Hotovo lokálně (2026-06-13). Na produkci spustit po deployi.
 
 - [x] [2026-06-05] **POS — 3-panel redesign: Balení → Množství → Pytlík**: Nový krok `configure` nahradil sekvenční `quantity→bag_yn→bag_material→bag_volume`. Tři vertikální panely vedle sebe, ArrowLeft/Right přepíná aktivní panel, ArrowUp/Down naviguje uvnitř. Nová komponenta `ConfigurePanel.tsx`. Odstraněny `QuantityModal`, `QuantitySelector`, `BagSelector`. Helper funkce `getPackagingOptions` + `getBagList` exportovány z `usePOS.ts`. 152/152 testů. Merge `e02e26e`.
