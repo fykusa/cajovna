@@ -165,6 +165,7 @@ export interface CajovnaProdej {
   total_kc: number
   username: string
   user_id: number
+  cancelled_at: string | null
 }
 
 export interface CajePolozkaSale {

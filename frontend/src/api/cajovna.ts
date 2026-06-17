@@ -35,3 +35,6 @@ export const getCajovnaKategorie = (): Promise<CajeCategory[]> =>
 
 export const getCajovnaPolozky = (prodejId: number): Promise<CajePolozkaSale[]> =>
   apiFetch<CajePolozkaSale[]>(`/cajovna/prodeje/${prodejId}/polozky`)
+
+export const cancelCajovnaSale = (id: number): Promise<{ ok: boolean }> =>
+  apiFetch<{ ok: boolean }>(`/cajovna/prodej/${id}`, { method: 'DELETE' })
