@@ -3,7 +3,7 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json; charset=utf-8');
 
@@ -25,6 +25,8 @@ if ($method === 'POST' && preg_match('#/api/cajovna/prodej$#', $path)) {
     listProdeje();
 } elseif ($method === 'GET' && preg_match('#/api/cajovna/kategorie$#', $path)) {
     listKategorie();
+} elseif ($method === 'DELETE' && preg_match('#/api/cajovna/prodej/(\d+)$#', $path, $m)) {
+    cancelProdej((int) $m[1]);
 } else {
     http_response_code(404);
     echo json_encode(['error' => 'Not found']);
@@ -118,7 +120,7 @@ function listProdeje(): void {
         }
     }
 
-    $sql = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id
+    $sql = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id, p.cancelled_at
             FROM `00_prodej` p
             JOIN users u ON u.id = p.user_id'
          . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
@@ -151,4 +153,29 @@ function listPolozky(int $prodejId): void {
     );
     $stmt->execute([$prodejId]);
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+function cancelProdej(int $id): void {
+    $auth = requireAdmin();
+    $pdo  = getPDO();
+
+    $stmt = $pdo->prepare('SELECT id, cancelled_at FROM `00_prodej` WHERE id = ?');
+    $stmt->execute([$id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Prodej nenalezen.']);
+        return;
+    }
+    if ($row['cancelled_at'] !== null) {
+        http_response_code(409);
+        echo json_encode(['error' => 'Prodej je již stornován.']);
+        return;
+    }
+
+    $pdo->prepare('UPDATE `00_prodej` SET cancelled_at = NOW(), cancelled_by = ? WHERE id = ?')
+        ->execute([$auth['user_id'], $id]);
+
+    echo json_encode(['ok' => true]);
 }
