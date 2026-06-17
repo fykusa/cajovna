@@ -53,7 +53,7 @@ function handleStatus(): void {
     $lastClosing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
     $stmt = $pdo->prepare(
-        'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ?'
+        'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ? AND cancelled_at IS NULL'
     );
     $stmt->execute([$today]);
     $trzbyDnes = (float) $stmt->fetchColumn();
@@ -173,7 +173,7 @@ function handleClose(array $auth): void {
 
     try {
         $stmt = $pdo->prepare(
-            'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ?'
+            'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ? AND cancelled_at IS NULL'
         );
         $stmt->execute([$today]);
         $trzbyDnes = (float) $stmt->fetchColumn();
