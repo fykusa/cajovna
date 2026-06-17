@@ -31,7 +31,7 @@ const VIEW_TITLES: Record<MobileView, string> = {
 
 export default function MobilePOS() {
   const pos = useMobilePOS()
-  const [mode, setMode] = useState<'pos' | 'history'>('pos')
+  const [mode, setMode] = useState<'pos' | 'history' | 'kasa'>('pos')
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
