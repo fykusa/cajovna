@@ -156,10 +156,10 @@ function listPolozky(int $prodejId): void {
 }
 
 function cancelProdej(int $id): void {
-    $auth = requireAdmin();
+    $auth = requireAuth();
     $pdo  = getPDO();
 
-    $stmt = $pdo->prepare('SELECT id, cancelled_at FROM `00_prodej` WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, user_id, cancelled_at, DATE(created_at) as sale_date FROM `00_prodej` WHERE id = ?');
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -171,6 +171,16 @@ function cancelProdej(int $id): void {
     if ($row['cancelled_at'] !== null) {
         http_response_code(409);
         echo json_encode(['error' => 'Prodej je již stornován.']);
+        return;
+    }
+
+    $isAdmin = ($auth['role'] === 'admin');
+    $isOwner = ((int) $row['user_id'] === (int) $auth['user_id']);
+    $isToday = ($row['sale_date'] === date('Y-m-d'));
+
+    if (!$isAdmin && !($isOwner && $isToday)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Nemáte oprávnění stornovat tento prodej.']);
         return;
     }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { CajovnaProdej } from '../../types'
-import { getCajovnaProdeje, cancelCajovnaSale } from '../../api/cajovna'
+import { getCajovnaProdeje } from '../../api/cajovna'
 import { useToast } from '../../components/toast/useToast'
 import { periodRange, PERIODS, type Period } from './periodRange'
 import HBarChart from '../../components/admin/HBarChart'
@@ -33,8 +33,6 @@ export default function Sales() {
   const [activePeriod, setActivePeriod] = useState<Period | null>('month')
   const [sales, setSales] = useState<CajovnaProdej[]>([])
   const [loading, setLoading] = useState(true)
-  const [confirmId, setConfirmId] = useState<number | null>(null)
-  const [cancelling, setCancelling] = useState(false)
   const toast = useToast()
 
   async function load(f = from, t = to) {
@@ -46,20 +44,6 @@ export default function Sales() {
       toast.error(err instanceof Error ? err.message : 'Chyba načítání')
     } finally {
       setLoading(false)
-    }
-  }
-
-  async function handleCancel(id: number) {
-    setCancelling(true)
-    try {
-      await cancelCajovnaSale(id)
-      setConfirmId(null)
-      toast.success('Prodej byl stornován.')
-      await load()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Chyba při stornování')
-    } finally {
-      setCancelling(false)
     }
   }
 
@@ -217,53 +201,6 @@ export default function Sales() {
             <p className={styles.empty}>Za zvolené období žádné prodeje.</p>
           )}
 
-          <div style={{ marginTop: 32 }}>
-            <h2 className={styles.sectionTitle}>Přehled prodejů</h2>
-            <table className={styles.table} aria-label="Přehled prodejů">
-              <thead>
-                <tr>
-                  <th>Datum a čas</th>
-                  <th>Prodavačka</th>
-                  <th style={{ textAlign: 'right' }}>Částka</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {sales.map((s) => (
-                  <tr key={s.id} className={s.cancelled_at ? styles.cancelled : undefined}>
-                    <td className={styles.time}>{s.created_at.slice(0, 16)}</td>
-                    <td>{s.username}</td>
-                    <td className={styles.amount}>{fmtKc(s.total_kc)}</td>
-                    <td>
-                      {s.cancelled_at ? (
-                        <span className={styles.stornoBadge}>STORNO</span>
-                      ) : (
-                        <button className={styles.stornoBtn} onClick={() => setConfirmId(s.id)}>
-                          Stornovat
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {confirmId !== null && (
-            <div className={styles.confirmOverlay}>
-              <div className={styles.confirmBox}>
-                <p>Opravdu stornovat prodej #{confirmId}? Tato akce je nevratná.</p>
-                <div className={styles.confirmActions}>
-                  <button className={styles.confirmBtn} disabled={cancelling} onClick={() => handleCancel(confirmId)}>
-                    {cancelling ? 'Stornuji…' : 'Potvrdit'}
-                  </button>
-                  <button className={styles.confirmCancelBtn} disabled={cancelling} onClick={() => setConfirmId(null)}>
-                    Zrušit
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>

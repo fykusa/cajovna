@@ -277,3 +277,71 @@
     height: 400px;
   }
 }
+
+/* Storno */
+.cancelled { opacity: 0.45; }
+.cancelled .itemAmount { text-decoration: none; color: #f87171; font-size: 0.75rem; font-weight: 700; }
+
+.stornoBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #4a2020;
+  color: #f87171;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.stornoBtn {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+.stornoBtn:hover { border-color: #f87171; color: #f87171; }
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.confirmBox {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 24px 28px;
+  max-width: 360px;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.confirmActions { display: flex; gap: 10px; }
+.confirmBtn {
+  padding: 8px 20px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.confirmBtn:hover:not(:disabled) { background: #d9534f; }
+.confirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.confirmCancelBtn {
+  padding: 8px 16px;
+  background: #444;
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

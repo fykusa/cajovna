@@ -9,7 +9,6 @@ vi.mock('../../api/cajovna', () => ({
   getCajovnaProdeje: vi.fn(),
   getCajovnaPolozky: vi.fn(),
   createCajovnaSale: vi.fn(),
-  cancelCajovnaSale: vi.fn(),
 }))
 
 const SALES = [
@@ -77,24 +76,4 @@ describe('Sales', () => {
     expect(screen.getAllByText('760 Kč').length).toBeGreaterThan(0)
   })
 
-  it('stornovaný prodej je v tabulce prodejů označen jako STORNO', async () => {
-    vi.mocked(cajovnaApi.getCajovnaProdeje).mockResolvedValue(SALES_WITH_CANCELLED)
-    renderWithToast(<Sales />)
-    const table = await screen.findByRole('table', { name: 'Přehled prodejů' })
-    expect(within(table).getByText('STORNO')).toBeInTheDocument()
-  })
-
-  it('klik na Stornovat zavolá cancelCajovnaSale a znovu načte data', async () => {
-    vi.mocked(cajovnaApi.cancelCajovnaSale).mockResolvedValue({ ok: true })
-    const user = userEvent.setup()
-    renderWithToast(<Sales />)
-    await screen.findByRole('table', { name: 'Přehled prodejů' })
-    const stornoBtn = screen.getAllByRole('button', { name: /stornovat/i })[0]
-    await user.click(stornoBtn)
-    // confirm dialog
-    const confirmBtn = screen.getByRole('button', { name: /potvrdit/i })
-    await user.click(confirmBtn)
-    await waitFor(() => expect(vi.mocked(cajovnaApi.cancelCajovnaSale)).toHaveBeenCalledWith(expect.any(Number)))
-    await waitFor(() => expect(vi.mocked(cajovnaApi.getCajovnaProdeje)).toHaveBeenCalledTimes(2))
-  })
 })

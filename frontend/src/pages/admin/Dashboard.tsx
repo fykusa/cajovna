@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { getCajovnaProdeje, getCajovnaPolozky, getCajovnaKategorie } from '../../api/cajovna'
+import { getCajovnaProdeje, getCajovnaPolozky, getCajovnaKategorie, cancelCajovnaSale } from '../../api/cajovna'
 import { getUsers } from '../../api/users'
 import type { CajovnaProdej, CajePolozkaSale, CajeCategory, User } from '../../types'
 import { useToast } from '../../components/toast/useToast'
@@ -32,6 +32,8 @@ export default function AdminDashboard() {
   const [kategorie, setKategorie]       = useState<CajeCategory[]>([])
   const [selectedKat, setSelectedKat]   = useState<CajeCategory | null>(null)
   const [showImport, setShowImport]     = useState(false)
+  const [confirmId, setConfirmId]       = useState<number | null>(null)
+  const [cancelling, setCancelling]     = useState(false)
 
   const toast = useToast()
 
@@ -123,10 +125,27 @@ export default function AdminDashboard() {
   const visibleSales = allSelected
     ? sales
     : sales.filter((s) => selectedUsers.has(s.user_id))
+  const activeSales = visibleSales.filter((s) => !s.cancelled_at)
 
-  const total = visibleSales.reduce((s, sale) => s + sale.total_kc, 0)
+  const total = activeSales.reduce((s, sale) => s + sale.total_kc, 0)
   const selectedSale = visibleSales.find((s) => s.id === selectedId) ?? null
   const chartData = bucketRevenue(visibleSales, from, to)
+
+  async function handleCancel(id: number) {
+    setCancelling(true)
+    try {
+      await cancelCajovnaSale(id)
+      setConfirmId(null)
+      setSelectedId(null)
+      setItems([])
+      toast.success('Prodej byl stornován.')
+      await load(from, to, selectedKat)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Chyba při stornování')
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   async function handleExport() {
     const csvRows: string[] = ['Datum;Čas;Uživatel;ID prodeje;Pořadí;Čaj;Balení;Kusů;Jedn. cena;Celk. cena']
@@ -253,7 +272,7 @@ export default function AdminDashboard() {
             </div>
             <div className={styles.stat}>
               <div className={styles.statLabel}>Prodejů</div>
-              <div className={styles.statValue}>{visibleSales.length}</div>
+              <div className={styles.statValue}>{activeSales.length}</div>
             </div>
           </div>
 
@@ -268,7 +287,7 @@ export default function AdminDashboard() {
                     <li
                       id={`sale-${s.id}`}
                       key={s.id}
-                      className={`${styles.listItem}${selectedId === s.id ? ' ' + styles.selected : ''}`}
+                      className={`${styles.listItem}${selectedId === s.id ? ' ' + styles.selected : ''}${s.cancelled_at ? ' ' + styles.cancelled : ''}`}
                       onClick={(e) => { selectSale(s.id); (e.currentTarget.closest('ul') as HTMLElement)?.focus() }}
                     >
                       <span className={styles.itemTime}>
@@ -278,7 +297,7 @@ export default function AdminDashboard() {
                         })}
                       </span>
                       <span className={styles.itemUser}>{s.username}</span>
-                      <span className={styles.itemAmount}>{s.total_kc} Kč</span>
+                      <span className={styles.itemAmount}>{s.cancelled_at ? 'STORNO' : `${s.total_kc} Kč`}</span>
                     </li>
                   ))}
                 </ul>
@@ -298,8 +317,17 @@ export default function AdminDashboard() {
                         hour: '2-digit', minute: '2-digit', second: '2-digit',
                       })}
                     </span>
-                    <span className={styles.detailTotal}>{selectedSale.total_kc} Kč</span>
+                    {selectedSale.cancelled_at ? (
+                      <span className={styles.stornoBadge}>STORNO</span>
+                    ) : (
+                      <span className={styles.detailTotal}>{selectedSale.total_kc} Kč</span>
+                    )}
                   </div>
+                  {!selectedSale.cancelled_at && (
+                    <button className={styles.stornoBtn} onClick={() => setConfirmId(selectedSale.id)}>
+                      Stornovat prodej
+                    </button>
+                  )}
                   {itemsLoading ? (
                     <p className={styles.loading}>Načítám…</p>
                   ) : (
@@ -335,6 +363,22 @@ export default function AdminDashboard() {
           onClose={() => setShowImport(false)}
           onDone={() => load(from, to)}
         />
+      )}
+
+      {confirmId !== null && (
+        <div className={styles.confirmOverlay}>
+          <div className={styles.confirmBox}>
+            <p>Opravdu stornovat prodej #{confirmId}? Tato akce je nevratná.</p>
+            <div className={styles.confirmActions}>
+              <button className={styles.confirmBtn} disabled={cancelling} onClick={() => handleCancel(confirmId)}>
+                {cancelling ? 'Stornuji…' : 'Potvrdit'}
+              </button>
+              <button className={styles.confirmCancelBtn} disabled={cancelling} onClick={() => setConfirmId(null)}>
+                Zrušit
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getCajovnaProdeje, getCajovnaPolozky } from '../../api/cajovna'
+import { getCajovnaProdeje, getCajovnaPolozky, cancelCajovnaSale } from '../../api/cajovna'
 import type { CajovnaProdej, CajePolozkaSale } from '../../types'
 import { useAuthStore } from '../../store/authStore'
 import styles from './CajeHistory.module.css'
@@ -14,14 +14,17 @@ export default function CajeHistory() {
   const [selectedId, setSelectedId]   = useState<number | null>(null)
   const [items, setItems]             = useState<CajePolozkaSale[]>([])
   const [itemsLoading, setItemsLoading] = useState(false)
+  const [cancelling, setCancelling]     = useState(false)
 
-  useEffect(() => {
+  function loadProdeje() {
     const today = new Date().toISOString().slice(0, 10)
-    getCajovnaProdeje({ from: today + ' 00:00:00', to: today + ' 23:59:59' })
+    return getCajovnaProdeje({ from: today + ' 00:00:00', to: today + ' 23:59:59' })
       .then((data) => setProdeje(user ? data.filter((p) => p.user_id === user.id) : data))
       .catch((e) => setError(e instanceof Error ? e.message : 'Chyba načítání'))
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { loadProdeje() }, [])
 
   async function toggleSale(id: number) {
     if (selectedId === id) { setSelectedId(null); setItems([]); return }
@@ -32,8 +35,21 @@ export default function CajeHistory() {
     finally { setItemsLoading(false) }
   }
 
-  const total = prodeje.reduce((s, p) => s + p.total_kc, 0)
-  const count = prodeje.length
+  async function handleCancel(id: number) {
+    setCancelling(true)
+    try {
+      await cancelCajovnaSale(id)
+      setSelectedId(null)
+      setItems([])
+      await loadProdeje()
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const activeProdeje = prodeje.filter((p) => !p.cancelled_at)
+  const total = activeProdeje.reduce((s, p) => s + p.total_kc, 0)
+  const count = activeProdeje.length
   const countLabel = count === 1 ? 'prodej' : count < 5 ? 'prodeje' : 'prodejů'
 
   if (loading) return <div className={styles.state}>Načítám…</div>
@@ -49,13 +65,16 @@ export default function CajeHistory() {
         {prodeje.map((p) => (
           <div key={p.id}>
             <div
-              className={`${styles.sale}${selectedId === p.id ? ' ' + styles.saleSelected : ''}`}
+              className={`${styles.sale}${selectedId === p.id ? ' ' + styles.saleSelected : ''}${p.cancelled_at ? ' ' + styles.saleCancelled : ''}`}
               onClick={() => toggleSale(p.id)}
             >
               <span className={styles.saleTime}>
                 {new Date(p.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
               </span>
-              <span className={styles.saleTotal}>{p.total_kc.toLocaleString('cs-CZ')} Kč</span>
+              {p.cancelled_at
+                ? <span className={styles.stornoBadge}>STORNO</span>
+                : <span className={styles.saleTotal}>{p.total_kc.toLocaleString('cs-CZ')} Kč</span>
+              }
             </div>
             {selectedId === p.id && (
               <div className={styles.items}>
@@ -72,6 +91,15 @@ export default function CajeHistory() {
                     </div>
                   ))
                 }
+                {!p.cancelled_at && (
+                  <button
+                    className={styles.stornoBtn}
+                    disabled={cancelling}
+                    onClick={(e) => { e.stopPropagation(); handleCancel(p.id) }}
+                  >
+                    {cancelling ? 'Stornuji…' : 'Stornovat tento prodej'}
+                  </button>
+                )}
               </div>
             )}
           </div>
