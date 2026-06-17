@@ -2,8 +2,6 @@
 
 Pokladní a evidenční systém pro čajovnu. Mobilní POS pro obsluhu, admin rozhraní pro přehled tržeb a správu dat.
 
-**Live ukázka:** [taocajovna.cz/testovaci](https://taocajovna.cz/testovaci)
-
 ---
 
 ## Co aplikace umí
