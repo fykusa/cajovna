@@ -1,0 +1,3 @@
+ALTER TABLE `00_prodej`
+  ADD COLUMN `cancelled_at` DATETIME NULL DEFAULT NULL,
+  ADD COLUMN `cancelled_by` INT NULL DEFAULT NULL;
