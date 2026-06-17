@@ -43,3 +43,15 @@ Stav čaje v sortimentu: `active` (prodejný), `discontinued` (již není), `no_
 
 ### Statistiky
 Přehledy pro admina: denní/měsíční/roční tržby, tržby per prodavačka, nejprodávanější položky za zvolené období.
+
+### Uzávěrka
+Explicitní denní uzavření kasy, provádí Admin. Jeden záznam na den — přepsatelný (nová uzávěrka téhož dne přepíše předchozí, stará verze se nepamátuje). Systém navrhne vypočítaný zůstatek, admin ho může před uložením upravit.
+
+### Pohyb kasy
+Intradenní pohyb hotovosti zaznamenaný Adminem — kladná nebo záporná částka + textová poznámka. Pohyby nelze mazat ani editovat; chybu admin opraví protipohybem.
+
+### Stav kasy
+Aktuální odhadovaný zůstatek hotovosti v provozovně. Vypočítá se jako: poslední Uzávěrka před dneškem + Tržby dnes (prodeje všech prodavaček) + součet dnešních Pohybů kasy. Pokud žádná Uzávěrka dosud neproběhla, výchozí zůstatek je nedefinovaný (zobrazí se „—").
+
+### Tržby dnes
+Součet `total_amount` všech Prodejů s `created_at` v aktuálním kalendářním dni, bez ohledu na to, která Prodavačka prodávala.

@@ -25,9 +25,9 @@ export default function CajeKasa() {
     <div className={styles.wrap}>
       <div className={styles.stats}>
         <div className={styles.stat}>
-          <div className={styles.label}>Uzávěrka předchozí den</div>
+          <div className={styles.label}>Poslední uzávěrka</div>
           <div className={styles.value} data-testid="stat-uzaverka">
-            {status.last_closing ? fmtKc(status.last_closing.confirmed_balance) : '—'}
+            {status.last_closing ? fmtKc(status.last_closing.confirmed_balance) : '?'}
           </div>
         </div>
         <div className={styles.stat}>
@@ -43,7 +43,7 @@ export default function CajeKasa() {
           <div className={styles.value} data-testid="stat-stav">
             {status.stav_kasy !== null
               ? fmtKc(status.stav_kasy)
-              : `— + ${fmtKc(status.trzby_dnes + status.pohyby_dnes)}`}
+              : `? + ${fmtKc(status.trzby_dnes + status.pohyby_dnes)}`}
           </div>
         </div>
       </div>

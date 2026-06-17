@@ -53,7 +53,7 @@ function handleStatus(): void {
     $lastClosing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
     $stmt = $pdo->prepare(
-        'SELECT COALESCE(SUM(total_amount), 0) FROM sales WHERE DATE(created_at) = ?'
+        'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ?'
     );
     $stmt->execute([$today]);
     $trzbyDnes = (float) $stmt->fetchColumn();
@@ -64,7 +64,7 @@ function handleStatus(): void {
          FROM 90_cashflow cm
          JOIN users u ON u.id = cm.created_by
          WHERE cm.date = ?
-         ORDER BY cm.created_at ASC'
+         ORDER BY cm.created_at DESC'
     );
     $stmt->execute([$today]);
     $movements = array_map(function($row) {
@@ -173,7 +173,7 @@ function handleClose(array $auth): void {
 
     try {
         $stmt = $pdo->prepare(
-            'SELECT COALESCE(SUM(total_amount), 0) FROM sales WHERE DATE(created_at) = ?'
+            'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ?'
         );
         $stmt->execute([$today]);
         $trzbyDnes = (float) $stmt->fetchColumn();

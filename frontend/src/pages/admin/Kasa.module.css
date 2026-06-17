@@ -1,0 +1,323 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.title {
+  color: #d4a84b;
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+/* ── Sekce ── */
+.section {
+  background: #222;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.subTitle {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Stat karty ── */
+.stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  background: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 14px 20px;
+  min-width: 160px;
+  flex: 1;
+}
+
+.statTotal {
+  border-color: #d4a84b;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ddd;
+  font-variant-numeric: tabular-nums;
+}
+
+.statTotal .statValue {
+  color: #d4a84b;
+}
+
+/* ── Tlačítko přidat (stejný vzor jako Users) ── */
+.addBtn {
+  padding: 8px 16px;
+  background: #6abf69;
+  color: #111;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.addBtn:hover:not(:disabled) { background: #7cc97b; }
+.addBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Modal formulář (stejný vzor jako Users) ── */
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 300px;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signPos,
+.signNeg {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.signPos { color: #6abf69; }
+.signNeg { color: #f4a64a; }
+
+.amountInput::-webkit-inner-spin-button,
+.amountInput::-webkit-outer-spin-button { -webkit-appearance: none; }
+.amountInput { -moz-appearance: textfield; }
+
+.formActions {
+  display: flex;
+  gap: 10px;
+}
+
+.formCancelBtn {
+  padding: 8px 16px;
+  background: #444;
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ── Formulář uzavření ── */
+.closeForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.formLabel {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* ── Sdílené inputy ── */
+.input {
+  padding: 8px 12px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #eee;
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #d4a84b;
+}
+
+/* ── Tlačítka ── */
+.saveBtn {
+  padding: 8px 20px;
+  background: #6abf69;
+  color: #111;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.saveBtn:hover:not(:disabled) { background: #7cc97b; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.closeBtn {
+  padding: 8px 20px;
+  background: #c0784a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  align-self: flex-start;
+}
+
+.closeBtn:hover:not(:disabled) { background: #d4895a; }
+.closeBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Tabulky ── */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 6px;
+  background: #1e1e1e;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #2a2a2a;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 9px 12px;
+  color: #ccc;
+  border-bottom: 1px solid #2a2a2a;
+  font-variant-numeric: tabular-nums;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: #252525;
+}
+
+/* ── Historie filter ── */
+.historyFilter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.dateInput {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #ccc;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #d4a84b;
+}
+
+.applyBtn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid #d4a84b;
+  background: #d4a84b;
+  color: #1a1a1a;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.applyBtn:hover { background: #e0b85a; border-color: #e0b85a; }
+
+/* ── Utility ── */
+.pos  { color: #6abf69; font-weight: 600; }
+.neg  { color: #f4a64a; font-weight: 600; }
+.tdTime { color: #888; font-size: 0.85rem; }
+.tdDim  { color: #666; }
+
+.empty {
+  color: #555;
+  font-style: italic;
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+.loading {
+  color: #666;
+  font-style: italic;
+  padding: 24px;
+}
+
+.error {
+  color: #f87171;
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+@media (max-width: 768px) {
+  .page { height: auto; }
+  .stats { flex-direction: column; }
+  .stat  { min-width: unset; }
+.historyFilter { flex-direction: column; align-items: flex-start; }
+}

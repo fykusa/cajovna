@@ -45,11 +45,11 @@ describe('CajeKasa', () => {
     })
   })
 
-  it('zobrazí "—" pokud žádná uzávěrka neexistuje', async () => {
+  it('zobrazí "?" pokud žádná uzávěrka neexistuje', async () => {
     mockGet.mockResolvedValue(STATUS_NO_CLOSING)
     render(<CajeKasa />)
     await waitFor(() => {
-      expect(screen.getByText('—')).toBeInTheDocument()
+      expect(within(screen.getByTestId('stat-uzaverka')).getByText('?')).toBeInTheDocument()
     })
   })
 

@@ -7,6 +7,7 @@ import {
   closeKasa,
   getKasaClosings,
 } from '../../api/kasa'
+import Modal from '../../components/Modal'
 import styles from './Kasa.module.css'
 
 const fmtKc = (n: number) => n.toLocaleString('cs-CZ') + ' Kč'
@@ -24,9 +25,9 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-function thirtyDaysAgoIso(): string {
+function sevenDaysAgoIso(): string {
   const d = new Date()
-  d.setDate(d.getDate() - 30)
+  d.setDate(d.getDate() - 7)
   return d.toISOString().slice(0, 10)
 }
 
@@ -36,15 +37,16 @@ export default function Kasa() {
   const [error, setError]               = useState<string | null>(null)
   const [showAddForm, setShowAddForm]   = useState(false)
   const [addAmount, setAddAmount]       = useState(0)
-  const [addNote, setAddNote]           = useState('')
+  const [noteType, setNoteType]         = useState<'vybrani' | 'vlozeni' | 'vlastni'>('vybrani')
+  const [customNote, setCustomNote]     = useState('')
   const [saving, setSaving]             = useState(false)
   const [closeBalance, setCloseBalance] = useState(0)
   const [closeNote, setCloseNote]       = useState('')
   const [closings, setClosings]         = useState<CashClosing[]>([])
   const [movements, setMovements]       = useState<CashMovement[]>([])
-  const [historyFrom, setHistoryFrom]   = useState(thirtyDaysAgoIso())
+  const [historyFrom, setHistoryFrom]   = useState(sevenDaysAgoIso())
   const [historyTo, setHistoryTo]       = useState(todayIso())
-  const hasInitializedClose             = useRef(false)
+  const didInitialHistoryLoad           = useRef(false)
 
   const loadStatus = useCallback(async () => {
     setLoading(true)
@@ -52,10 +54,7 @@ export default function Kasa() {
     try {
       const s = await getKasaStatus()
       setStatus(s)
-      if (!hasInitializedClose.current) {
-        setCloseBalance(s.stav_kasy ?? 0)
-        hasInitializedClose.current = true
-      }
+      setCloseBalance(s.stav_kasy ?? (s.trzby_dnes + s.pohyby_dnes))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
@@ -67,13 +66,29 @@ export default function Kasa() {
 
   async function handleAddMovement(e: React.FormEvent) {
     e.preventDefault()
+
+    if (noteType === 'vybrani' && status) {
+      const effectiveBalance = status.stav_kasy ?? (status.trzby_dnes + status.pohyby_dnes)
+      const castka = Math.abs(addAmount)
+      if (castka > effectiveBalance) {
+        setError(`Výběr ${fmtKc(castka)} přesahuje aktuální stav kasy (${fmtKc(effectiveBalance)})`)
+        return
+      }
+    }
+
     setSaving(true)
     setError(null)
     try {
-      await addKasaMovement(addAmount, addNote)
+      const finalAmount = noteType === 'vlastni'
+        ? addAmount
+        : noteType === 'vybrani' ? -Math.abs(addAmount) : Math.abs(addAmount)
+      const finalNote = noteType === 'vlastni' ? customNote : noteType === 'vybrani' ? 'výběr' : 'vložení'
+      await addKasaMovement(finalAmount, finalNote)
       setAddAmount(0)
-      setAddNote('')
+      setNoteType('vybrani')
+      setCustomNote('')
       setShowAddForm(false)
+      setError(null)
       await loadStatus()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chyba přidání pohybu')
@@ -89,7 +104,7 @@ export default function Kasa() {
     try {
       await closeKasa(closeBalance, closeNote || undefined)
       setCloseNote('')
-      await loadStatus()
+      await Promise.all([loadStatus(), loadHistory()])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chyba uzavření kasy')
     } finally {
@@ -97,7 +112,7 @@ export default function Kasa() {
     }
   }
 
-  async function loadHistory() {
+  const loadHistory = useCallback(async () => {
     setError(null)
     try {
       const [c, allMovements] = await Promise.all([
@@ -109,7 +124,14 @@ export default function Kasa() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chyba načítání historie')
     }
-  }
+  }, [historyFrom, historyTo])
+
+  useEffect(() => {
+    if (!didInitialHistoryLoad.current) {
+      didInitialHistoryLoad.current = true
+      loadHistory()
+    }
+  }, [loadHistory])
 
   if (loading) return <p className={styles.loading}>Načítám…</p>
   if (error && !status) return <p className={styles.error}>{error}</p>
@@ -128,9 +150,9 @@ export default function Kasa() {
           <h2 className={styles.sectionTitle}>Dnešní stav</h2>
           <div className={styles.stats}>
             <div className={styles.stat}>
-              <div className={styles.statLabel}>Uzávěrka předchozí den</div>
+              <div className={styles.statLabel}>Poslední uzávěrka</div>
               <div className={styles.statValue} data-testid="stat-uzaverka">
-                {status.last_closing ? fmtKc(status.last_closing.confirmed_balance) : '—'}
+                {status.last_closing ? fmtKc(status.last_closing.confirmed_balance) : '?'}
               </div>
             </div>
             <div className={styles.stat}>
@@ -150,7 +172,7 @@ export default function Kasa() {
               <div className={styles.statValue} data-testid="stat-stav">
                 {status.stav_kasy !== null
                   ? fmtKc(status.stav_kasy)
-                  : `— + ${fmtKc(status.trzby_dnes + status.pohyby_dnes)}`}
+                  : `? + ${fmtKc(status.trzby_dnes + status.pohyby_dnes)}`}
               </div>
             </div>
           </div>
@@ -163,35 +185,63 @@ export default function Kasa() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Pohyby dnes</h2>
             <button
-              className={styles.toggleBtn}
-              onClick={() => setShowAddForm((p) => !p)}
+              className={styles.addBtn}
+              onClick={() => { setError(null); setShowAddForm(true) }}
             >
-              {showAddForm ? 'Zrušit' : '+ Přidat pohyb'}
+              + Přidat pohyb
             </button>
           </div>
 
           {showAddForm && (
-            <form className={styles.addForm} onSubmit={handleAddMovement}>
-              <input
-                type="number"
-                placeholder="Částka (Kč)"
-                value={addAmount}
-                onChange={(e) => setAddAmount(Number(e.target.value))}
-                className={styles.input}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Poznámka pohybu"
-                value={addNote}
-                onChange={(e) => setAddNote(e.target.value)}
-                className={styles.input}
-                required
-              />
-              <button type="submit" disabled={saving} className={styles.saveBtn}>
-                Přidat
-              </button>
-            </form>
+            <Modal title="Nový pohyb" onClose={() => { setShowAddForm(false); setAddAmount(0); setNoteType('vybrani'); setCustomNote('') }}>
+              <form className={styles.modalForm} onSubmit={handleAddMovement}>
+                {error && <p className={styles.error}>{error}</p>}
+
+                <div className={styles.addRow}>
+                  <select
+                    value={noteType}
+                    onChange={(e) => setNoteType(e.target.value as 'vybrani' | 'vlozeni' | 'vlastni')}
+                    className={styles.input}
+                  >
+                    <option value="vybrani">výběr</option>
+                    <option value="vlozeni">vložení</option>
+                    <option value="vlastni">vlastní</option>
+                  </select>
+                  {noteType === 'vlastni' && (
+                    <input
+                      type="text"
+                      placeholder="Vlastní poznámka"
+                      value={customNote}
+                      onChange={(e) => setCustomNote(e.target.value)}
+                      className={styles.input}
+                      required
+                    />
+                  )}
+                </div>
+
+                <div className={styles.addRow}>
+                  {noteType !== 'vlastni' && (
+                    <span className={noteType === 'vybrani' ? styles.signNeg : styles.signPos}>
+                      {noteType === 'vybrani' ? '−' : '+'}
+                    </span>
+                  )}
+                  <input
+                    type="number"
+                    placeholder="Částka"
+                    value={addAmount || ''}
+                    onChange={(e) => setAddAmount(Number(e.target.value))}
+                    className={`${styles.input} ${styles.amountInput}`}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <div className={styles.formActions}>
+                  <button type="submit" disabled={saving} className={styles.saveBtn}>Přidat</button>
+                  <button type="button" onClick={() => { setShowAddForm(false); setAddAmount(0); setNoteType('vybrani'); setCustomNote('') }} className={styles.formCancelBtn}>Zrušit</button>
+                </div>
+              </form>
+            </Modal>
           )}
 
           {status.movements.length === 0 ? (
