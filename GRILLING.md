@@ -111,6 +111,115 @@
 2. **Editace DB čajů** — CRUD čajů, ceny, množství ve skladu
 3. **Statistiky** — až nakonec
 
+---
+
+---
+
+# Přehled kasy (cash register overview) — 2026-06-16
+
+## 1. Uzávěrka dne
+
+**Rozhodnutí:** Uzávěrka je explicitní akce prováděná Adminem (ne automatická o půlnoci).
+
+**Jak probíhá:** Systém navrhne vypočítaný zůstatek (poslední uzávěrka + dnešní tržby + dnešní pohyby). Admin ho může před uložením přepsat — např. po fyzickém přepočítání kasičky.
+
+**Jeden záznam na den, přepsatelný:** Pokud admin potřebuje opravu (pozdní prodej, chyba), může uzávěrku téhož dne přepsat. Předchozí verze se nepamátuje.
+
+**Proč ne automatika:** Bez explicitní akce nelze zjistit „co bylo v kasičce ráno" — někdo to musí zadat.
+
+---
+
+## 2. Pohyby kasy
+
+**Co je pohyb:** Libovolný intradenní příjem nebo výdej hotovosti — kladná nebo záporná částka + povinná textová poznámka. Bez kategorií.
+
+**Neměnné:** Pohyby nelze smazat ani editovat. Chybu admin opraví protipohybem. Čistý audit trail.
+
+**Pouze dnešní den:** Admin zadává pohyby vždy pro aktuální den. Backdating není možný.
+
+**Proč bez kategorií:** Pro malou provozovnu je volná poznámka dostatečná a flexibilnější než číselník.
+
+---
+
+## 3. Stav kasy — výpočet
+
+```
+Stav kasy = poslední Uzávěrka před dneškem (confirmed_balance)
+          + SUM(sales.total_amount) WHERE DATE(created_at) = dnes
+          + SUM(cash_movements.amount) WHERE date = dnes
+```
+
+Kasa je **globální** (jedna pro celou provozovnu) — tržby se počítají ze všech prodavaček dohromady.
+
+**První den (bez uzávěrky):** Stav kasy zobrazí „—" jako výchozí zůstatek + tržby dnes + pohyby dnes. Admin zadá reálný stav při první uzávěrce.
+
+---
+
+## 4. Zobrazení pro prodavačku (POS záložka „Pokladna")
+
+Nová záložka v `MobileTopBar` vedle „Prodej" a „Přehled".
+
+Prodavačka vidí:
+- Uzávěrka (poslední před dneškem): X Kč
+- Tržby dnes: Y Kč
+- Pohyby dnes: Z Kč (součet)
+- **Aktuální stav: X + Y + Z Kč**
+- Tabulka dnešních pohybů (čas, částka, poznámka) — read-only
+
+Prodavačka nic neupravuje.
+
+---
+
+## 5. Záložka „Kasa" v admin sekci
+
+Přidá se do `AdminLayout` nav jako nová položka.
+
+Stránka má tři sekce:
+
+1. **Dnešní stav** — hlavička: uzávěrka včera, tržby dnes, pohyby dnes, aktuální stav
+2. **Pohyby** — tabulka pohybů za dnešek (čas, částka, poznámka) + tlačítko „Přidat pohyb" (dialog: částka + poznámka)
+3. **Uzavření dne** — předvyplněný vypočítaný zůstatek, admin může upravit, tlačítko „Uzavřít den"
+
+Dole: tabulka historických uzávěrek (datum, potvrzený zůstatek, poznámka) a pohybů s filtrem data.
+
+---
+
+## 6. Datový model (nové tabulky)
+
+### `cash_closings`
+| sloupec | typ | poznámka |
+|---|---|---|
+| id | INT PK AI | |
+| date | DATE UNIQUE | jeden záznam na den, přepsatelný |
+| calculated_balance | DECIMAL(10,2) | co systém spočítal |
+| confirmed_balance | DECIMAL(10,2) | co admin potvrdil/upravil |
+| note | TEXT NULL | volitelná poznámka |
+| created_by | INT FK users | kdo uzavřel |
+| created_at | DATETIME | první uzávěrka |
+| updated_at | DATETIME | čas posledního přepisu |
+
+### `cash_movements`
+| sloupec | typ | poznámka |
+|---|---|---|
+| id | INT PK AI | |
+| date | DATE | vždy dnešní den při vytvoření |
+| amount | DECIMAL(10,2) | kladné nebo záporné |
+| note | TEXT NOT NULL | povinná poznámka |
+| created_by | INT FK users | kdo zadal |
+| created_at | DATETIME | |
+
+---
+
+## 7. API endpointy (nový soubor `backend/api/kasa.php`)
+
+| metoda | cesta | auth | popis |
+|---|---|---|---|
+| GET | /api/kasa/status | prodavacka + admin | dnešní stav kasy (výpočet) |
+| POST | /api/kasa/movements | admin | přidat pohyb |
+| GET | /api/kasa/movements | admin | seznam pohybů (filtr ?date=) |
+| POST | /api/kasa/close | admin | uložit/přepsat uzávěrku |
+| GET | /api/kasa/closings | admin | seznam uzávěrek (filtr ?from=&to=) |
+
 ### Statistiky (detailně)
 - Časové tržby: denní, měsíční, roční
 - Tržby per prodavačka (za zvolené období) — základ pro výplaty

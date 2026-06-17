@@ -127,3 +127,82 @@
 **Odpověď:** To řešit nemusíme, majiteli stačí vědět, kolik prodaly.
 
 ---
+
+---
+
+# Přehled kasy — Grill session log (2026-06-16)
+
+## Q1
+**Otázka:** V návrhu zmiňuješ „zůstatek pro uzavření z minulého dne". V systému teď žádná operace „zavření dne" neexistuje. Jak se ten zůstatek stanoví — explicitní uzavření dne (admin/prodavačka ručně stiskne „Uzavřít den"), nebo automatický výpočet o půlnoci?
+
+**Odpověď:** Explicitní uzavření dne, admin ho provede.
+
+---
+
+## Q2
+**Otázka:** Co přesně při uzavření nastane? (a) Admin zadá fyzicky přepočtenou hotovost, (b) systém vypočítá sám, (c) systém navrhne vypočítaný zůstatek, admin může přepsat.
+
+**Odpověď:** c
+
+---
+
+## Q3
+**Otázka:** Pohyby kasy — volné položky (+/- částka + textová poznámka), nebo typ pohybu z číselníku (příjem / výdej / korekce…)?
+
+**Odpověď:** a (volný pohyb — jen částka + poznámka)
+
+---
+
+## Q4
+**Otázka:** Kasa je jedna pro celou provozovnu, nebo každá prodavačka má svou?
+
+**Odpověď:** a (jedna kasa, globální)
+
+---
+
+## Q5
+**Otázka:** Co přesně prodavačka vidí na záložce „Pokladna" — jen čísla (uzávěrka včera, tržby dnes, stav dnes), nebo i tabulku pohybů admina?
+
+**Odpověď:** b (čísla + přehled pohybů)
+
+---
+
+## Q6
+**Otázka:** Co se zobrazí první den, kdy žádná uzávěrka ještě neproběhla — počáteční stav 0, nebo admin zadá reálný stav?
+
+**Odpověď:** b (admin zadá reálný stav při první uzávěrce; před tím „—")
+
+---
+
+## Q7
+**Otázka:** Návrh stránky admin Kasa: (1) dnešní stav v hlavičce, (2) tabulka pohybů + tlačítko „Přidat pohyb", (3) sekce uzavření dne. Vypadá to dobře?
+
+**Odpověď:** Vypadá dobře, jdeme dál.
+
+---
+
+## Q8
+**Otázka:** Může admin přidat pohyb zpětně pro minulý den, nebo jen pro dnešek?
+
+**Odpověď:** a (jen dnešní den)
+
+---
+
+## Q9
+**Otázka:** Může mít jeden den více uzávěrek — (a) jen jedna, (b) přepsat poslední, (c) více záznamů?
+
+**Odpověď:** b (jedna uzávěrka na den, přepsatelná)
+
+---
+
+## Q10
+**Otázka:** Může admin smazat nebo opravit chybný pohyb — (a) pouze přidat protipohyb, (b) smazat dnešní, (c) plná editace?
+
+**Odpověď:** a (pouze protipohyb, audit trail zůstane čistý)
+
+---
+
+## Q11
+**Otázka:** Potřebuje admin vidět historii uzávěrek a pohybů z minulých dní, nebo jen dnešní den?
+
+**Odpověď:** b (přehled historických uzávěrek a pohybů s filtrem data)

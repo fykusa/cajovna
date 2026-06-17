@@ -1,0 +1,18 @@
+.state { display: flex; align-items: center; justify-content: center; padding: 40px 16px; color: var(--mob-fg-dim, #888); font-size: 14px; }
+.wrap  { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+.stats { display: flex; flex-direction: column; gap: 8px; }
+.stat  { background: var(--mob-surface); border: 1px solid var(--mob-border); border-radius: var(--mob-r); padding: 12px 16px; }
+.statTotal { border-color: var(--mob-accent); }
+.label { font-size: 12px; color: var(--mob-fg-dim, #888); margin-bottom: 4px; }
+.value { font-size: 20px; font-weight: 700; color: var(--mob-fg); }
+.statTotal .value { color: var(--mob-accent); }
+
+.movements { display: flex; flex-direction: column; gap: 4px; }
+.movTitle  { font-size: 12px; color: var(--mob-fg-dim, #888); margin-bottom: 4px; }
+.movement  { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--mob-surface); border: 1px solid var(--mob-border); border-radius: var(--mob-r); font-size: 13px; }
+.movTime   { color: var(--mob-fg-dim, #888); min-width: 40px; }
+.movAmount { font-weight: 600; white-space: nowrap; }
+.pos { color: var(--mob-accent); }
+.neg { color: #f4a64a; }
+.movNote   { flex: 1; color: var(--mob-fg); }
