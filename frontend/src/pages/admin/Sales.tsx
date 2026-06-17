@@ -54,6 +54,7 @@ export default function Sales() {
     try {
       await cancelCajovnaSale(id)
       setConfirmId(null)
+      toast.success('Prodej byl stornován.')
       await load()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Chyba při stornování')
