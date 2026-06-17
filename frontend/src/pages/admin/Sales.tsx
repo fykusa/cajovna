@@ -172,7 +172,7 @@ export default function Sales() {
             </div>
             <div className={styles.stat}>
               <div className={styles.statLabel}>Počet prodejů</div>
-              <div className={styles.statValue}>{sales.length}</div>
+              <div className={styles.statValue}>{activeSales.length}</div>
             </div>
           </div>
 
