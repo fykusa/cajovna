@@ -133,7 +133,7 @@ function handleListMovements(): void {
             'SELECT cm.id, cm.date, cm.amount, cm.note, cm.created_by,
                     u.username AS created_by_username, cm.created_at
              FROM 90_cashflow cm JOIN users u ON u.id = cm.created_by
-             WHERE cm.date BETWEEN :from AND :to ORDER BY cm.created_at ASC'
+             WHERE cm.date BETWEEN :from AND :to ORDER BY cm.date DESC, cm.created_at DESC'
         );
         $stmt->execute(['from' => $from, 'to' => $to]);
     } else {
