@@ -44,10 +44,10 @@ export default function CajeKasa() {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
-    if (noteType === 'vybrani' && status) {
+    if (status && (noteType === 'vybrani' || (noteType === 'vlastni' && amount < 0))) {
       const balance = status.stav_kasy ?? (status.trzby_dnes + status.pohyby_dnes)
       if (Math.abs(amount) > balance) {
-        setFormError(`Výběr ${fmtKc(Math.abs(amount))} přesahuje stav kasy (${fmtKc(balance)})`)
+        setFormError(`Částka ${fmtKc(Math.abs(amount))} přesahuje stav kasy (${fmtKc(balance)})`)
         return
       }
     }

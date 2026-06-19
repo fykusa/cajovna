@@ -148,6 +148,25 @@ describe('CajeKasa', () => {
     expect(mockAdd).not.toHaveBeenCalled()
   })
 
+  it('vlastní záporná hodnota nad stav kasy zobrazí chybu', async () => {
+    mockGet.mockResolvedValue(STATUS_WITH_CLOSING) // stav_kasy = 1300
+    render(<CajeKasa />)
+    await waitFor(() => screen.getByRole('button', { name: /přidat pohyb/i }))
+    fireEvent.click(screen.getByRole('button', { name: /přidat pohyb/i }))
+
+    const form = screen.getByTestId('add-form')
+    fireEvent.change(within(form).getByRole('combobox'), { target: { value: 'vlastni' } })
+    await waitFor(() => within(form).getByPlaceholderText('Poznámka'))
+    fireEvent.change(within(form).getByPlaceholderText('Poznámka'), { target: { value: 'test' } })
+    fireEvent.change(within(form).getByRole('spinbutton'), { target: { value: '-9999' } })
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(screen.getByText(/přesahuje stav kasy/i)).toBeInTheDocument()
+    })
+    expect(mockAdd).not.toHaveBeenCalled()
+  })
+
   it('zobrazí vlastní poznámku při výběru "vlastní"', async () => {
     mockGet.mockResolvedValue(STATUS_WITH_CLOSING)
     render(<CajeKasa />)
