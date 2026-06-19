@@ -28,7 +28,7 @@
 .username { font-size: 13px; color: var(--mob-fg-2); }
 .logoutBtn {
   background: none; border: none; cursor: pointer;
-  font-size: 18px; color: var(--mob-muted); padding: 4px;
-  line-height: 1;
+  color: var(--mob-muted); padding: 4px;
+  display: flex; align-items: center;
 }
 .logoutBtn:active { opacity: 0.6; }

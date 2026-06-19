@@ -7,6 +7,22 @@
 .label { font-size: 12px; color: var(--mob-fg-dim, #888); margin-bottom: 4px; }
 .value { font-size: 20px; font-weight: 700; color: var(--mob-fg); }
 .statTotal .value { color: var(--mob-accent); }
+.dateHint { font-size: 13px; font-weight: 400; color: var(--mob-fg-dim, #888); }
+
+.addBtn { width: 100%; padding: 12px; border: none; border-radius: var(--mob-r); background: var(--mob-accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+.addBtn:active { opacity: 0.85; }
+
+.form { display: flex; flex-direction: column; gap: 10px; background: var(--mob-surface); border: 1px solid var(--mob-border); border-radius: var(--mob-r); padding: 14px; }
+.formError { font-size: 13px; color: #f4a64a; }
+.select { width: 100%; padding: 10px 12px; border: 1px solid var(--mob-border); border-radius: var(--mob-r); background: var(--mob-bg); color: var(--mob-fg); font-size: 15px; }
+.input  { width: 100%; padding: 10px 12px; border: 1px solid var(--mob-border); border-radius: var(--mob-r); background: var(--mob-bg); color: var(--mob-fg); font-size: 15px; box-sizing: border-box; }
+.amountRow  { display: flex; align-items: center; gap: 8px; }
+.amountRow span { font-size: 20px; font-weight: 700; min-width: 16px; text-align: center; }
+.amountInput { flex: 1; }
+.formBtns { display: flex; gap: 8px; }
+.saveBtn   { flex: 1; padding: 11px; border: none; border-radius: var(--mob-r); background: var(--mob-accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+.cancelBtn { flex: 1; padding: 11px; border: 1px solid var(--mob-border); border-radius: var(--mob-r); background: transparent; color: var(--mob-fg-dim, #888); font-size: 15px; cursor: pointer; }
+.saveBtn:disabled { opacity: 0.6; cursor: default; }
 
 .movements { display: flex; flex-direction: column; gap: 4px; }
 .movTitle  { font-size: 12px; color: var(--mob-fg-dim, #888); margin-bottom: 4px; }

@@ -20,7 +20,7 @@ if ($method === 'GET' && preg_match('#/api/kasa/status$#', $path)) {
     handleStatus();
 
 } elseif ($method === 'POST' && preg_match('#/api/kasa/movements$#', $path)) {
-    $auth = requireAdmin();
+    $auth = requireAuth();
     handleAddMovement($auth);
 
 } elseif ($method === 'GET' && preg_match('#/api/kasa/movements$#', $path)) {

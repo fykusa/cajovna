@@ -34,7 +34,11 @@ export default function MobileTopBar({ mode, onModeChange, username, onLogout }:
       <div className={styles.user}>
         <span className={styles.username}>{username}</span>
         <button className={styles.logoutBtn} onClick={onLogout} aria-label="Odhlásit">
-          ↩
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+            <polyline points="8 7 2 12 8 17"/>
+            <line x1="2" y1="12" x2="14" y2="12"/>
+            <path d="M14 7a5 5 0 0 1 0 10"/>
+          </svg>
         </button>
       </div>
     </nav>
