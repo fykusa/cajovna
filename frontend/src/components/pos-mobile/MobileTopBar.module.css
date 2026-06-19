@@ -30,5 +30,8 @@
   background: none; border: none; cursor: pointer;
   color: var(--mob-muted); padding: 4px;
   display: flex; align-items: center;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
 }
+.logoutBtn:hover  { background: rgba(255,255,255,0.07); color: var(--mob-fg); }
 .logoutBtn:active { opacity: 0.6; }
