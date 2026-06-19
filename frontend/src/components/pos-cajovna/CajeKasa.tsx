@@ -143,7 +143,7 @@ export default function CajeKasa() {
               onChange={(e) => setAmount(Number(e.target.value))}
               required
               autoFocus
-              min={1}
+              min={noteType === 'vlastni' ? undefined : 1}
             />
           </div>
           <div className={styles.formBtns}>
