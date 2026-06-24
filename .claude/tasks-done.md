@@ -1,5 +1,7 @@
 # Tasks — Cajovna (hotovo)
 
+- [x] [2026-06-17] **Storno prodejů** (#1): Soft-delete (`cancelled_at`/`cancelled_by`) na `00_prodej`. Admin stornuje z Přehledu (detail prodeje + confirm overlay). Prodavačka stornuje vlastní dnešní prodej z CajeHistory. Stornované prodeje se nezapočítají do statistik. 212/212 testů. Commit: `dd81f1a`.
+
 - [x] [2026-06-17] **POS Desktop — přístup na /pos-desktop** (#4): Desktop POS je dostupný přímo přes URL `/pos-desktop`. Prodavačka se po přihlášení routuje na `/cajovna`. Žádná select obrazovka.
 
 - [x] [2026-06-17] **Google Sheets → DB Sync (fáze 2 — sync logika)** (#3): Záložka CAJE v Google Sheets → tabulka `01_caje` v DB. Sync logika implementována, merge do masteru.
