@@ -9,8 +9,11 @@
 .statTotal .value { color: var(--mob-accent); }
 .dateHint { font-size: 13px; font-weight: 400; color: var(--mob-fg-dim, #888); }
 
-.addBtn { width: 100%; padding: 12px; border: none; border-radius: var(--mob-r); background: var(--mob-accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
-.addBtn:active { opacity: 0.85; }
+.btns { display: flex; flex-direction: column; gap: 8px; }
+.addBtn  { width: 100%; padding: 12px; border: none; border-radius: var(--mob-r); background: var(--mob-accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+.addBtn:active  { opacity: 0.85; }
+.closeBtn { width: 100%; padding: 12px; border: 1px solid var(--mob-border); border-radius: var(--mob-r); background: transparent; color: var(--mob-fg-dim, #888); font-size: 15px; font-weight: 600; cursor: pointer; }
+.closeBtn:active { opacity: 0.75; }
 
 .form { display: flex; flex-direction: column; gap: 10px; background: var(--mob-surface); border: 1px solid var(--mob-border); border-radius: var(--mob-r); padding: 14px; }
 .formError { font-size: 13px; color: #f4a64a; }

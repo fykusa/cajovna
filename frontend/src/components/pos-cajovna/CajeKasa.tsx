@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getKasaStatus, addKasaMovement } from '../../api/kasa'
+import { getKasaStatus, addKasaMovement, closeKasa } from '../../api/kasa'
 import type { KasaStatus } from '../../types'
 import styles from './CajeKasa.module.css'
 
@@ -22,6 +22,11 @@ export default function CajeKasa() {
   const [customNote, setCustomNote] = useState('')
   const [saving, setSaving]         = useState(false)
   const [formError, setFormError]   = useState<string | null>(null)
+  const [showCloseForm, setShowCloseForm] = useState(false)
+  const [closeBalance, setCloseBalance]   = useState(0)
+  const [closeNote, setCloseNote]         = useState('')
+  const [closeSaving, setCloseSaving]     = useState(false)
+  const [closeError, setCloseError]       = useState<string | null>(null)
 
   const loadStatus = useCallback(() => {
     setLoading(true)
@@ -40,6 +45,28 @@ export default function CajeKasa() {
     setAmount(0)
     setCustomNote('')
     setFormError(null)
+  }
+
+  function resetCloseForm() {
+    setShowCloseForm(false)
+    setCloseBalance(0)
+    setCloseNote('')
+    setCloseError(null)
+  }
+
+  async function handleClose(e: React.FormEvent) {
+    e.preventDefault()
+    setCloseSaving(true)
+    setCloseError(null)
+    try {
+      await closeKasa(closeBalance, closeNote || undefined)
+      resetCloseForm()
+      await loadStatus()
+    } catch (e) {
+      setCloseError(e instanceof Error ? e.message : 'Chyba uzávěrky')
+    } finally {
+      setCloseSaving(false)
+    }
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -103,11 +130,18 @@ export default function CajeKasa() {
         </div>
       </div>
 
-      {!showForm ? (
-        <button className={styles.addBtn} onClick={() => setShowForm(true)}>
-          + Přidat pohyb
-        </button>
-      ) : (
+      {!showForm && !showCloseForm && (
+        <div className={styles.btns}>
+          <button className={styles.addBtn} onClick={() => setShowForm(true)}>
+            + Přidat pohyb
+          </button>
+          <button className={styles.closeBtn} onClick={() => setShowCloseForm(true)}>
+            Uzavřít den
+          </button>
+        </div>
+      )}
+
+      {showForm && (
         <form className={styles.form} onSubmit={handleAdd} data-testid="add-form">
           {formError && <div className={styles.formError}>{formError}</div>}
           <select
@@ -151,6 +185,37 @@ export default function CajeKasa() {
               {saving ? 'Ukládám…' : 'Přidat'}
             </button>
             <button type="button" className={styles.cancelBtn} onClick={resetForm}>
+              Zrušit
+            </button>
+          </div>
+        </form>
+      )}
+
+      {showCloseForm && (
+        <form className={styles.form} onSubmit={handleClose} data-testid="close-form">
+          {closeError && <div className={styles.formError}>{closeError}</div>}
+          <input
+            className={styles.input}
+            type="number"
+            placeholder="Potvrzený zůstatek (Kč)"
+            value={closeBalance || ''}
+            onChange={(e) => setCloseBalance(Number(e.target.value))}
+            required
+            autoFocus
+            min={0}
+          />
+          <input
+            className={styles.input}
+            type="text"
+            placeholder="Poznámka (nepovinná)"
+            value={closeNote}
+            onChange={(e) => setCloseNote(e.target.value)}
+          />
+          <div className={styles.formBtns}>
+            <button type="submit" className={styles.saveBtn} disabled={closeSaving}>
+              {closeSaving ? 'Ukládám…' : 'Uzavřít den'}
+            </button>
+            <button type="button" className={styles.cancelBtn} onClick={resetCloseForm}>
               Zrušit
             </button>
           </div>

@@ -28,7 +28,7 @@ if ($method === 'GET' && preg_match('#/api/kasa/status$#', $path)) {
     handleListMovements();
 
 } elseif ($method === 'POST' && preg_match('#/api/kasa/close$#', $path)) {
-    $auth = requireAdmin();
+    $auth = requireAuth();
     handleClose($auth);
 
 } elseif ($method === 'GET' && preg_match('#/api/kasa/closings$#', $path)) {
