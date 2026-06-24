@@ -4,7 +4,6 @@ import { useCajovnaPOS, CAJE_VIEW_ORDER, type CajeView } from '../hooks/useCajov
 import { useAuthStore } from '../store/authStore'
 import MobileTopBar from '../components/pos-mobile/MobileTopBar'
 import MobileHeader from '../components/pos-mobile/MobileHeader'
-import MobileSuccess from '../components/pos-mobile/MobileSuccess'
 import CajeProgressBar from '../components/pos-cajovna/CajeProgressBar'
 import CajeCategories from '../components/pos-cajovna/CajeCategories'
 import CajeTeas from '../components/pos-cajovna/CajeTeas'
@@ -23,7 +22,6 @@ const VIEW_TITLES: Record<CajeView, string> = {
   packaging:  'Typ balení',
   quantity:   'Množství',
   checkout:   'Přehled prodeje',
-  success:    'Hotovo',
 }
 
 export default function CajovnaPOS() {
@@ -59,7 +57,7 @@ export default function CajovnaPOS() {
   if (pos.loading) return <div className={styles.loading}>Načítám…</div>
   if (pos.error)   return <div className={styles.loading}>Chyba: {pos.error}</div>
 
-  const showBack = pos.view !== 'home' && pos.view !== 'success'
+  const showBack = pos.view !== 'home'
   const categoryName = pos.selectedCategory
     ? `${pos.selectedCategory.kategorie}${pos.selectedCategory.zeme ? ` — ${pos.selectedCategory.zeme}` : ''}`
     : ''
@@ -76,14 +74,12 @@ export default function CajovnaPOS() {
 
         {mode === 'pos' && (
           <div className={`${styles.view} ${slideClass}`}>
-            {pos.view !== 'success' && (
-              <MobileHeader
-                title={VIEW_TITLES[pos.view]}
-                subtitle={pos.view === 'teas' ? categoryName : undefined}
-                cartCount={pos.cart.length}
-                onBack={showBack ? pos.goBack : undefined}
-              />
-            )}
+            <MobileHeader
+              title={VIEW_TITLES[pos.view]}
+              subtitle={pos.view === 'teas' ? categoryName : undefined}
+              cartCount={pos.cart.length}
+              onBack={showBack ? pos.goBack : undefined}
+            />
             <CajeProgressBar view={pos.view} />
 
             {pos.view === 'home' && (
@@ -122,9 +118,6 @@ export default function CajovnaPOS() {
                 onConfirm={handleConfirmCheckout}
                 onBack={pos.goBack}
               />
-            )}
-            {pos.view === 'success' && (
-              <MobileSuccess total={pos.lastTotal} onNewSale={pos.newSale} />
             )}
           </div>
         )}

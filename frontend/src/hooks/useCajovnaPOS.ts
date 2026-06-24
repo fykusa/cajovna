@@ -3,10 +3,10 @@ import type { TeaRow, CajeCategory, CajeBaleni, CajeCartItem } from '../types'
 import { getTeas } from '../api/teas'
 import { createCajovnaSale } from '../api/cajovna'
 
-export type CajeView = 'home' | 'categories' | 'teas' | 'packaging' | 'quantity' | 'checkout' | 'success'
+export type CajeView = 'home' | 'categories' | 'teas' | 'packaging' | 'quantity' | 'checkout'
 
 export const CAJE_VIEW_ORDER: CajeView[] = [
-  'home', 'categories', 'teas', 'packaging', 'quantity', 'checkout', 'success',
+  'home', 'categories', 'teas', 'packaging', 'quantity', 'checkout',
 ]
 
 export function buildBaleni(tea: TeaRow): CajeBaleni[] {
@@ -129,8 +129,7 @@ export function useCajovnaPOS() {
       }))
       const res = await createCajovnaSale(polozky)
       setLastTotal(res.total)
-      setCart([])
-      setView('success')
+      newSale()
     } catch (e) {
       setCheckoutError(e instanceof Error ? e.message : 'Chyba při zápisu prodeje')
     }

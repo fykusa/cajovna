@@ -7,10 +7,10 @@ import { createSale } from '../api/sales'
 import { getPackagingOptions, getBagList, buildCartItem, type PackagingOption, type BagListItem } from './posHelpers'
 import { cartTotal, bagUnitPrice } from '../components/pos/cartTotals'
 
-export type MobileView = 'home' | 'categories' | 'teas' | 'packaging' | 'quantity' | 'bags' | 'checkout' | 'success'
+export type MobileView = 'home' | 'categories' | 'teas' | 'packaging' | 'quantity' | 'bags' | 'checkout'
 
 export const VIEW_ORDER: MobileView[] = [
-  'home', 'categories', 'teas', 'packaging', 'quantity', 'bags', 'checkout', 'success',
+  'home', 'categories', 'teas', 'packaging', 'quantity', 'bags', 'checkout',
 ]
 
 export const QUANTITY_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20]
@@ -130,8 +130,7 @@ export function useMobilePOS() {
       }
       await createSale(payload)
       setLastTotal(total)
-      setCart([])
-      setView('success')
+      newSale()
     } catch (e) {
       setCheckoutError(e instanceof Error ? e.message : 'Chyba při zápisu prodeje')
     }

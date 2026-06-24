@@ -15,7 +15,6 @@ import MobilePackaging from '../components/pos-mobile/MobilePackaging'
 import MobileQuantity from '../components/pos-mobile/MobileQuantity'
 import MobileBags from '../components/pos-mobile/MobileBags'
 import MobileCheckout from '../components/pos-mobile/MobileCheckout'
-import MobileSuccess from '../components/pos-mobile/MobileSuccess'
 import styles from './MobilePOS.module.css'
 
 const VIEW_TITLES: Record<MobileView, string> = {
@@ -26,7 +25,6 @@ const VIEW_TITLES: Record<MobileView, string> = {
   quantity: 'Množství',
   bags: 'Typ pytlíku',
   checkout: 'Přehled prodeje',
-  success: 'Hotovo',
 }
 
 export default function MobilePOS() {
@@ -62,7 +60,7 @@ export default function MobilePOS() {
   if (pos.loading) return <div className={styles.loading}>Načítám…</div>
   if (pos.error) return <div className={styles.loading}>Chyba: {pos.error}</div>
 
-  const showBack = pos.view !== 'home' && pos.view !== 'success'
+  const showBack = pos.view !== 'home'
   const packagingOptions = pos.selectedTea ? getPackagingOptions(pos.selectedTea) : []
 
   return (
@@ -76,14 +74,12 @@ export default function MobilePOS() {
         />
         {mode === 'pos' && (
           <div className={`${styles.view} ${slideClass}`}>
-            {pos.view !== 'success' && (
-              <MobileHeader
-                title={VIEW_TITLES[pos.view]}
-                subtitle={pos.selectedCategory?.name}
-                cartCount={pos.cart.length}
-                onBack={showBack ? pos.goBack : undefined}
-              />
-            )}
+            <MobileHeader
+              title={VIEW_TITLES[pos.view]}
+              subtitle={pos.selectedCategory?.name}
+              cartCount={pos.cart.length}
+              onBack={showBack ? pos.goBack : undefined}
+            />
             <MobileProgressBar view={pos.view} />
 
             {pos.view === 'home' && (
@@ -125,9 +121,6 @@ export default function MobilePOS() {
                 onConfirm={handleConfirmCheckout}
                 onBack={pos.goBack}
               />
-            )}
-            {pos.view === 'success' && (
-              <MobileSuccess total={pos.lastTotal} onNewSale={pos.newSale} />
             )}
           </div>
         )}
