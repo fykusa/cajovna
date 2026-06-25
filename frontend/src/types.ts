@@ -192,7 +192,7 @@ export interface CashMovement {
 
 export interface KasaStatus {
   last_closing: { date: string; confirmed_balance: number } | null
-  today_closing: { confirmed_balance: number; note: string | null; created_by_username: string } | null
+  today_closing: { confirmed_balance: number; calculated_balance: number; note: string | null; created_by_username: string } | null
   trzby_dnes: number
   pohyby_dnes: number
   stav_kasy: number | null

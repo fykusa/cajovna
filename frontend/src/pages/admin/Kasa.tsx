@@ -8,6 +8,7 @@ import {
   getKasaClosings,
 } from '../../api/kasa'
 import Modal from '../../components/Modal'
+import { periodRange, type Period } from './periodRange'
 import styles from './Kasa.module.css'
 
 const fmtKc = (n: number) => n.toLocaleString('cs-CZ') + ' Kč'
@@ -46,6 +47,7 @@ export default function Kasa() {
   const [movements, setMovements]       = useState<CashMovement[]>([])
   const [historyFrom, setHistoryFrom]   = useState(sevenDaysAgoIso())
   const [historyTo, setHistoryTo]       = useState(todayIso())
+  const [activePeriod, setActivePeriod] = useState<Period | null>(null)
   const didInitialHistoryLoad           = useRef(false)
 
   const loadStatus = useCallback(async () => {
@@ -112,12 +114,12 @@ export default function Kasa() {
     }
   }
 
-  const loadHistory = useCallback(async () => {
+  const loadHistory = useCallback(async (from = historyFrom, to = historyTo) => {
     setError(null)
     try {
       const [c, allMovements] = await Promise.all([
-        getKasaClosings(historyFrom, historyTo),
-        getKasaMovements(undefined, historyFrom, historyTo),
+        getKasaClosings(from, to),
+        getKasaMovements(undefined, from, to),
       ])
       setClosings(c)
       setMovements(allMovements)
@@ -132,6 +134,14 @@ export default function Kasa() {
       loadHistory()
     }
   }, [loadHistory])
+
+  function selectPeriod(p: Period) {
+    const range = periodRange(p)
+    setHistoryFrom(range.from)
+    setHistoryTo(range.to)
+    setActivePeriod(p)
+    loadHistory(range.from, range.to)
+  }
 
   if (loading) return <p className={styles.loading}>Načítám…</p>
   if (error && !status) return <p className={styles.error}>{error}</p>
@@ -167,6 +177,14 @@ export default function Kasa() {
                 {fmtKc(status.pohyby_dnes)}
               </div>
             </div>
+            {status.today_closing && (
+              <div className={styles.stat}>
+                <div className={styles.statLabel}>Dýžko dnes</div>
+                <div className={styles.statValue} data-testid="stat-dyzko">
+                  {fmtKc(status.today_closing.confirmed_balance - status.today_closing.calculated_balance)}
+                </div>
+              </div>
+            )}
             <div className={`${styles.stat} ${styles.statTotal}`}>
               <div className={styles.statLabel}>Aktuální stav kasy</div>
               <div className={styles.statValue} data-testid="stat-stav">
@@ -307,22 +325,30 @@ export default function Kasa() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Historie</h2>
         <div className={styles.historyFilter}>
-          <span className={styles.filterLabel}>Od</span>
+          {([{ key: 'month', label: 'Tento měsíc' }, { key: 'lastmonth', label: 'Minulý měsíc' }] as { key: Period; label: string }[]).map(({ key, label }) => (
+            <button
+              key={key}
+              className={`${styles.periodBtn}${activePeriod === key ? ' ' + styles.active : ''}`}
+              onClick={() => selectPeriod(key)}
+            >
+              {label}
+            </button>
+          ))}
           <input
             type="date"
             value={historyFrom}
-            onChange={(e) => setHistoryFrom(e.target.value)}
+            onChange={(e) => { setHistoryFrom(e.target.value); setActivePeriod(null) }}
             className={styles.dateInput}
           />
-          <span className={styles.filterLabel}>Do</span>
+          <span className={styles.filterLabel}>–</span>
           <input
             type="date"
             value={historyTo}
-            onChange={(e) => setHistoryTo(e.target.value)}
+            onChange={(e) => { setHistoryTo(e.target.value); setActivePeriod(null) }}
             className={styles.dateInput}
           />
-          <button onClick={loadHistory} className={styles.applyBtn}>
-            Načíst
+          <button onClick={() => loadHistory()} className={styles.applyBtn}>
+            Zobrazit
           </button>
         </div>
 
@@ -338,8 +364,9 @@ export default function Kasa() {
                 <thead>
                   <tr>
                     <th>Datum</th>
-                    <th>Potvrzený zůstatek</th>
-                    <th>Vypočítaný zůstatek</th>
+                    <th className={styles.tdNum}>Potvrzený zůstatek</th>
+                    <th className={styles.tdNum}>Vypočítaný zůstatek</th>
+                    <th className={styles.tdNum}>Dýžko</th>
                     <th>Poznámka</th>
                     <th>Uživatel</th>
                   </tr>
@@ -348,13 +375,32 @@ export default function Kasa() {
                   {closings.map((c) => (
                     <tr key={c.id}>
                       <td>{fmtDate(c.date)}</td>
-                      <td className={styles.pos}>{fmtKc(c.confirmed_balance)}</td>
-                      <td className={styles.tdDim}>{fmtKc(c.calculated_balance)}</td>
+                      <td className={`${styles.pos} ${styles.tdNum}`}>{fmtKc(c.confirmed_balance)}</td>
+                      <td className={`${styles.tdDim} ${styles.tdNum}`}>{fmtKc(c.calculated_balance)}</td>
+                      <td className={`${c.confirmed_balance - c.calculated_balance >= 0 ? styles.pos : styles.neg} ${styles.tdNum}`}>
+                        {fmtKc(c.confirmed_balance - c.calculated_balance)}
+                      </td>
                       <td>{c.note ?? '—'}</td>
                       <td className={styles.tdDim}>{c.created_by_username}</td>
                     </tr>
                   ))}
                 </tbody>
+                {closings.length > 1 && (() => {
+                  const sumConfirmed   = closings.reduce((s, c) => s + c.confirmed_balance, 0)
+                  const sumCalculated  = closings.reduce((s, c) => s + c.calculated_balance, 0)
+                  const sumDyzko       = sumConfirmed - sumCalculated
+                  return (
+                    <tfoot>
+                      <tr className={styles.summaryRow}>
+                        <td>Celkem</td>
+                        <td className={`${styles.pos} ${styles.tdNum}`}>{fmtKc(sumConfirmed)}</td>
+                        <td className={`${styles.tdDim} ${styles.tdNum}`}>{fmtKc(sumCalculated)}</td>
+                        <td className={`${sumDyzko >= 0 ? styles.pos : styles.neg} ${styles.tdNum}`}>{fmtKc(sumDyzko)}</td>
+                        <td /><td />
+                      </tr>
+                    </tfoot>
+                  )
+                })()}
               </table>
             </div>
           </>

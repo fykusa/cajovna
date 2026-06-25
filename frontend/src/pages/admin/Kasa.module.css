@@ -249,6 +249,16 @@
   background: #252525;
 }
 
+.summaryRow td {
+  border-top: 2px solid #d4a84b;
+  font-weight: 700;
+  background: #252010;
+  color: #e8c96a;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 0.95rem;
+}
+
 /* ── Historie filter ── */
 .historyFilter {
   display: flex;
@@ -256,6 +266,19 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+
+.periodBtn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s, color 0.15s;
+}
+.periodBtn:hover { background: #333; color: #fff; }
+.periodBtn.active { background: #d4a84b; color: #1a1a1a; border-color: #d4a84b; font-weight: 700; }
 
 .filterLabel {
   font-size: 0.8rem;
@@ -295,6 +318,7 @@
 .neg  { color: #f4a64a; font-weight: 600; }
 .tdTime { color: #888; font-size: 0.85rem; }
 .tdDim  { color: #666; }
+.tdNum, .table .tdNum { text-align: right; }
 
 .empty {
   color: #555;

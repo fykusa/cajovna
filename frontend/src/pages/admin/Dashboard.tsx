@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { getCajovnaProdeje, getCajovnaPolozky, getCajovnaKategorie, cancelCajovnaSale } from '../../api/cajovna'
 import { getUsers } from '../../api/users'
-import type { CajovnaProdej, CajePolozkaSale, CajeCategory, User } from '../../types'
+import { getKasaClosings } from '../../api/kasa'
+import type { CajovnaProdej, CajePolozkaSale, CajeCategory, CashClosing, User } from '../../types'
 import { useToast } from '../../components/toast/useToast'
 import ImportDialog from '../../components/admin/ImportDialog'
 import RevenueChart from '../../components/admin/RevenueChart'
@@ -34,6 +35,7 @@ export default function AdminDashboard() {
   const [showImport, setShowImport]     = useState(false)
   const [confirmId, setConfirmId]       = useState<number | null>(null)
   const [cancelling, setCancelling]     = useState(false)
+  const [closings, setClosings]         = useState<CashClosing[]>([])
 
   const toast = useToast()
 
@@ -42,11 +44,16 @@ export default function AdminDashboard() {
     setSelectedId(null)
     setItems([])
     try {
-      setSales(await getCajovnaProdeje({
-        from: f + ' 00:00:00',
-        to: t + ' 23:59:59',
-        ...(kat ? { kategorie: kat.kategorie, zeme: kat.zeme } : {}),
-      }))
+      const [salesData, closingsData] = await Promise.all([
+        getCajovnaProdeje({
+          from: f + ' 00:00:00',
+          to: t + ' 23:59:59',
+          ...(kat ? { kategorie: kat.kategorie, zeme: kat.zeme } : {}),
+        }),
+        getKasaClosings(f, t),
+      ])
+      setSales(salesData)
+      setClosings(closingsData)
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
@@ -128,6 +135,7 @@ export default function AdminDashboard() {
   const activeSales = visibleSales.filter((s) => !s.cancelled_at)
 
   const total = activeSales.reduce((s, sale) => s + sale.total_kc, 0)
+  const dyzko = closings.reduce((s, c) => s + (c.confirmed_balance - c.calculated_balance), 0)
   const selectedSale = visibleSales.find((s) => s.id === selectedId) ?? null
   const chartData = bucketRevenue(visibleSales, from, to)
 
@@ -274,6 +282,12 @@ export default function AdminDashboard() {
               <div className={styles.statLabel}>Prodejů</div>
               <div className={styles.statValue}>{activeSales.length}</div>
             </div>
+            {closings.length > 0 && (
+              <div className={styles.stat}>
+                <div className={styles.statLabel}>Dýžko</div>
+                <div className={styles.statValue}>{Math.round(dyzko).toLocaleString('cs-CZ')} Kč</div>
+              </div>
+            )}
           </div>
 
           <div className={styles.panels}>
