@@ -53,6 +53,15 @@ function handleStatus(): void {
     $lastClosing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
     $stmt = $pdo->prepare(
+        'SELECT cc.confirmed_balance, cc.note, u.username AS created_by_username
+         FROM 91_zaverka cc JOIN users u ON u.id = cc.created_by
+         WHERE cc.date = ? LIMIT 1'
+    );
+    $stmt->execute([$today]);
+    $todayClosing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    if ($todayClosing) $todayClosing['confirmed_balance'] = (float) $todayClosing['confirmed_balance'];
+
+    $stmt = $pdo->prepare(
         'SELECT COALESCE(SUM(total_kc), 0) FROM `00_prodej` WHERE DATE(created_at) = ? AND cancelled_at IS NULL'
     );
     $stmt->execute([$today]);
@@ -78,13 +87,14 @@ function handleStatus(): void {
         : null;
 
     echo json_encode([
-        'last_closing' => $lastClosing
+        'last_closing'  => $lastClosing
             ? ['date' => $lastClosing['date'], 'confirmed_balance' => (float) $lastClosing['confirmed_balance']]
             : null,
-        'trzby_dnes'  => $trzbyDnes,
-        'pohyby_dnes' => $pohybySum,
-        'stav_kasy'   => $stavKasy,
-        'movements'   => $movements,
+        'today_closing' => $todayClosing,
+        'trzby_dnes'    => $trzbyDnes,
+        'pohyby_dnes'   => $pohybySum,
+        'stav_kasy'     => $stavKasy,
+        'movements'     => $movements,
     ]);
 }
 

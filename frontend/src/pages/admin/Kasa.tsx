@@ -341,6 +341,7 @@ export default function Kasa() {
                     <th>Potvrzený zůstatek</th>
                     <th>Vypočítaný zůstatek</th>
                     <th>Poznámka</th>
+                    <th>Uživatel</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -350,6 +351,7 @@ export default function Kasa() {
                       <td className={styles.pos}>{fmtKc(c.confirmed_balance)}</td>
                       <td className={styles.tdDim}>{fmtKc(c.calculated_balance)}</td>
                       <td>{c.note ?? '—'}</td>
+                      <td className={styles.tdDim}>{c.created_by_username}</td>
                     </tr>
                   ))}
                 </tbody>

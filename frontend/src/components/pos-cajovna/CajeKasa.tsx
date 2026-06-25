@@ -222,6 +222,26 @@ export default function CajeKasa() {
         </form>
       )}
 
+      {status.today_closing && (
+        <div className={styles.closingInfo} data-testid="today-closing">
+          <div className={styles.closingTitle}>Uzávěrka dnes</div>
+          <div className={styles.closingRow}>
+            <span className={styles.closingLabel}>Potvrzený zůstatek</span>
+            <span className={styles.closingValue}>{fmtKc(status.today_closing.confirmed_balance)}</span>
+          </div>
+          {status.today_closing.note && (
+            <div className={styles.closingRow}>
+              <span className={styles.closingLabel}>Poznámka</span>
+              <span className={styles.closingValue}>{status.today_closing.note}</span>
+            </div>
+          )}
+          <div className={styles.closingRow}>
+            <span className={styles.closingLabel}>Provedl/a</span>
+            <span className={styles.closingValue}>{status.today_closing.created_by_username}</span>
+          </div>
+        </div>
+      )}
+
       {status.movements.length > 0 && (
         <div className={styles.movements} data-testid="movements-section">
           <div className={styles.movTitle}>Pohyby dnes</div>
