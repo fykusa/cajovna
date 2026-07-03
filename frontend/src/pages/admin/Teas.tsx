@@ -32,7 +32,7 @@ export default function AdminTeas() {
     setSyncing(true)
     try {
       const result = await syncFromSheets()
-      toast.success(`Sync hotový — ${result.inserted} záznamů`)
+      toast.success(`Sync hotový — ${result.synced} položek (${result.vyrazeno} vyřazeno)`)
       await load()
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Sync se nezdařil')

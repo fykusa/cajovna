@@ -350,7 +350,7 @@ export default function AdminDashboard() {
                         <li key={p.id} className={styles.detailRow}>
                           <span className={styles.detailQty}>{p.kusu}×</span>
                           <span className={styles.detailName}>
-                            {p.nazev ?? `Čaj #${p.caje_id}`}
+                            {p.nazev ?? p.caje_kod}
                             <span className={styles.detailCode}> ({BALENI_LABELS[p.baleni]})</span>
                           </span>
                           <span className={styles.detailPrices}>
