@@ -103,23 +103,27 @@ function assertUniqueKod(array $rows): void {
  * Vrací ['synced' => počet řádků v sheetu, 'vyrazeno' => počet V_SHEETU = 0 po syncu].
  */
 function sheetsUpsertCaje(PDO $pdo, array $rows): array {
+    if (empty($rows)) {
+        throw new RuntimeException('Sheet neobsahuje žádné platné řádky — sync přerušen.');
+    }
+
     $pdo->beginTransaction();
     try {
         $pdo->exec('UPDATE `01_caje` SET V_SHEETU = 0');
 
-        if (!empty($rows)) {
-            $cols     = SHEETS_COL_NAMES;
-            $dataCols = array_values(array_diff($cols, ['KOD']));
-            $sql = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`, `V_SHEETU`)'
-                 . ' VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ', 1)'
-                 . ' ON DUPLICATE KEY UPDATE '
-                 . implode(', ', array_map(fn($c) => "`$c` = VALUES(`$c`)", $dataCols))
-                 . ', `V_SHEETU` = 1';
-            $stmt = $pdo->prepare($sql);
-            foreach ($rows as $row) {
-                $stmt->execute(array_map(fn($c) => $row[$c] ?? null, $cols));
-            }
+        $cols     = SHEETS_COL_NAMES;
+        $dataCols = array_values(array_diff($cols, ['KOD']));
+        $sql = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`, `V_SHEETU`)'
+             . ' VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ', 1)'
+             . ' ON DUPLICATE KEY UPDATE '
+             . implode(', ', array_map(fn($c) => "`$c` = VALUES(`$c`)", $dataCols))
+             . ', `V_SHEETU` = 1';
+        $stmt = $pdo->prepare($sql);
+        foreach ($rows as $row) {
+            $stmt->execute(array_map(fn($c) => $row[$c] ?? null, $cols));
         }
+
+        $vyrazeno = (int) $pdo->query('SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 0')->fetchColumn();
 
         $pdo->commit();
     } catch (Throwable $e) {
@@ -127,6 +131,5 @@ function sheetsUpsertCaje(PDO $pdo, array $rows): array {
         throw $e;
     }
 
-    $vyrazeno = (int) $pdo->query('SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 0')->fetchColumn();
     return ['synced' => count($rows), 'vyrazeno' => $vyrazeno];
 }

@@ -71,5 +71,15 @@ ok('FK + JOIN: historie dohledá název vyřazené položky', $nazev === 'Bai Mu
 $pdo->exec('TRUNCATE TABLE `00_prodej_polozky`');
 $pdo->exec('DELETE FROM `00_prodej`');
 
+// --- 4. prázdný vstup → výjimka, DB netknutá ---
+try {
+    sheetsUpsertCaje($pdo, []);
+    ok('prázdný sheet hodí výjimku', false);
+} catch (RuntimeException $e) {
+    ok('prázdný sheet hodí výjimku', true);
+}
+$cnt = (int) $pdo->query("SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 1")->fetchColumn();
+ok('prázdný sheet nevyřadil žádné položky', $cnt === 2);
+
 echo "\n$PASS passed, $FAIL failed\n";
 exit($FAIL > 0 ? 1 : 0);
