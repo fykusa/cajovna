@@ -25,29 +25,17 @@ function sheetsFetchCsv(string $url): string {
 }
 
 /**
- * Hlavní sync: stáhne CSV, parsuje, TRUNCATE + INSERT do 01_caje.
- * Vrací ['inserted' => N].
+ * Hlavní sync: stáhne CSV, parsuje, ověří unikátnost KOD, upsertuje do 01_caje.
+ * Vrací ['synced' => N, 'vyrazeno' => M].
  */
 function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
     $raw = sheetsFetchCsv($csvUrl);
     $utf = dbtToUtf8($raw);
 
-    [$allRows] = parseCajeRows($utf);
+    [$rows] = parseCajeRows($utf);
+    assertUniqueKod($rows);
 
-    $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
-    $pdo->beginTransaction();
-    try {
-        $pdo->exec('TRUNCATE TABLE `01_caje`');
-        $inserted = insertCajeRows($pdo, $allRows);
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        throw $e;
-    } finally {
-        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
-    }
-
-    return ['inserted' => $inserted];
+    return sheetsUpsertCaje($pdo, $rows);
 }
 
 /**
@@ -109,19 +97,36 @@ function assertUniqueKod(array $rows): void {
 }
 
 /**
- * Vloží řádky do 01_caje. Vrací počet vložených.
+ * Upsert řádků do 01_caje podle KOD (UNIQUE klíč uq_kod).
+ * Řádky chybějící v $rows zůstanou v DB s V_SHEETU = 0 (vyřazené ze sheetu).
+ * Nikdy nemaže — 00_prodej_polozky.caje_kod má FK na 01_caje.KOD.
+ * Vrací ['synced' => počet řádků v sheetu, 'vyrazeno' => počet V_SHEETU = 0 po syncu].
  */
-function insertCajeRows(PDO $pdo, array $rows): int {
-    if (empty($rows)) return 0;
+function sheetsUpsertCaje(PDO $pdo, array $rows): array {
+    $pdo->beginTransaction();
+    try {
+        $pdo->exec('UPDATE `01_caje` SET V_SHEETU = 0');
 
-    $cols = SHEETS_COL_NAMES;
-    $ph   = '(' . implode(',', array_fill(0, count($cols), '?')) . ')';
-    $sql  = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`) VALUES ' . $ph;
-    $stmt = $pdo->prepare($sql);
+        if (!empty($rows)) {
+            $cols     = SHEETS_COL_NAMES;
+            $dataCols = array_values(array_diff($cols, ['KOD']));
+            $sql = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`, `V_SHEETU`)'
+                 . ' VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ', 1)'
+                 . ' ON DUPLICATE KEY UPDATE '
+                 . implode(', ', array_map(fn($c) => "`$c` = VALUES(`$c`)", $dataCols))
+                 . ', `V_SHEETU` = 1';
+            $stmt = $pdo->prepare($sql);
+            foreach ($rows as $row) {
+                $stmt->execute(array_map(fn($c) => $row[$c] ?? null, $cols));
+            }
+        }
 
-    foreach ($rows as $row) {
-        $vals = array_map(fn($c) => $row[$c] ?? null, $cols);
-        $stmt->execute($vals);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
     }
-    return count($rows);
+
+    $vyrazeno = (int) $pdo->query('SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 0')->fetchColumn();
+    return ['synced' => count($rows), 'vyrazeno' => $vyrazeno];
 }

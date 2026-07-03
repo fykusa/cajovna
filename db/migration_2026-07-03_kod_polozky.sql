@@ -4,6 +4,8 @@
 -- Pořadí: TRUNCATE 01_caje musí proběhnout dřív, než na ni vznikne FK.
 -- TRUNCATE nelze na 00_prodej (míří na ni FK z položek) → DELETE + reset AI.
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 TRUNCATE TABLE `01_caje`;
 ALTER TABLE `01_caje`
   ADD COLUMN `KOD` VARCHAR(32) NOT NULL AFTER `id`,
@@ -15,6 +17,10 @@ DELETE FROM `00_prodej`;
 ALTER TABLE `00_prodej` AUTO_INCREMENT = 1;
 
 ALTER TABLE `00_prodej_polozky`
-  DROP COLUMN `caje_id`,
-  ADD COLUMN `caje_kod` VARCHAR(32) NOT NULL AFTER `prodej_id`,
+  DROP FOREIGN KEY `00_prodej_polozky_ibfk_2`;
+ALTER TABLE `00_prodej_polozky`
+  CHANGE COLUMN `caje_id` `caje_kod` VARCHAR(32) NOT NULL;
+ALTER TABLE `00_prodej_polozky`
   ADD CONSTRAINT `fk_polozky_kod` FOREIGN KEY (`caje_kod`) REFERENCES `01_caje`(`KOD`);
+
+SET FOREIGN_KEY_CHECKS = 1;
