@@ -2,9 +2,9 @@
 // Sync záložky CAJE z Google Sheets → tabulka `01_caje`.
 require_once __DIR__ . '/db_transfer.php';
 
-// Indexy sloupců v sheetu, které bereme (0-based, A=0).
-const SHEETS_COL_INDICES = [0, 1, 2, 3, 4, 5, 6, 9, 10, 13, 14, 17, 18];
-const SHEETS_COL_NAMES   = ['KATEGORIE', 'ZEME', 'AKTIV', 'NAZEV', 'POZNAMKA',
+// Indexy sloupců v sheetu, které bereme (0-based, A=0). D = KOD (od 2026-07).
+const SHEETS_COL_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 14, 15, 18, 19];
+const SHEETS_COL_NAMES   = ['KATEGORIE', 'ZEME', 'AKTIV', 'KOD', 'NAZEV', 'POZNAMKA',
                              'MN1', 'CENA1', 'MN2', 'CENA2', 'MN3', 'CENA3', 'MN4', 'CENA4'];
 
 /**
@@ -85,11 +85,27 @@ function parseCajeRows(string $csvUtf8): array {
         // Přeskočit řádky bez kategorie nebo bez názvu
         if ($row['KATEGORIE'] === null) continue;
         if ($row['NAZEV'] === null) continue;
+        if ($row['KOD'] === null) continue;
 
         $rows[] = $row;
     }
     fclose($fh);
     return [$rows];
+}
+
+/**
+ * Ověří unikátnost KOD napříč parsovanými řádky.
+ * Duplicita = chyba dat v sheetu → RuntimeException (sync se nesmí provést).
+ */
+function assertUniqueKod(array $rows): void {
+    $seen = [];
+    foreach ($rows as $row) {
+        $kod = $row['KOD'];
+        if (isset($seen[$kod])) {
+            throw new RuntimeException('Duplicitní KOD v sheetu: ' . $kod);
+        }
+        $seen[$kod] = true;
+    }
 }
 
 /**
