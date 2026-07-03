@@ -9,17 +9,17 @@ vi.mock('../api/teas')
 vi.mock('../api/cajovna')
 
 const row1: TeaRow = {
-  id: 1, KATEGORIE: 'BÍLÝ', ZEME: 'Čína', AKTIV: 'x', NAZEV: 'Show Mee',
+  id: 1, KOD: '2606-C-BILY-TAWN-01', KATEGORIE: 'BÍLÝ', ZEME: 'Čína', AKTIV: 'x', NAZEV: 'Show Mee',
   POZNAMKA: null, MN1: 30, CENA1: 130, MN2: 200, CENA2: 700,
   MN3: null, CENA3: null, MN4: null, CENA4: null,
 }
 const row2: TeaRow = {
-  id: 2, KATEGORIE: 'BÍLÝ', ZEME: 'Čína', AKTIV: 'x', NAZEV: 'Bai Mu Dan',
+  id: 2, KOD: '2606-C-BILY-TAWN-02', KATEGORIE: 'BÍLÝ', ZEME: 'Čína', AKTIV: 'x', NAZEV: 'Bai Mu Dan',
   POZNAMKA: 'poznámka', MN1: 30, CENA1: 220, MN2: null, CENA2: null,
   MN3: null, CENA3: null, MN4: null, CENA4: null,
 }
 const row3: TeaRow = {
-  id: 3, KATEGORIE: 'ZELENÉ', ZEME: 'Japonsko', AKTIV: null, NAZEV: 'Neaktivní',
+  id: 3, KOD: '2606-C-ZELE-JAPO-01', KATEGORIE: 'ZELENÉ', ZEME: 'Japonsko', AKTIV: null, NAZEV: 'Neaktivní',
   POZNAMKA: null, MN1: 30, CENA1: 100, MN2: null, CENA2: null,
   MN3: null, CENA3: null, MN4: null, CENA4: null,
 }
@@ -160,7 +160,7 @@ describe('useCajovnaPOS', () => {
     await act(async () => { await result.current.confirmCheckout() })
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledOnce()
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
-      { caje_id: 1, baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
+      { caje_kod: '2606-C-BILY-TAWN-01', baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
     ])
     expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(0)

@@ -121,7 +121,7 @@ export function useCajovnaPOS() {
     setCheckoutError(null)
     try {
       const polozky = cart.map((item) => ({
-        caje_id:   item.caj.id,
+        caje_kod:  item.caj.KOD,
         baleni:    item.baleni.cislo,
         kusu:      item.kusu,
         jedn_cena: item.baleni.cena,
