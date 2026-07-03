@@ -149,7 +149,7 @@ describe('useCajovnaPOS', () => {
     expect(result.current.view).toBe('home')
   })
 
-  test('confirmCheckout → volá createCajovnaSale, přejde na success, vymaže košík', async () => {
+  test('confirmCheckout → volá createCajovnaSale, vymaže košík, vrátí na home', async () => {
     const { result } = renderHook(() => useCajovnaPOS())
     await waitFor(() => expect(result.current.loading).toBe(false))
     act(() => result.current.selectCategory({ kategorie: 'BÍLÝ', zeme: 'Čína' }))
@@ -162,7 +162,7 @@ describe('useCajovnaPOS', () => {
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
       { caje_id: 1, baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
     ])
-    expect(result.current.view).toBe('success')
+    expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(0)
     expect(result.current.lastTotal).toBe(130)
   })
