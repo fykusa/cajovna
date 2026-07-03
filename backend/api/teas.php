@@ -26,7 +26,7 @@ if ($method === 'GET' && preg_match('#/api/teas$#', $path)) {
 
 function listTeas(): void {
     $pdo    = getPDO();
-    $where  = [];
+    $where  = ['V_SHEETU = 1'];
     $params = [];
 
     if (!empty($_GET['search'])) {
