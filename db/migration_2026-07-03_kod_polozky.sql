@@ -16,11 +16,19 @@ TRUNCATE TABLE `00_prodej_polozky`;
 DELETE FROM `00_prodej`;
 ALTER TABLE `00_prodej` AUTO_INCREMENT = 1;
 
-ALTER TABLE `00_prodej_polozky`
-  DROP FOREIGN KEY `00_prodej_polozky_ibfk_2`;
+-- FK z původního schématu existuje jen tam, kde neběžela migration_2026-06-13_02_drop_caje_fk
+SET @fk_cnt := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = '00_prodej_polozky'
+                  AND CONSTRAINT_NAME = '00_prodej_polozky_ibfk_2');
+SET @sql := IF(@fk_cnt > 0,
+               'ALTER TABLE `00_prodej_polozky` DROP FOREIGN KEY `00_prodej_polozky_ibfk_2`',
+               'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 ALTER TABLE `00_prodej_polozky`
   CHANGE COLUMN `caje_id` `caje_kod` VARCHAR(32) NOT NULL;
 ALTER TABLE `00_prodej_polozky`
   ADD CONSTRAINT `fk_polozky_kod` FOREIGN KEY (`caje_kod`) REFERENCES `01_caje`(`KOD`);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
