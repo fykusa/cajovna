@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
-import { useCajovnaPOS, buildBaleni, deriveCategories, deriveZeme } from './useCajovnaPOS'
+import { useCajovnaPOS, buildBaleni, deriveCategories, deriveZeme, normalizeSearch } from './useCajovnaPOS'
 import type { TeaRow } from '../types'
 import * as teasApi from '../api/teas'
 import * as cajovnaApi from '../api/cajovna'
@@ -80,6 +80,17 @@ describe('deriveZeme', () => {
   test('prázdné/null země se vynechají', () => {
     const bezZeme = { ...row1, id: 9, KOD: '2606-C-BILY-XXXX-09', ZEME: null }
     expect(deriveZeme([bezZeme], 'BÍLÝ')).toEqual([])
+  })
+})
+
+// --- normalizeSearch ---
+describe('normalizeSearch', () => {
+  test('odstraní diakritiku a převede na malá písmena', () => {
+    expect(normalizeSearch('Černý')).toBe('cerny')
+    expect(normalizeSearch('ŠÍPKOVÝ ČAJ')).toBe('sipkovy caj')
+  })
+  test('prázdný řetězec zůstane prázdný', () => {
+    expect(normalizeSearch('')).toBe('')
   })
 })
 
@@ -271,5 +282,42 @@ describe('useCajovnaPOS', () => {
     expect(result.current.selectedCategory).toBeNull()
     expect(result.current.selectedZeme).toBeNull()
     expect(result.current.zemeOptions).toHaveLength(0)
+  })
+
+  test('setSearchQuery naplní searchResults podle názvu, bez diakritiky, jen aktivní čaje', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.setSearchQuery('bily'))
+    expect(result.current.searchResults.map((t) => t.NAZEV)).toEqual(['Bílý Taiwan'])
+  })
+
+  test('prázdný searchQuery → prázdné searchResults', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.searchResults).toHaveLength(0)
+  })
+
+  test('searchResults vynechá neaktivní čaje', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.setSearchQuery('neaktivni'))
+    expect(result.current.searchResults).toHaveLength(0)
+  })
+
+  test('selectTea z vyhledávání vyprázdní searchQuery', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.setSearchQuery('bily'))
+    act(() => result.current.selectTea(row4))
+    expect(result.current.view).toBe('packaging')
+    expect(result.current.searchQuery).toBe('')
+  })
+
+  test('newSale vyprázdní searchQuery', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.setSearchQuery('bily'))
+    act(() => result.current.newSale())
+    expect(result.current.searchQuery).toBe('')
   })
 })

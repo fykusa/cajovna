@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { TeaRow, CajeBaleni, CajeCartItem } from '../types'
 import { getTeas } from '../api/teas'
 import { createCajovnaSale } from '../api/cajovna'
@@ -40,6 +40,13 @@ export function deriveZeme(rows: TeaRow[], kategorie: string): string[] {
   return Array.from(seen).sort((a, b) => a.localeCompare(b, 'cs'))
 }
 
+export function normalizeSearch(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
 export function useCajovnaPOS() {
   const [view, setView]                     = useState<CajeView>('home')
   const [allRows, setAllRows]               = useState<TeaRow[]>([])
@@ -56,6 +63,7 @@ export function useCajovnaPOS() {
   const [loading, setLoading]               = useState(true)
   const [error, setError]                   = useState<string | null>(null)
   const [checkoutError, setCheckoutError]   = useState<string | null>(null)
+  const [searchQuery, setSearchQuery]       = useState('')
 
   useEffect(() => {
     getTeas()
@@ -69,6 +77,12 @@ export function useCajovnaPOS() {
         setLoading(false)
       })
   }, [])
+
+  const searchResults = useMemo(() => {
+    if (searchQuery.trim().length === 0) return []
+    const q = normalizeSearch(searchQuery)
+    return allRows.filter((r) => r.AKTIV === 'x' && r.NAZEV != null && normalizeSearch(r.NAZEV).includes(q))
+  }, [allRows, searchQuery])
 
   function filterTeas(kategorie: string, zeme: string | null): TeaRow[] {
     return allRows.filter((r) =>
@@ -101,6 +115,7 @@ export function useCajovnaPOS() {
     const opts = buildBaleni(tea)
     setBaleniOptions(opts)
     setSelectedBaleni(opts[0] ?? null)
+    setSearchQuery('')
     setView('packaging')
   }
 
@@ -171,6 +186,7 @@ export function useCajovnaPOS() {
     setSelectedTea(null)
     setSelectedBaleni(null)
     setBaleniOptions([])
+    setSearchQuery('')
     setView('home')
   }
 
@@ -178,6 +194,7 @@ export function useCajovnaPOS() {
     view, categories, teas, baleniOptions, zemeOptions,
     selectedCategory, selectedZeme, selectedTea, selectedBaleni,
     cart, lastTotal, loading, error, checkoutError,
+    searchQuery, searchResults, setSearchQuery,
     selectCategory, selectZeme, selectTea, selectBaleni, selectKusu,
     removeFromCart, goBack, goToCategories,
     startCheckout, confirmCheckout, newSale,
