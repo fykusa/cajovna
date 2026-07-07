@@ -5,13 +5,14 @@ interface Props {
   teas: TeaRow[]
   categoryName: string
   onSelect: (tea: TeaRow) => void
+  emptyMessage?: string
 }
 
-export default function CajeTeas({ teas, categoryName, onSelect }: Props) {
+export default function CajeTeas({ teas, categoryName, onSelect, emptyMessage }: Props) {
   return (
     <div className={styles.scroll}>
       {teas.length === 0 && (
-        <p className={styles.empty}>Žádné čaje v kategorii {categoryName}.</p>
+        <p className={styles.empty}>{emptyMessage ?? `Žádné čaje v kategorii ${categoryName}.`}</p>
       )}
       <ul className={styles.list}>
         {teas.map((tea) => (
