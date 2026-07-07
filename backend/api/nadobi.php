@@ -16,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $method = $_SERVER['REQUEST_METHOD'];
 $path   = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
-if ($method === 'GET' && preg_match('#/api/teas$#', $path)) {
-    handleListProdukty('01_caje');
+if ($method === 'GET' && preg_match('#/api/nadobi$#', $path)) {
+    handleListProdukty('02_nadobi');
 } else {
     http_response_code(404);
     echo json_encode(['error' => 'Not found']);
