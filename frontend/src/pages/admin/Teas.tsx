@@ -118,13 +118,14 @@ export default function AdminTeas() {
           <table className={gridStyles.table}>
             <thead>
               <tr>
-                <th colSpan={5} style={{ borderRight: '2px solid #444' }}>Základní info</th>
+                <th colSpan={6} style={{ borderRight: '2px solid #444' }}>Základní info</th>
                 <th colSpan={2} style={{ borderRight: '2px solid #444' }}>Standard</th>
                 <th colSpan={2} style={{ borderRight: '2px solid #444' }}>Větší</th>
                 <th colSpan={2} style={{ borderRight: '2px solid #444' }}>Největší</th>
                 <th colSpan={2}>Čajovna</th>
               </tr>
               <tr>
+                <th>Kód</th>
                 <th>Kategorie</th>
                 <th>Země</th>
                 <th>Aktiv</th>
@@ -143,6 +144,7 @@ export default function AdminTeas() {
             <tbody>
               {visible.map((r) => (
                 <tr key={r.id} className={r.AKTIV !== 'x' ? styles.rowInactive : undefined}>
+                  <td>{r.KOD}</td>
                   <td>{r.KATEGORIE}</td>
                   <td>{r.ZEME}</td>
                   <td>{r.AKTIV}</td>
