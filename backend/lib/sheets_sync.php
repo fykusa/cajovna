@@ -1,6 +1,7 @@
 <?php
 // Sync záložky CAJE z Google Sheets → tabulka `01_caje`.
 require_once __DIR__ . '/db_transfer.php';
+require_once __DIR__ . '/produkt_typy.php';
 
 // Indexy sloupců v sheetu, které bereme (0-based, A=0). D = KOD (od 2026-07).
 const SHEETS_COL_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 14, 15, 18, 19];
@@ -25,17 +26,23 @@ function sheetsFetchCsv(string $url): string {
 }
 
 /**
- * Hlavní sync: stáhne CSV, parsuje, ověří unikátnost KOD, upsertuje do 01_caje.
+ * Hlavní sync pro libovolnou produktovou řadu: stáhne CSV, parsuje,
+ * ověří unikátnost KOD, upsertuje do zadané tabulky.
  * Vrací ['synced' => N, 'vyrazeno' => M].
  */
-function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
+function sheetsSyncProdukty(PDO $pdo, string $csvUrl, string $tableName): array {
     $raw = sheetsFetchCsv($csvUrl);
     $utf = dbtToUtf8($raw);
 
     [$rows] = parseCajeRows($utf);
     assertUniqueKod($rows);
 
-    return sheetsUpsertCaje($pdo, $rows);
+    return sheetsUpsertProdukty($pdo, $rows, $tableName);
+}
+
+/** Zpětně kompatibilní wrapper pro čaje. */
+function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
+    return sheetsSyncProdukty($pdo, $csvUrl, '01_caje');
 }
 
 /**
@@ -97,23 +104,26 @@ function assertUniqueKod(array $rows): void {
 }
 
 /**
- * Upsert řádků do 01_caje podle KOD (UNIQUE klíč uq_kod).
+ * Upsert řádků do zadané tabulky podle KOD (UNIQUE klíč uq_kod).
  * Řádky chybějící v $rows zůstanou v DB s V_SHEETU = 0 (vyřazené ze sheetu).
- * Nikdy nemaže — 00_prodej_polozky.caje_kod má FK na 01_caje.KOD.
+ * Nikdy nemaže.
  * Vrací ['synced' => počet řádků v sheetu, 'vyrazeno' => počet V_SHEETU = 0 po syncu].
  */
-function sheetsUpsertCaje(PDO $pdo, array $rows): array {
+function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName): array {
     if (empty($rows)) {
         throw new RuntimeException('Sheet neobsahuje žádné platné řádky — sync přerušen.');
+    }
+    if (!in_array($tableName, PRODUKT_TABULKY, true)) {
+        throw new InvalidArgumentException('Neznámá tabulka pro sync: ' . $tableName);
     }
 
     $pdo->beginTransaction();
     try {
-        $pdo->exec('UPDATE `01_caje` SET V_SHEETU = 0');
+        $pdo->exec("UPDATE `$tableName` SET V_SHEETU = 0");
 
         $cols     = SHEETS_COL_NAMES;
         $dataCols = array_values(array_diff($cols, ['KOD']));
-        $sql = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`, `V_SHEETU`)'
+        $sql = "INSERT INTO `$tableName` (`" . implode('`,`', $cols) . '`, `V_SHEETU`)'
              . ' VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ', 1)'
              . ' ON DUPLICATE KEY UPDATE '
              . implode(', ', array_map(fn($c) => "`$c` = VALUES(`$c`)", $dataCols))
@@ -123,7 +133,7 @@ function sheetsUpsertCaje(PDO $pdo, array $rows): array {
             $stmt->execute(array_map(fn($c) => $row[$c] ?? null, $cols));
         }
 
-        $vyrazeno = (int) $pdo->query('SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 0')->fetchColumn();
+        $vyrazeno = (int) $pdo->query("SELECT COUNT(*) FROM `$tableName` WHERE V_SHEETU = 0")->fetchColumn();
 
         $pdo->commit();
     } catch (Throwable $e) {
