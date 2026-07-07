@@ -97,7 +97,14 @@ export default function CajovnaPOS() {
               />
             )}
             {pos.view === 'categories' && (
-              <CajeCategories categories={pos.categories} onSelect={pos.selectCategory} />
+              <CajeCategories
+                categories={pos.categories}
+                onSelect={pos.selectCategory}
+                searchQuery={pos.searchQuery}
+                onSearchChange={pos.setSearchQuery}
+                searchResults={pos.searchResults}
+                onSelectTea={pos.selectTea}
+              />
             )}
             {pos.view === 'countries' && (
               <CajeZeme options={pos.zemeOptions} onSelect={pos.selectZeme} />
