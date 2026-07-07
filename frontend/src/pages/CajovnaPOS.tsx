@@ -6,6 +6,7 @@ import MobileTopBar from '../components/pos-mobile/MobileTopBar'
 import MobileHeader from '../components/pos-mobile/MobileHeader'
 import CajeProgressBar from '../components/pos-cajovna/CajeProgressBar'
 import CajeCategories from '../components/pos-cajovna/CajeCategories'
+import CajeZeme from '../components/pos-cajovna/CajeZeme'
 import CajeTeas from '../components/pos-cajovna/CajeTeas'
 import CajePackaging from '../components/pos-cajovna/CajePackaging'
 import CajeQuantity from '../components/pos-cajovna/CajeQuantity'
@@ -18,6 +19,7 @@ import styles from './MobilePOS.module.css'
 const VIEW_TITLES: Record<CajeView, string> = {
   home:       'TAO čajovna',
   categories: 'Kategorie',
+  countries:  'Země původu',
   teas:       'Vyberte čaj',
   packaging:  'Typ balení',
   quantity:   'Množství',
@@ -59,7 +61,7 @@ export default function CajovnaPOS() {
 
   const showBack = pos.view !== 'home'
   const categoryName = pos.selectedCategory
-    ? `${pos.selectedCategory.kategorie}${pos.selectedCategory.zeme ? ` — ${pos.selectedCategory.zeme}` : ''}`
+    ? `${pos.selectedCategory}${pos.selectedZeme ? ` — ${pos.selectedZeme}` : ''}`
     : ''
 
   return (
@@ -76,7 +78,11 @@ export default function CajovnaPOS() {
           <div className={`${styles.view} ${slideClass}`}>
             <MobileHeader
               title={VIEW_TITLES[pos.view]}
-              subtitle={pos.view === 'teas' ? categoryName : undefined}
+              subtitle={
+                pos.view === 'teas' ? categoryName
+                : pos.view === 'countries' ? pos.selectedCategory ?? undefined
+                : undefined
+              }
               cartCount={pos.cart.length}
               onBack={showBack ? pos.goBack : undefined}
             />
@@ -92,6 +98,9 @@ export default function CajovnaPOS() {
             )}
             {pos.view === 'categories' && (
               <CajeCategories categories={pos.categories} onSelect={pos.selectCategory} />
+            )}
+            {pos.view === 'countries' && (
+              <CajeZeme options={pos.zemeOptions} onSelect={pos.selectZeme} />
             )}
             {pos.view === 'teas' && (
               <CajeTeas

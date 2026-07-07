@@ -125,7 +125,7 @@ describe('useMobilePOS', () => {
     expect(result.current.view).toBe('home')
   })
 
-  test('confirmCheckout volá createSale, přejde na success', async () => {
+  test('confirmCheckout volá createSale, vymaže košík, vrátí na home', async () => {
     const { result } = renderHook(() => useMobilePOS())
     await waitFor(() => expect(result.current.loading).toBe(false))
     act(() => result.current.selectCategory(mockCat))
@@ -136,7 +136,7 @@ describe('useMobilePOS', () => {
     act(() => result.current.startCheckout())
     await act(async () => { await result.current.confirmCheckout() })
     expect(salesApi.createSale).toHaveBeenCalledOnce()
-    expect(result.current.view).toBe('success')
+    expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(0)
     expect(result.current.lastTotal).toBe(120)
   })

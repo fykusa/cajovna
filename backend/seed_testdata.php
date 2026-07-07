@@ -46,7 +46,7 @@ try {
 
 // Načtení aktivních čajů
 $teas = $pdo->query(
-    "SELECT id, NAZEV, CENA1, CENA2, CENA3, CENA4 FROM `01_caje` WHERE AKTIV = 'x'"
+    "SELECT KOD, NAZEV, CENA1, CENA2, CENA3, CENA4 FROM `01_caje` WHERE AKTIV = 'x' AND V_SHEETU = 1"
 )->fetchAll(PDO::FETCH_ASSOC);
 
 p('Aktivních čajů: ' . count($teas));
@@ -76,7 +76,7 @@ $stmtProdej  = $pdo->prepare(
     'INSERT INTO `00_prodej` (user_id, created_at, total_kc) VALUES (?, ?, ?)'
 );
 $stmtPolozka = $pdo->prepare(
-    'INSERT INTO `00_prodej_polozky` (prodej_id, caje_id, baleni, kusu, jedn_cena, celk_cena)
+    'INSERT INTO `00_prodej_polozky` (prodej_id, caje_kod, baleni, kusu, jedn_cena, celk_cena)
      VALUES (?, ?, ?, ?, ?, ?)'
 );
 
@@ -120,7 +120,7 @@ while ($cur < $limit) {
             $celk = $bal['cena'] * $kusu;
 
             $polozky[] = [
-                'caje_id'   => (int)$tea['id'],
+                'caje_kod'  => $tea['KOD'],
                 'baleni'    => $bal['cislo'],
                 'kusu'      => $kusu,
                 'jedn_cena' => $bal['cena'],
@@ -148,7 +148,7 @@ while ($cur < $limit) {
             foreach ($polozky as $pol) {
                 $stmtPolozka->execute([
                     $pid,
-                    $pol['caje_id'],
+                    $pol['caje_kod'],
                     $pol['baleni'],
                     $pol['kusu'],
                     $pol['jedn_cena'],

@@ -31,7 +31,8 @@ export async function exportDatabase(): Promise<void> {
 }
 
 export interface SyncResult {
-  inserted: number
+  synced: number
+  vyrazeno: number
 }
 
 /** Spustí sync záložky CAJE ze Google Sheets → 01_caje v DB. */

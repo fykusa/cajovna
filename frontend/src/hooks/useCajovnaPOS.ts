@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import type { TeaRow, CajeCategory, CajeBaleni, CajeCartItem } from '../types'
+import type { TeaRow, CajeBaleni, CajeCartItem } from '../types'
 import { getTeas } from '../api/teas'
 import { createCajovnaSale } from '../api/cajovna'
 
-export type CajeView = 'home' | 'categories' | 'teas' | 'packaging' | 'quantity' | 'checkout'
+export type CajeView = 'home' | 'categories' | 'countries' | 'teas' | 'packaging' | 'quantity' | 'checkout'
 
 export const CAJE_VIEW_ORDER: CajeView[] = [
-  'home', 'categories', 'teas', 'packaging', 'quantity', 'checkout',
+  'home', 'categories', 'countries', 'teas', 'packaging', 'quantity', 'checkout',
 ]
 
 export function buildBaleni(tea: TeaRow): CajeBaleni[] {
@@ -22,26 +22,32 @@ export function buildBaleni(tea: TeaRow): CajeBaleni[] {
   return opts
 }
 
-export function deriveCategories(rows: TeaRow[]): CajeCategory[] {
+export function deriveCategories(rows: TeaRow[]): string[] {
   const seen = new Set<string>()
-  const cats: CajeCategory[] = []
   for (const r of rows) {
     if (r.AKTIV !== 'x' || r.KATEGORIE == null) continue
-    const key = `${r.KATEGORIE}||${r.ZEME ?? ''}`
-    if (!seen.has(key)) {
-      seen.add(key)
-      cats.push({ kategorie: r.KATEGORIE, zeme: r.ZEME })
-    }
+    seen.add(r.KATEGORIE)
   }
-  return cats.sort((a, b) => a.kategorie.localeCompare(b.kategorie, 'cs'))
+  return Array.from(seen).sort((a, b) => a.localeCompare(b, 'cs'))
+}
+
+export function deriveZeme(rows: TeaRow[], kategorie: string): string[] {
+  const seen = new Set<string>()
+  for (const r of rows) {
+    if (r.AKTIV !== 'x' || r.KATEGORIE !== kategorie || !r.ZEME) continue
+    seen.add(r.ZEME)
+  }
+  return Array.from(seen).sort((a, b) => a.localeCompare(b, 'cs'))
 }
 
 export function useCajovnaPOS() {
   const [view, setView]                     = useState<CajeView>('home')
   const [allRows, setAllRows]               = useState<TeaRow[]>([])
-  const [categories, setCategories]         = useState<CajeCategory[]>([])
+  const [categories, setCategories]         = useState<string[]>([])
   const [teas, setTeas]                     = useState<TeaRow[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<CajeCategory | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedZeme, setSelectedZeme]     = useState<string | null>(null)
+  const [zemeOptions, setZemeOptions]       = useState<string[]>([])
   const [selectedTea, setSelectedTea]       = useState<TeaRow | null>(null)
   const [baleniOptions, setBaleniOptions]   = useState<CajeBaleni[]>([])
   const [selectedBaleni, setSelectedBaleni] = useState<CajeBaleni | null>(null)
@@ -64,9 +70,29 @@ export function useCajovnaPOS() {
       })
   }, [])
 
-  function selectCategory(cat: CajeCategory) {
-    setSelectedCategory(cat)
-    setTeas(allRows.filter((r) => r.AKTIV === 'x' && r.KATEGORIE === cat.kategorie))
+  function filterTeas(kategorie: string, zeme: string | null): TeaRow[] {
+    return allRows.filter((r) =>
+      r.AKTIV === 'x' && r.KATEGORIE === kategorie && (zeme === null || r.ZEME === zeme)
+    )
+  }
+
+  function selectCategory(kategorie: string) {
+    setSelectedCategory(kategorie)
+    setSelectedZeme(null)
+    const opts = deriveZeme(allRows, kategorie)
+    setZemeOptions(opts)
+    if (opts.length >= 2) {
+      setView('countries')
+    } else {
+      setTeas(filterTeas(kategorie, null))
+      setView('teas')
+    }
+  }
+
+  function selectZeme(zeme: string | null) {
+    if (selectedCategory === null) return
+    setSelectedZeme(zeme)
+    setTeas(filterTeas(selectedCategory, zeme))
     setView('teas')
   }
 
@@ -105,6 +131,8 @@ export function useCajovnaPOS() {
 
   function goBack() {
     if (view === 'checkout') { setView('home'); return }
+    // krok zemí se u kategorií s 0–1 zeměmi přeskakuje i cestou zpět
+    if (view === 'teas' && zemeOptions.length < 2) { setView('categories'); return }
     const idx = CAJE_VIEW_ORDER.indexOf(view)
     if (idx <= 0) return
     setView(CAJE_VIEW_ORDER[idx - 1])
@@ -121,7 +149,7 @@ export function useCajovnaPOS() {
     setCheckoutError(null)
     try {
       const polozky = cart.map((item) => ({
-        caje_id:   item.caj.id,
+        caje_kod:  item.caj.KOD,
         baleni:    item.baleni.cislo,
         kusu:      item.kusu,
         jedn_cena: item.baleni.cena,
@@ -138,6 +166,8 @@ export function useCajovnaPOS() {
   function newSale() {
     setCart([])
     setSelectedCategory(null)
+    setSelectedZeme(null)
+    setZemeOptions([])
     setSelectedTea(null)
     setSelectedBaleni(null)
     setBaleniOptions([])
@@ -145,10 +175,10 @@ export function useCajovnaPOS() {
   }
 
   return {
-    view, categories, teas, baleniOptions,
-    selectedCategory, selectedTea, selectedBaleni,
+    view, categories, teas, baleniOptions, zemeOptions,
+    selectedCategory, selectedZeme, selectedTea, selectedBaleni,
     cart, lastTotal, loading, error, checkoutError,
-    selectCategory, selectTea, selectBaleni, selectKusu,
+    selectCategory, selectZeme, selectTea, selectBaleni, selectKusu,
     removeFromCart, goBack, goToCategories,
     startCheckout, confirmCheckout, newSale,
   }

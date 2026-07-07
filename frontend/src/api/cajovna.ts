@@ -2,7 +2,7 @@ import { apiFetch } from './client'
 import type { CajovnaProdej, CajePolozkaSale, CajeCategory } from '../types'
 
 export interface CajePolozkaSend {
-  caje_id: number
+  caje_kod: string
   baleni: 1 | 2 | 3 | 4
   kusu: number
   jedn_cena: number

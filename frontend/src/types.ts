@@ -66,6 +66,8 @@ export interface Bag {
 
 export interface TeaRow {
   id: number
+  KOD: string
+  V_SHEETU?: number
   KATEGORIE: string | null
   ZEME: string | null
   AKTIV: string | null
@@ -170,7 +172,7 @@ export interface CajovnaProdej {
 
 export interface CajePolozkaSale {
   id: number
-  caje_id: number
+  caje_kod: string
   baleni: 1 | 2 | 3 | 4
   kusu: number
   jedn_cena: number

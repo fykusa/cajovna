@@ -2,9 +2,9 @@
 // Sync záložky CAJE z Google Sheets → tabulka `01_caje`.
 require_once __DIR__ . '/db_transfer.php';
 
-// Indexy sloupců v sheetu, které bereme (0-based, A=0).
-const SHEETS_COL_INDICES = [0, 1, 2, 3, 4, 5, 6, 9, 10, 13, 14, 17, 18];
-const SHEETS_COL_NAMES   = ['KATEGORIE', 'ZEME', 'AKTIV', 'NAZEV', 'POZNAMKA',
+// Indexy sloupců v sheetu, které bereme (0-based, A=0). D = KOD (od 2026-07).
+const SHEETS_COL_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 14, 15, 18, 19];
+const SHEETS_COL_NAMES   = ['KATEGORIE', 'ZEME', 'AKTIV', 'KOD', 'NAZEV', 'POZNAMKA',
                              'MN1', 'CENA1', 'MN2', 'CENA2', 'MN3', 'CENA3', 'MN4', 'CENA4'];
 
 /**
@@ -25,29 +25,17 @@ function sheetsFetchCsv(string $url): string {
 }
 
 /**
- * Hlavní sync: stáhne CSV, parsuje, TRUNCATE + INSERT do 01_caje.
- * Vrací ['inserted' => N].
+ * Hlavní sync: stáhne CSV, parsuje, ověří unikátnost KOD, upsertuje do 01_caje.
+ * Vrací ['synced' => N, 'vyrazeno' => M].
  */
 function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
     $raw = sheetsFetchCsv($csvUrl);
     $utf = dbtToUtf8($raw);
 
-    [$allRows] = parseCajeRows($utf);
+    [$rows] = parseCajeRows($utf);
+    assertUniqueKod($rows);
 
-    $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
-    $pdo->beginTransaction();
-    try {
-        $pdo->exec('TRUNCATE TABLE `01_caje`');
-        $inserted = insertCajeRows($pdo, $allRows);
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        throw $e;
-    } finally {
-        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
-    }
-
-    return ['inserted' => $inserted];
+    return sheetsUpsertCaje($pdo, $rows);
 }
 
 /**
@@ -85,6 +73,7 @@ function parseCajeRows(string $csvUtf8): array {
         // Přeskočit řádky bez kategorie nebo bez názvu
         if ($row['KATEGORIE'] === null) continue;
         if ($row['NAZEV'] === null) continue;
+        if ($row['KOD'] === null) continue;
 
         $rows[] = $row;
     }
@@ -93,19 +82,54 @@ function parseCajeRows(string $csvUtf8): array {
 }
 
 /**
- * Vloží řádky do 01_caje. Vrací počet vložených.
+ * Ověří unikátnost KOD napříč parsovanými řádky.
+ * Duplicita = chyba dat v sheetu → RuntimeException (sync se nesmí provést).
  */
-function insertCajeRows(PDO $pdo, array $rows): int {
-    if (empty($rows)) return 0;
-
-    $cols = SHEETS_COL_NAMES;
-    $ph   = '(' . implode(',', array_fill(0, count($cols), '?')) . ')';
-    $sql  = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`) VALUES ' . $ph;
-    $stmt = $pdo->prepare($sql);
-
+function assertUniqueKod(array $rows): void {
+    $seen = [];
     foreach ($rows as $row) {
-        $vals = array_map(fn($c) => $row[$c] ?? null, $cols);
-        $stmt->execute($vals);
+        $kod = $row['KOD'];
+        if (isset($seen[$kod])) {
+            throw new RuntimeException('Duplicitní KOD v sheetu: ' . $kod);
+        }
+        $seen[$kod] = true;
     }
-    return count($rows);
+}
+
+/**
+ * Upsert řádků do 01_caje podle KOD (UNIQUE klíč uq_kod).
+ * Řádky chybějící v $rows zůstanou v DB s V_SHEETU = 0 (vyřazené ze sheetu).
+ * Nikdy nemaže — 00_prodej_polozky.caje_kod má FK na 01_caje.KOD.
+ * Vrací ['synced' => počet řádků v sheetu, 'vyrazeno' => počet V_SHEETU = 0 po syncu].
+ */
+function sheetsUpsertCaje(PDO $pdo, array $rows): array {
+    if (empty($rows)) {
+        throw new RuntimeException('Sheet neobsahuje žádné platné řádky — sync přerušen.');
+    }
+
+    $pdo->beginTransaction();
+    try {
+        $pdo->exec('UPDATE `01_caje` SET V_SHEETU = 0');
+
+        $cols     = SHEETS_COL_NAMES;
+        $dataCols = array_values(array_diff($cols, ['KOD']));
+        $sql = 'INSERT INTO `01_caje` (`' . implode('`,`', $cols) . '`, `V_SHEETU`)'
+             . ' VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ', 1)'
+             . ' ON DUPLICATE KEY UPDATE '
+             . implode(', ', array_map(fn($c) => "`$c` = VALUES(`$c`)", $dataCols))
+             . ', `V_SHEETU` = 1';
+        $stmt = $pdo->prepare($sql);
+        foreach ($rows as $row) {
+            $stmt->execute(array_map(fn($c) => $row[$c] ?? null, $cols));
+        }
+
+        $vyrazeno = (int) $pdo->query('SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 0')->fetchColumn();
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    return ['synced' => count($rows), 'vyrazeno' => $vyrazeno];
 }

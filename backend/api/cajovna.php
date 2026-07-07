@@ -43,7 +43,8 @@ function createProdej(array $auth): void {
     }
 
     foreach ($polozky as $p) {
-        if (!isset($p['caje_id'], $p['baleni'], $p['kusu'], $p['jedn_cena'], $p['celk_cena'])) {
+        if (!isset($p['caje_kod'], $p['baleni'], $p['kusu'], $p['jedn_cena'], $p['celk_cena'])
+            || !is_string($p['caje_kod']) || trim($p['caje_kod']) === '') {
             http_response_code(400);
             echo json_encode(['error' => 'Neplatná položka.']);
             return;
@@ -64,13 +65,13 @@ function createProdej(array $auth): void {
         $prodejId = (int) $pdo->lastInsertId();
 
         $ins = $pdo->prepare(
-            'INSERT INTO `00_prodej_polozky` (prodej_id, caje_id, baleni, kusu, jedn_cena, celk_cena)
+            'INSERT INTO `00_prodej_polozky` (prodej_id, caje_kod, baleni, kusu, jedn_cena, celk_cena)
              VALUES (?, ?, ?, ?, ?, ?)'
         );
         foreach ($polozky as $p) {
             $ins->execute([
                 $prodejId,
-                (int) $p['caje_id'],
+                trim($p['caje_kod']),
                 (int) $p['baleni'],
                 (int) $p['kusu'],
                 (int) $p['jedn_cena'],
@@ -80,6 +81,16 @@ function createProdej(array $auth): void {
         $pdo->commit();
         http_response_code(201);
         echo json_encode(['prodej_id' => $prodejId, 'total' => $total]);
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        // 1452 = FK violation → kód neexistuje v 01_caje
+        if (($e->errorInfo[1] ?? 0) === 1452) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Neznámý kód položky.']);
+            return;
+        }
+        http_response_code(500);
+        echo json_encode(['error' => 'Chyba při zápisu prodeje.']);
     } catch (Throwable $e) {
         $pdo->rollBack();
         http_response_code(500);
@@ -111,11 +122,11 @@ function listProdeje(): void {
 
     if ($kategorie !== null && $kategorie !== '') {
         if ($zeme !== null && $zeme !== '') {
-            $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.id = pp.caje_id WHERE pp.prodej_id = p.id AND c.KATEGORIE = ? AND c.ZEME = ?)';
+            $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.KOD = pp.caje_kod WHERE pp.prodej_id = p.id AND c.KATEGORIE = ? AND c.ZEME = ?)';
             $params[] = $kategorie;
             $params[] = $zeme;
         } else {
-            $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.id = pp.caje_id WHERE pp.prodej_id = p.id AND c.KATEGORIE = ?)';
+            $where[]  = 'EXISTS (SELECT 1 FROM `00_prodej_polozky` pp JOIN `01_caje` c ON c.KOD = pp.caje_kod WHERE pp.prodej_id = p.id AND c.KATEGORIE = ?)';
             $params[] = $kategorie;
         }
     }
@@ -135,7 +146,7 @@ function listKategorie(): void {
     $pdo  = getPDO();
     $stmt = $pdo->query(
         "SELECT DISTINCT KATEGORIE as kategorie, ZEME as zeme FROM `01_caje`
-         WHERE AKTIV = 'x' AND KATEGORIE IS NOT NULL
+         WHERE AKTIV = 'x' AND V_SHEETU = 1 AND KATEGORIE IS NOT NULL
          ORDER BY KATEGORIE, ZEME"
     );
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -144,10 +155,10 @@ function listKategorie(): void {
 function listPolozky(int $prodejId): void {
     $pdo  = getPDO();
     $stmt = $pdo->prepare(
-        'SELECT pp.id, pp.caje_id, pp.baleni, pp.kusu, pp.jedn_cena, pp.celk_cena,
+        'SELECT pp.id, pp.caje_kod, pp.baleni, pp.kusu, pp.jedn_cena, pp.celk_cena,
                 c.NAZEV as nazev, c.KATEGORIE as kategorie, c.ZEME as zeme
          FROM `00_prodej_polozky` pp
-         LEFT JOIN `01_caje` c ON c.id = pp.caje_id
+         LEFT JOIN `01_caje` c ON c.KOD = pp.caje_kod
          WHERE pp.prodej_id = ?
          ORDER BY pp.id'
     );
