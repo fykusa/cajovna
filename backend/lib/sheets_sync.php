@@ -1,5 +1,5 @@
 <?php
-// Sync záložky CAJE z Google Sheets → tabulka `01_caje`.
+// Sync produktových záložek z Google Sheets → tabulky 01_caje / 02_nadobi / 03_etnoshop.
 require_once __DIR__ . '/db_transfer.php';
 require_once __DIR__ . '/produkt_typy.php';
 
@@ -110,11 +110,11 @@ function assertUniqueKod(array $rows): void {
  * Vrací ['synced' => počet řádků v sheetu, 'vyrazeno' => počet V_SHEETU = 0 po syncu].
  */
 function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName): array {
-    if (empty($rows)) {
-        throw new RuntimeException('Sheet neobsahuje žádné platné řádky — sync přerušen.');
-    }
     if (!in_array($tableName, PRODUKT_TABULKY, true)) {
         throw new InvalidArgumentException('Neznámá tabulka pro sync: ' . $tableName);
+    }
+    if (empty($rows)) {
+        throw new RuntimeException('Sheet neobsahuje žádné platné řádky — sync přerušen.');
     }
 
     $pdo->beginTransaction();
@@ -142,4 +142,9 @@ function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName): array {
     }
 
     return ['synced' => count($rows), 'vyrazeno' => $vyrazeno];
+}
+
+/** Zpětně kompatibilní wrapper pro čaje. */
+function sheetsUpsertCaje(PDO $pdo, array $rows): array {
+    return sheetsUpsertProdukty($pdo, $rows, '01_caje');
 }
