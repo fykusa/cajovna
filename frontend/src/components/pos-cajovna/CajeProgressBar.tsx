@@ -1,7 +1,7 @@
 import type { CajeView } from '../../hooks/useCajovnaPOS'
 import styles from './CajeProgressBar.module.css'
 
-const STEPS: CajeView[] = ['categories', 'teas', 'packaging', 'quantity', 'checkout']
+const STEPS: CajeView[] = ['categories', 'countries', 'teas', 'packaging', 'quantity', 'checkout']
 
 interface Props { view: CajeView }
 

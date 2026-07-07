@@ -1,23 +1,21 @@
-import type { CajeCategory } from '../../types'
 import styles from './CajeCategories.module.css'
 
 interface Props {
-  categories: CajeCategory[]
-  onSelect: (cat: CajeCategory) => void
+  categories: string[]
+  onSelect: (kategorie: string) => void
 }
 
 export default function CajeCategories({ categories, onSelect }: Props) {
   return (
     <div className={styles.scroll}>
       <div className={styles.grid}>
-        {categories.map((cat) => (
+        {categories.map((kategorie) => (
           <button
-            key={`${cat.kategorie}||${cat.zeme ?? ''}`}
+            key={kategorie}
             className={styles.card}
-            onClick={() => onSelect(cat)}
+            onClick={() => onSelect(kategorie)}
           >
-            <span className={styles.name}>{cat.kategorie}</span>
-            {cat.zeme && <span className={styles.zeme}>{cat.zeme}</span>}
+            <span className={styles.name}>{kategorie}</span>
           </button>
         ))}
       </div>
