@@ -70,7 +70,15 @@ function handleSheetsSync(): void {
         requireAdmin(); // hodí 401/403 pokud není admin session
     }
 
-    $url = $config['caje_csv_url'] ?? '';
+    $sheet = $_GET['sheet'] ?? 'caje';
+    if (!isset(PRODUKT_TABULKY[$sheet])) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Neznámá záložka: ' . $sheet]);
+        return;
+    }
+    $tableName = PRODUKT_TABULKY[$sheet];
+
+    $url = $config["{$sheet}_csv_url"] ?? '';
     if ($url === '') {
         http_response_code(503);
         echo json_encode(['ok' => false, 'error' => 'CSV URL není nakonfigurována.']);
@@ -78,7 +86,7 @@ function handleSheetsSync(): void {
     }
 
     try {
-        $result = sheetsSyncCaje(getPDO(), $url);
+        $result = sheetsSyncProdukty(getPDO(), $url, $tableName);
         echo json_encode(['ok' => true, 'synced' => $result]);
     } catch (Throwable $e) {
         error_log('Sheets sync error: ' . $e->getMessage());
