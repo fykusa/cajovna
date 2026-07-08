@@ -13,9 +13,11 @@
 # backend nahraný do neexistujícího/nepoužívaného "backend/" podadresáře,
 # živý provoz běžel dál na staré verzi bez podpory ?sheet=, proto sync
 # nádobí/etnoshopu tiše přesynchronizovával čaje). backend/ se proto
-# nahrává přes WHITELIST (api/, lib/, db.php, index.php,
-# middleware.php, config/.htaccess) PŘÍMO do kořene FTP_REMOTE_PATH,
-# NE do žádného podadresáře. Repo obsahuje spoustu
+# nahrává přes WHITELIST (api/, lib/, db.php, middleware.php,
+# config/.htaccess) PŘÍMO do kořene FTP_REMOTE_PATH, NE do žádného
+# podadresáře. backend/index.php se NENAHRÁVÁ — je to mrtvý placeholder
+# (echo "jedeme ..."), nic ho nepoužívá, a v kořeni webrootu by mohl
+# podle DirectoryIndex kolidovat s index.html z frontend buildu. Repo obsahuje spoustu
 # jednorázových/CLI dev skriptů bez auth ochrany (seed*, db_reset.php,
 # install.php, dbtest.php, export/import.php, tools/test_*.php) i
 # per-prostředí soubory (config.php, config_Forpsi.php, backend/.htaccess) —
@@ -126,7 +128,6 @@ echo "== Nahrávám backend/ -> ${FTP_REMOTE_PATH} (PLOCHO, whitelist, viz komen
 upload_dir "$REPO_ROOT/backend/api" "${FTP_REMOTE_PATH}/api"
 upload_dir "$REPO_ROOT/backend/lib" "${FTP_REMOTE_PATH}/lib"
 upload_file "$REPO_ROOT/backend/db.php" "${FTP_REMOTE_PATH}/db.php"
-upload_file "$REPO_ROOT/backend/index.php" "${FTP_REMOTE_PATH}/index.php"
 upload_file "$REPO_ROOT/backend/middleware.php" "${FTP_REMOTE_PATH}/middleware.php"
 upload_file "$REPO_ROOT/backend/config/.htaccess" "${FTP_REMOTE_PATH}/config/.htaccess"
 
