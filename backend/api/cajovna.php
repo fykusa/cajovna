@@ -43,6 +43,13 @@ function createProdej(array $auth): void {
         return;
     }
 
+    $celkemZaplaceno = $data['celkem_zaplaceno'] ?? null;
+    if ($celkemZaplaceno !== null && (!is_numeric($celkemZaplaceno) || (float) $celkemZaplaceno < 0)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Neplatná zaplacená částka.']);
+        return;
+    }
+
     $pdo = getPDO();
 
     foreach ($polozky as $p) {
@@ -68,7 +75,7 @@ function createProdej(array $auth): void {
         }
     }
 
-    $total = (int) array_sum(array_column($polozky, 'celk_cena'));
+    $total = $celkemZaplaceno !== null ? (int) round((float) $celkemZaplaceno) : (int) array_sum(array_column($polozky, 'celk_cena'));
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare('INSERT INTO `00_prodej` (user_id, total_kc) VALUES (?, ?)');

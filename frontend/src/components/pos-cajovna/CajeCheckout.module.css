@@ -5,8 +5,20 @@
 .name { flex: 1; font-size: 15px; }
 .qty { color: var(--mob-muted); font-size: 14px; }
 .price { font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace; font-weight: 600; }
-.totalRow { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--mob-border); font-size: 15px; }
+.totalRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 0; border-top: 1px solid var(--mob-border); font-size: 15px; }
 .totalAmt { font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace; font-weight: 700; font-size: 20px; color: var(--mob-accent); }
+.paidInput {
+  flex: 1; min-width: 0; box-sizing: border-box; padding: 8px 10px;
+  border-radius: var(--mob-r-sm); border: 1px solid var(--mob-border);
+  background: var(--mob-surface); color: var(--mob-accent);
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace; font-weight: 700; font-size: 20px;
+  text-align: right;
+}
+.paidInput:focus { outline: none; border-color: var(--mob-accent); }
+.paidInput::-webkit-outer-spin-button,
+.paidInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.paidInput { -moz-appearance: textfield; appearance: textfield; }
+.currency { font-size: 15px; color: var(--mob-fg-2); }
 .actions { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px calc(env(safe-area-inset-bottom) + 12px); }
 .payBtn { padding: 16px; border-radius: var(--mob-r); background: var(--mob-success); color: #fff; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
 .payBtn:active:not(:disabled) { transform: scale(0.985); opacity: 0.9; }

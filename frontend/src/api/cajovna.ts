@@ -15,10 +15,10 @@ export interface CajovnaSaleResponse {
   total: number
 }
 
-export const createCajovnaSale = (polozky: CajePolozkaSend[]): Promise<CajovnaSaleResponse> =>
+export const createCajovnaSale = (polozky: CajePolozkaSend[], celkemZaplaceno: number): Promise<CajovnaSaleResponse> =>
   apiFetch<CajovnaSaleResponse>('/cajovna/prodej', {
     method: 'POST',
-    body: JSON.stringify({ polozky }),
+    body: JSON.stringify({ polozky, celkem_zaplaceno: celkemZaplaceno }),
   })
 
 export const getCajovnaProdeje = (params?: { from?: string; to?: string; kategorie?: string; zeme?: string | null }): Promise<CajovnaProdej[]> => {

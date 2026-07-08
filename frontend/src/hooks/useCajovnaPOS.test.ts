@@ -256,7 +256,7 @@ describe('useCajovnaPOS', () => {
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledOnce()
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
       { caje_kod: '2606-C-BILY-TAWN-01', produkt_typ: 'caje', baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
-    ])
+    ], 130)
     expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(0)
     expect(result.current.lastTotal).toBe(130)
@@ -389,6 +389,21 @@ describe('useCajovnaPOS', () => {
     await act(async () => { await result.current.confirmCheckout() })
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
       { caje_kod: 'ND-01', produkt_typ: 'nadobi', baleni: 1, kusu: 1, jedn_cena: 250, celk_cena: 250 },
-    ])
+    ], 250)
+  })
+
+  test('confirmCheckout s explicitní zaplacenou částkou → pošle ji místo dopočtené', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.selectCategory('BÍLÝ'))
+    act(() => result.current.selectZeme('Čína'))
+    act(() => result.current.selectTea(row1))
+    act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
+    act(() => result.current.selectKusu(1))
+    act(() => result.current.startCheckout())
+    await act(async () => { await result.current.confirmCheckout(150) })
+    expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
+      { caje_kod: '2606-C-BILY-TAWN-01', produkt_typ: 'caje', baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
+    ], 150)
   })
 })

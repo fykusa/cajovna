@@ -50,9 +50,9 @@ export default function CajovnaPOS() {
     prevViewRef.current = pos.view
   }, [pos.view])
 
-  async function handleConfirmCheckout() {
+  async function handleConfirmCheckout(celkemZaplaceno: number) {
     setCheckoutLoading(true)
-    await pos.confirmCheckout()
+    await pos.confirmCheckout(celkemZaplaceno)
     setCheckoutLoading(false)
   }
 

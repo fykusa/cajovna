@@ -180,7 +180,7 @@ export function useCajovnaPOS() {
     setView('checkout')
   }
 
-  async function confirmCheckout() {
+  async function confirmCheckout(celkemZaplaceno?: number) {
     setCheckoutError(null)
     try {
       const polozky = cart.map((item) => ({
@@ -191,7 +191,8 @@ export function useCajovnaPOS() {
         jedn_cena:   item.baleni.cena,
         celk_cena:   item.celkCena,
       }))
-      const res = await createCajovnaSale(polozky)
+      const computedTotal = cart.reduce((s, item) => s + item.celkCena, 0)
+      const res = await createCajovnaSale(polozky, celkemZaplaceno ?? computedTotal)
       setLastTotal(res.total)
       newSale()
     } catch (e) {

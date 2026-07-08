@@ -17,7 +17,9 @@ export default function CajeHistory() {
   const [cancelling, setCancelling]     = useState(false)
 
   function loadProdeje() {
-    const today = new Date().toISOString().slice(0, 10)
+    const now = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
     return getCajovnaProdeje({ from: today + ' 00:00:00', to: today + ' 23:59:59' })
       .then((data) => setProdeje(user ? data.filter((p) => p.user_id === user.id) : data))
       .catch((e) => setError(e instanceof Error ? e.message : 'Chyba načítání'))
