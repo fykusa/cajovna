@@ -20,7 +20,7 @@ export default function CajeCategories({
         <input
           className={styles.search}
           type="text"
-          placeholder="Hledat čaj podle názvu…"
+          placeholder="Hledat podle názvu…"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
         />

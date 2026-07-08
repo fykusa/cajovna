@@ -1,9 +1,9 @@
-import type { CajeCartItem } from '../../types'
+import type { CajeCartItem, ProduktTyp } from '../../types'
 import styles from './CajeHome.module.css'
 
 interface Props {
   cart: CajeCartItem[]
-  onAddItem: () => void
+  onAddItem: (typ: ProduktTyp) => void
   onCheckout: () => void
   onRemove: (localId: string) => void
 }
@@ -51,7 +51,11 @@ export default function CajeHome({ cart, onAddItem, onCheckout, onRemove }: Prop
       )}
 
       <div className={styles.actions}>
-        <button className={styles.addBtn} onClick={onAddItem}>+ Přidat položku</button>
+        <div className={styles.addRow}>
+          <button className={styles.addBtn} onClick={() => onAddItem('caje')}>+ Čaj</button>
+          <button className={styles.addBtn} onClick={() => onAddItem('nadobi')}>+ Nádobí</button>
+          <button className={styles.addBtn} onClick={() => onAddItem('etnoshop')}>+ Etnoshop</button>
+        </div>
         {cart.length > 0 && (
           <button className={styles.checkoutBtn} onClick={onCheckout}>
             Zaúčtovat prodej →

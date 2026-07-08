@@ -37,7 +37,7 @@ describe('CajeCategories', () => {
         onSelectTea={vi.fn()}
       />,
     )
-    fireEvent.change(screen.getByPlaceholderText('Hledat čaj podle názvu…'), { target: { value: 'bily' } })
+    fireEvent.change(screen.getByPlaceholderText('Hledat podle názvu…'), { target: { value: 'bily' } })
     expect(onSearchChange).toHaveBeenCalledWith('bily')
   })
 

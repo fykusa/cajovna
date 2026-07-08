@@ -15,5 +15,7 @@
 .actions { display: flex; flex-direction: column; gap: 8px; padding: 8px 16px calc(env(safe-area-inset-bottom) + 12px); }
 .addBtn { padding: 14px; border-radius: var(--mob-r); background: var(--mob-surface-alt); border: 1px solid var(--mob-border); color: var(--mob-accent); font-size: 15px; font-weight: 600; cursor: pointer; }
 .addBtn:active { transform: scale(0.985); }
+.addRow { display: flex; gap: 8px; }
+.addRow .addBtn { flex: 1; padding: 12px 4px; font-size: 13px; }
 .checkoutBtn { padding: 14px; border-radius: var(--mob-r); background: var(--mob-accent); color: #fff; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
 .checkoutBtn:active { transform: scale(0.985); opacity: 0.9; }
