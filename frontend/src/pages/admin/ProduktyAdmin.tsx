@@ -1,12 +1,17 @@
 import { useEffect, useState, useCallback } from 'react'
-import { getTeas } from '../../api/teas'
-import type { TeaRow } from '../../types'
+import { getProdukty } from '../../api/teas'
+import type { TeaRow, ProduktTyp } from '../../types'
 import { useToast } from '../../components/toast/useToast'
 import { syncFromSheets } from '../../api/admin'
 import styles from './Items.module.css'
 import gridStyles from '../../components/admin/EditableGrid.module.css'
 
-export default function AdminTeas() {
+interface Props {
+  produktTyp: ProduktTyp
+  nadpis: string
+}
+
+export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
   const [rows, setRows] = useState<TeaRow[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
@@ -18,20 +23,20 @@ export default function AdminTeas() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      setRows(await getTeas())
+      setRows(await getProdukty(produktTyp))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }, [toast, produktTyp])
 
   useEffect(() => { load() }, [load])
 
   async function handleSync() {
     setSyncing(true)
     try {
-      const result = await syncFromSheets()
+      const result = await syncFromSheets(produktTyp)
       toast.success(`Sync hotový — ${result.synced} položek (${result.vyrazeno} vyřazeno)`)
       await load()
     } catch (e) {
@@ -55,7 +60,7 @@ export default function AdminTeas() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>TEAs — import ze Sheets</h1>
+        <h1 className={styles.title}>{nadpis} — import ze Sheets</h1>
         <input
           className={styles.nameFilter}
           placeholder="Hledat název…"
