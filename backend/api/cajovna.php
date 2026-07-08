@@ -48,7 +48,7 @@ function createProdej(array $auth): void {
     foreach ($polozky as $p) {
         if (!isset($p['caje_kod'], $p['produkt_typ'], $p['baleni'], $p['kusu'], $p['jedn_cena'], $p['celk_cena'])
             || !is_string($p['caje_kod']) || trim($p['caje_kod']) === ''
-            || !isset(PRODUKT_TABULKY[$p['produkt_typ']])) {
+            || !is_string($p['produkt_typ']) || !isset(PRODUKT_TABULKY[$p['produkt_typ']])) {
             http_response_code(400);
             echo json_encode(['error' => 'Neplatná položka.']);
             return;
