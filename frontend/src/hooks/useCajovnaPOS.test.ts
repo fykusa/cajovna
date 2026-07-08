@@ -33,10 +33,19 @@ const row5: TeaRow = {
   POZNAMKA: null, MN1: 50, CENA1: 250, MN2: null, CENA2: null,
   MN3: null, CENA3: null, MN4: null, CENA4: null,
 }
+const nadobiRow: TeaRow = {
+  id: 101, KOD: 'ND-01', KATEGORIE: 'HRNKY', ZEME: null, AKTIV: 'x', NAZEV: 'Hrnek modrý',
+  POZNAMKA: null, MN1: 1, CENA1: 250, MN2: null, CENA2: null,
+  MN3: null, CENA3: null, MN4: null, CENA4: null,
+}
 const allRows = [row1, row2, row3, row4, row5]
 
 beforeEach(() => {
-  vi.mocked(teasApi.getTeas).mockResolvedValue(allRows)
+  vi.mocked(teasApi.getProdukty).mockImplementation((typ: string) => {
+    if (typ === 'nadobi') return Promise.resolve([nadobiRow])
+    if (typ === 'etnoshop') return Promise.resolve([])
+    return Promise.resolve(allRows)
+  })
   vi.mocked(cajovnaApi.createCajovnaSale).mockResolvedValue({ prodej_id: 1, total: 130 })
 })
 
@@ -246,7 +255,7 @@ describe('useCajovnaPOS', () => {
     await act(async () => { await result.current.confirmCheckout() })
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledOnce()
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
-      { caje_kod: '2606-C-BILY-TAWN-01', baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
+      { caje_kod: '2606-C-BILY-TAWN-01', produkt_typ: 'caje', baleni: 1, kusu: 1, jedn_cena: 130, celk_cena: 130 },
     ])
     expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(0)
@@ -319,5 +328,51 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.setSearchQuery('bily'))
     act(() => result.current.newSale())
     expect(result.current.searchQuery).toBe('')
+  })
+
+  test('goToCategories(nadobi) přepne produktovou řadu a kategorie', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.goToCategories('nadobi'))
+    expect(result.current.view).toBe('categories')
+    expect(result.current.categories).toEqual(['HRNKY'])
+    expect(result.current.produktTyp).toBe('nadobi')
+  })
+
+  test('košík může obsahovat čaj i nádobí zároveň, každé se svým produktTyp', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => result.current.goToCategories('caje'))
+    act(() => result.current.selectCategory('BÍLÝ'))
+    act(() => result.current.selectZeme('Čína'))
+    act(() => result.current.selectTea(row1))
+    act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
+    act(() => result.current.selectKusu(1))
+
+    act(() => result.current.goToCategories('nadobi'))
+    act(() => result.current.selectCategory('HRNKY'))
+    act(() => result.current.selectTea(nadobiRow))
+    act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
+    act(() => result.current.selectKusu(2))
+
+    expect(result.current.cart).toHaveLength(2)
+    expect(result.current.cart[0].produktTyp).toBe('caje')
+    expect(result.current.cart[1].produktTyp).toBe('nadobi')
+  })
+
+  test('confirmCheckout pošle produkt_typ pro každou položku', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.goToCategories('nadobi'))
+    act(() => result.current.selectCategory('HRNKY'))
+    act(() => result.current.selectTea(nadobiRow))
+    act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
+    act(() => result.current.selectKusu(1))
+    act(() => result.current.startCheckout())
+    await act(async () => { await result.current.confirmCheckout() })
+    expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
+      { caje_kod: 'ND-01', produkt_typ: 'nadobi', baleni: 1, kusu: 1, jedn_cena: 250, celk_cena: 250 },
+    ])
   })
 })

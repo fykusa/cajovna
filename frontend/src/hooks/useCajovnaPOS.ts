@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import type { TeaRow, CajeBaleni, CajeCartItem } from '../types'
-import { getTeas } from '../api/teas'
+import type { TeaRow, CajeBaleni, CajeCartItem, ProduktTyp } from '../types'
+import { getProdukty } from '../api/teas'
 import { createCajovnaSale } from '../api/cajovna'
 
 export type CajeView = 'home' | 'categories' | 'countries' | 'teas' | 'packaging' | 'quantity' | 'checkout'
@@ -49,7 +49,8 @@ export function normalizeSearch(s: string): string {
 
 export function useCajovnaPOS() {
   const [view, setView]                     = useState<CajeView>('home')
-  const [allRows, setAllRows]               = useState<TeaRow[]>([])
+  const [produktTyp, setProduktTyp]         = useState<ProduktTyp>('caje')
+  const [allRowsByTyp, setAllRowsByTyp]     = useState<Record<ProduktTyp, TeaRow[]>>({ caje: [], nadobi: [], etnoshop: [] })
   const [categories, setCategories]         = useState<string[]>([])
   const [teas, setTeas]                     = useState<TeaRow[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -66,10 +67,10 @@ export function useCajovnaPOS() {
   const [searchQuery, setSearchQuery]       = useState('')
 
   useEffect(() => {
-    getTeas()
-      .then((rows) => {
-        setAllRows(rows)
-        setCategories(deriveCategories(rows))
+    Promise.all([getProdukty('caje'), getProdukty('nadobi'), getProdukty('etnoshop')])
+      .then(([caje, nadobi, etnoshop]) => {
+        setAllRowsByTyp({ caje, nadobi, etnoshop })
+        setCategories(deriveCategories(caje))
         setLoading(false)
       })
       .catch((e) => {
@@ -77,6 +78,8 @@ export function useCajovnaPOS() {
         setLoading(false)
       })
   }, [])
+
+  const allRows = allRowsByTyp[produktTyp]
 
   const searchResults = useMemo(() => {
     if (searchQuery.trim().length === 0) return []
@@ -129,6 +132,7 @@ export function useCajovnaPOS() {
     const item: CajeCartItem = {
       localId: `${Date.now()}-${Math.random()}`,
       caj: selectedTea,
+      produktTyp,
       baleni: selectedBaleni,
       kusu: n,
       celkCena: selectedBaleni.cena * n,
@@ -153,7 +157,11 @@ export function useCajovnaPOS() {
     setView(CAJE_VIEW_ORDER[idx - 1])
   }
 
-  function goToCategories() { setView('categories') }
+  function goToCategories(typ: ProduktTyp) {
+    setProduktTyp(typ)
+    setCategories(deriveCategories(allRowsByTyp[typ]))
+    setView('categories')
+  }
 
   function startCheckout() {
     setCheckoutError(null)
@@ -164,11 +172,12 @@ export function useCajovnaPOS() {
     setCheckoutError(null)
     try {
       const polozky = cart.map((item) => ({
-        caje_kod:  item.caj.KOD,
-        baleni:    item.baleni.cislo,
-        kusu:      item.kusu,
-        jedn_cena: item.baleni.cena,
-        celk_cena: item.celkCena,
+        caje_kod:    item.caj.KOD,
+        produkt_typ: item.produktTyp,
+        baleni:      item.baleni.cislo,
+        kusu:        item.kusu,
+        jedn_cena:   item.baleni.cena,
+        celk_cena:   item.celkCena,
       }))
       const res = await createCajovnaSale(polozky)
       setLastTotal(res.total)
@@ -191,7 +200,7 @@ export function useCajovnaPOS() {
   }
 
   return {
-    view, categories, teas, baleniOptions, zemeOptions,
+    view, produktTyp, categories, teas, baleniOptions, zemeOptions,
     selectedCategory, selectedZeme, selectedTea, selectedBaleni,
     cart, lastTotal, loading, error, checkoutError,
     searchQuery, searchResults, setSearchQuery,
