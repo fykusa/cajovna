@@ -153,9 +153,12 @@ export interface CajeBaleni {
   cena: number  // MOC v Kč
 }
 
+export type ProduktTyp = 'caje' | 'nadobi' | 'etnoshop'
+
 export interface CajeCartItem {
   localId: string
   caj: TeaRow
+  produktTyp: ProduktTyp
   baleni: CajeBaleni
   kusu: number
   celkCena: number

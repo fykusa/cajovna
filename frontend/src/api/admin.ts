@@ -35,9 +35,9 @@ export interface SyncResult {
   vyrazeno: number
 }
 
-/** Spustí sync záložky CAJE ze Google Sheets → 01_caje v DB. */
-export async function syncFromSheets(): Promise<SyncResult> {
-  const res = await fetch(`${apiBase}/admin/sheets-sync`, {
+/** Spustí sync záložky ze Google Sheets → DB. */
+export async function syncFromSheets(sheet: 'caje' | 'nadobi' | 'etnoshop' = 'caje'): Promise<SyncResult> {
+  const res = await fetch(`${apiBase}/admin/sheets-sync?sheet=${sheet}`, {
     method: 'POST',
     headers: { ...authHeader() },
   })

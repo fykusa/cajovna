@@ -3,6 +3,7 @@ import type { CajovnaProdej, CajePolozkaSale, CajeCategory } from '../types'
 
 export interface CajePolozkaSend {
   caje_kod: string
+  produkt_typ: 'caje' | 'nadobi' | 'etnoshop'
   baleni: 1 | 2 | 3 | 4
   kusu: number
   jedn_cena: number
