@@ -2,6 +2,7 @@
 
 # Lokální env proměnné
 .env
+deploy/.env.deploy
 
 # phpMyAdmin témata (lokální, nepatří do repozitáře)
 phpMyAdmin_themes/
