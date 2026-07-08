@@ -1,3 +1,7 @@
+# Forpsi běží PHP jako cgi-fcgi — Apache jinak Authorization hlavičku
+# k PHP vůbec nepustí (RewriteRule E= trik na tomto SAPI nefunguje).
+CGIPassAuth On
+
 RewriteEngine On
 
 # Existující soubory a složky servíruj přímo (assets, favicon, atd.)
