@@ -40,7 +40,7 @@ Dvě nové tabulky, zrcadlící `01_caje` 1:1 (stejné sloupce + `V_SHEETU` flag
 
 ### Beze změny (mimo rozsah)
 
-Dashboard filtry a stránka Tržby zůstávají jen pro čaj — rozšíření reportingu o produktovou řadu je samostatný následný úkol v `tasks.md`. Export/import celé DB (`db_transfer.php`) — nové tabulky se do exportu/importu doplní jako součást implementace (musí být v `DBT_GROUPS`), ale bez zvláštního reportingového UI.
+Dashboard filtry a stránka Tržby zůstávají jen pro čaj — rozšíření reportingu o produktovou řadu je samostatný následný úkol v `tasks.md`. Export/import celé DB (`db_transfer.php`) — `02_nadobi`/`03_etnoshop` se záměrně NEdoplňují do `DBT_GROUPS`, stejně jako dnes není `01_caje`: jde o Sheets-synced data, vždy odvoditelná ze zdrojového Google Sheetu, ne o data spravovaná ruční exportní/importní funkcí aplikace.
 
 ### Testy
 

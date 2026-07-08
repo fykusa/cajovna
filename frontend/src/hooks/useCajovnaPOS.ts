@@ -67,14 +67,26 @@ export function useCajovnaPOS() {
   const [searchQuery, setSearchQuery]       = useState('')
 
   useEffect(() => {
-    Promise.all([getProdukty('caje'), getProdukty('nadobi'), getProdukty('etnoshop')])
+    Promise.allSettled([getProdukty('caje'), getProdukty('nadobi'), getProdukty('etnoshop')])
       .then(([caje, nadobi, etnoshop]) => {
-        setAllRowsByTyp({ caje, nadobi, etnoshop })
-        setCategories(deriveCategories(caje))
-        setLoading(false)
-      })
-      .catch((e) => {
-        setError(e instanceof Error ? e.message : 'Chyba načítání dat')
+        if (caje.status === 'rejected') {
+          setError(caje.reason instanceof Error ? caje.reason.message : 'Chyba načítání dat')
+          setLoading(false)
+          return
+        }
+        if (nadobi.status === 'rejected') {
+          console.warn('Nepodařilo se načíst katalog nádobí:', nadobi.reason)
+        }
+        if (etnoshop.status === 'rejected') {
+          console.warn('Nepodařilo se načíst katalog etnoshopu:', etnoshop.reason)
+        }
+        const rows: Record<ProduktTyp, TeaRow[]> = {
+          caje: caje.value,
+          nadobi: nadobi.status === 'fulfilled' ? nadobi.value : [],
+          etnoshop: etnoshop.status === 'fulfilled' ? etnoshop.value : [],
+        }
+        setAllRowsByTyp(rows)
+        setCategories(deriveCategories(rows.caje))
         setLoading(false)
       })
   }, [])

@@ -330,6 +330,22 @@ describe('useCajovnaPOS', () => {
     expect(result.current.searchQuery).toBe('')
   })
 
+  test('selhání katalogu nádobí nezhroutí čajový flow (Promise.allSettled)', async () => {
+    vi.mocked(teasApi.getProdukty).mockImplementation((typ: string) => {
+      if (typ === 'nadobi') return Promise.reject(new Error('500'))
+      if (typ === 'etnoshop') return Promise.resolve([])
+      return Promise.resolve(allRows)
+    })
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBeNull()
+    expect(result.current.categories).toEqual(['BÍLÝ', 'PUERH'])
+    expect(result.current.produktTyp).toBe('caje')
+    expect(warnSpy).toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
+
   test('goToCategories(nadobi) přepne produktovou řadu a kategorie', async () => {
     const { result } = renderHook(() => useCajovnaPOS())
     await waitFor(() => expect(result.current.loading).toBe(false))

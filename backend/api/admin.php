@@ -71,7 +71,7 @@ function handleSheetsSync(): void {
     }
 
     $sheet = $_GET['sheet'] ?? 'caje';
-    if (!isset(PRODUKT_TABULKY[$sheet])) {
+    if (!is_string($sheet) || !isset(PRODUKT_TABULKY[$sheet])) {
         http_response_code(400);
         echo json_encode(['ok' => false, 'error' => 'Neznámá záložka: ' . $sheet]);
         return;

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/produkt_typy.php';
+
 /**
  * Sdílená GET listovací logika pro produktové tabulky (01_caje, 02_nadobi,
  * 03_etnoshop) — shodná struktura sloupců, liší se jen název tabulky.
@@ -7,6 +9,12 @@
  */
 function handleListProdukty(string $tableName): void {
     requireAuth();
+
+    if (!in_array($tableName, PRODUKT_TABULKY, true)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal error: unknown table.']);
+        return;
+    }
 
     $pdo    = getPDO();
     $where  = ['V_SHEETU = 1'];
