@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
+require_once __DIR__ . '/../lib/produkt_typy.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
@@ -42,9 +43,12 @@ function createProdej(array $auth): void {
         return;
     }
 
+    $pdo = getPDO();
+
     foreach ($polozky as $p) {
-        if (!isset($p['caje_kod'], $p['baleni'], $p['kusu'], $p['jedn_cena'], $p['celk_cena'])
-            || !is_string($p['caje_kod']) || trim($p['caje_kod']) === '') {
+        if (!isset($p['caje_kod'], $p['produkt_typ'], $p['baleni'], $p['kusu'], $p['jedn_cena'], $p['celk_cena'])
+            || !is_string($p['caje_kod']) || trim($p['caje_kod']) === ''
+            || !isset(PRODUKT_TABULKY[$p['produkt_typ']])) {
             http_response_code(400);
             echo json_encode(['error' => 'Neplatná položka.']);
             return;
@@ -54,10 +58,17 @@ function createProdej(array $auth): void {
             echo json_encode(['error' => 'Neplatné číslo balení: ' . $p['baleni']]);
             return;
         }
+        $table = PRODUKT_TABULKY[$p['produkt_typ']];
+        $check = $pdo->prepare("SELECT 1 FROM `$table` WHERE KOD = ?");
+        $check->execute([trim($p['caje_kod'])]);
+        if ($check->fetchColumn() === false) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Neznámý kód položky.']);
+            return;
+        }
     }
 
     $total = (int) array_sum(array_column($polozky, 'celk_cena'));
-    $pdo   = getPDO();
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare('INSERT INTO `00_prodej` (user_id, total_kc) VALUES (?, ?)');
@@ -65,13 +76,14 @@ function createProdej(array $auth): void {
         $prodejId = (int) $pdo->lastInsertId();
 
         $ins = $pdo->prepare(
-            'INSERT INTO `00_prodej_polozky` (prodej_id, caje_kod, baleni, kusu, jedn_cena, celk_cena)
-             VALUES (?, ?, ?, ?, ?, ?)'
+            'INSERT INTO `00_prodej_polozky` (prodej_id, caje_kod, PRODUKT_TYP, baleni, kusu, jedn_cena, celk_cena)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
         foreach ($polozky as $p) {
             $ins->execute([
                 $prodejId,
                 trim($p['caje_kod']),
+                $p['produkt_typ'],
                 (int) $p['baleni'],
                 (int) $p['kusu'],
                 (int) $p['jedn_cena'],
@@ -81,16 +93,6 @@ function createProdej(array $auth): void {
         $pdo->commit();
         http_response_code(201);
         echo json_encode(['prodej_id' => $prodejId, 'total' => $total]);
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        // 1452 = FK violation → kód neexistuje v 01_caje
-        if (($e->errorInfo[1] ?? 0) === 1452) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Neznámý kód položky.']);
-            return;
-        }
-        http_response_code(500);
-        echo json_encode(['error' => 'Chyba při zápisu prodeje.']);
     } catch (Throwable $e) {
         $pdo->rollBack();
         http_response_code(500);
@@ -155,10 +157,14 @@ function listKategorie(): void {
 function listPolozky(int $prodejId): void {
     $pdo  = getPDO();
     $stmt = $pdo->prepare(
-        'SELECT pp.id, pp.caje_kod, pp.baleni, pp.kusu, pp.jedn_cena, pp.celk_cena,
-                c.NAZEV as nazev, c.KATEGORIE as kategorie, c.ZEME as zeme
+        'SELECT pp.id, pp.caje_kod, pp.PRODUKT_TYP, pp.baleni, pp.kusu, pp.jedn_cena, pp.celk_cena,
+                COALESCE(c.NAZEV, n.NAZEV, e.NAZEV) as nazev,
+                COALESCE(c.KATEGORIE, n.KATEGORIE, e.KATEGORIE) as kategorie,
+                COALESCE(c.ZEME, n.ZEME, e.ZEME) as zeme
          FROM `00_prodej_polozky` pp
-         LEFT JOIN `01_caje` c ON c.KOD = pp.caje_kod
+         LEFT JOIN `01_caje` c    ON c.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'caje\'
+         LEFT JOIN `02_nadobi` n  ON n.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'nadobi\'
+         LEFT JOIN `03_etnoshop` e ON e.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'etnoshop\'
          WHERE pp.prodej_id = ?
          ORDER BY pp.id'
     );
