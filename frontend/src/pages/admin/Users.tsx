@@ -202,11 +202,11 @@ export default function Users() {
             {error && <p className={styles.error}>{error}</p>}
             <input
               type="password"
-              placeholder="Nové heslo (min. 6 znaků)"
+              placeholder="Nové heslo (min. 4 znaky)"
               value={newPwd}
               onChange={(e) => setNewPwd(e.target.value)}
               required
-              minLength={6}
+              minLength={4}
               className={styles.input}
               autoFocus
               autoComplete="new-password"

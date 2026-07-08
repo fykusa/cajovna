@@ -89,9 +89,9 @@ function handleChangePassword(): void {
     $oldPassword = $data['old_password'] ?? '';
     $newPassword = $data['new_password'] ?? '';
 
-    if ($username === '' || $oldPassword === '' || strlen($newPassword) < 6) {
+    if ($username === '' || $oldPassword === '' || strlen($newPassword) < 4) {
         http_response_code(400);
-        echo json_encode(['error' => 'Vyplňte jméno, staré heslo a nové heslo (min. 6 znaků)']);
+        echo json_encode(['error' => 'Vyplňte jméno, staré heslo a nové heslo (min. 4 znaky)']);
         return;
     }
 

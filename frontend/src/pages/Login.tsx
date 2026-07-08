@@ -129,12 +129,12 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
           />
           <input
             type="password"
-            placeholder="Nové heslo (min. 6 znaků)"
+            placeholder="Nové heslo (min. 4 znaky)"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             className={styles.input}
             required
-            minLength={6}
+            minLength={4}
             autoComplete="new-password"
           />
           <div className={styles.changeActions}>

@@ -54,9 +54,9 @@ function createUser(): void {
     $password = $data['password'] ?? '';
     $role     = $data['role'] ?? 'prodavacka';
 
-    if ($username === '' || strlen($password) < 6) {
+    if ($username === '' || strlen($password) < 4) {
         http_response_code(400);
-        echo json_encode(['error' => 'Username a heslo (min. 6 znaků) jsou povinné']);
+        echo json_encode(['error' => 'Username a heslo (min. 4 znaky) jsou povinné']);
         return;
     }
 
@@ -106,7 +106,7 @@ function updateUser(int $id): void {
         $fields[] = 'username = ?';
         $params[]  = trim($data['username']);
     }
-    if (isset($data['password']) && strlen($data['password']) >= 6) {
+    if (isset($data['password']) && strlen($data['password']) >= 4) {
         $fields[] = 'password_hash = ?';
         $params[]  = password_hash($data['password'], PASSWORD_BCRYPT);
         $fields[] = 'password_changed_at = NOW()';
