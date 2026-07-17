@@ -15,7 +15,7 @@ import CajeHome from '../components/pos-cajovna/CajeHome'
 import CajeCheckout from '../components/pos-cajovna/CajeCheckout'
 import CajeHistory from '../components/pos-cajovna/CajeHistory'
 import CajeKasa from '../components/pos-cajovna/CajeKasa'
-import styles from './MobilePOS.module.css'
+import styles from './CajovnaPOS.module.css'
 
 const VIEW_TITLES: Record<CajeView, string> = {
   home:       'TAO čajovna',

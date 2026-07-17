@@ -38,7 +38,7 @@ function renderLogin() {
     <MemoryRouter initialEntries={['/login']}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/pos" element={<div>POS page</div>} />
+        <Route path="/cajovna" element={<div>Cajovna page</div>} />
         <Route path="/admin" element={<div>Admin page</div>} />
       </Routes>
     </MemoryRouter>

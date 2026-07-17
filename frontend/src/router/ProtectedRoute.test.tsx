@@ -28,10 +28,10 @@ function renderWithRoute(initialPath: string) {
         <Route path="/login" element={<div>Login page</div>} />
         <Route path="/403" element={<div>403 page</div>} />
         <Route
-          path="/pos"
+          path="/cajovna"
           element={
             <ProtectedRoute requiredRole="prodavacka">
-              <div>POS page</div>
+              <div>Cajovna page</div>
             </ProtectedRoute>
           }
         />
@@ -52,15 +52,15 @@ describe('ProtectedRoute', () => {
   it('přesměruje na /login pokud není token', () => {
     mockState.user = null
     mockState.token = null
-    renderWithRoute('/pos')
+    renderWithRoute('/cajovna')
     expect(screen.getByText('Login page')).toBeInTheDocument()
   })
 
   it('zobrazí obsah přihlášenému uživateli se správnou rolí', () => {
     mockState.user = { id: 1, username: 'terka', role: 'prodavacka' }
     mockState.token = 'tok'
-    renderWithRoute('/pos')
-    expect(screen.getByText('POS page')).toBeInTheDocument()
+    renderWithRoute('/cajovna')
+    expect(screen.getByText('Cajovna page')).toBeInTheDocument()
   })
 
   it('přesměruje na /403 pokud má uživatel špatnou roli', () => {
