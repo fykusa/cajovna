@@ -1,5 +1,6 @@
 # Log — Cajovna (nejnovější nahoře)
 
+- [2026-07-17 21:45] Zrušen `/pos` a `/pos-desktop`, zůstává jen `/cajovna`. Smazáno 44 souborů, 3 sdílené (`MobileHeader`, `MobileTopBar`, přejmenovaný `CajovnaPOS.module.css`) zachovány. 184/184 testů, tsc čistý.
 - [2026-07-17 21:35] Přidán krok potvrzení/editace ceny položky v /cajovna pokladně (nový view 'confirm', `CajeConfirmPrice.tsx`), TDD, 258/258 testů zelených. Rozhodnuto: `/pos` + `/pos-desktop` se v budoucnu zruší, zůstane jen `/cajovna` (samostatný task v tasks.md).
 
 Jednořádkové záznamy toho, co se stalo/rozhodlo — timeline napříč sessions.
