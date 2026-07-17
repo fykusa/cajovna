@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCajovnaPOS, CAJE_VIEW_ORDER, type CajeView } from '../hooks/useCajovnaPOS'
 import { useAuthStore } from '../store/authStore'
@@ -36,21 +36,24 @@ export default function CajovnaPOS() {
   const logout   = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
   const prevViewRef = useRef<CajeView>('home')
-  const [slideClass, setSlideClass] = useState('')
+  const slideClassRef = useRef('')
 
   function handleLogout() {
     logout()
     navigate('/login', { replace: true })
   }
 
-  useEffect(() => {
+  // Směr animace se počítá přímo při renderu (ne v efektu), aby nová třída
+  // byla na plátně hned v prvním vykreslení nového kroku — jinak se stará
+  // třída na okamžik vykreslí beze změny a teprve dodatečně naskočí nová,
+  // což restartuje CSS animaci a obsah viditelně "problikne".
+  if (prevViewRef.current !== pos.view) {
     const prevIdx = CAJE_VIEW_ORDER.indexOf(prevViewRef.current)
     const newIdx  = CAJE_VIEW_ORDER.indexOf(pos.view)
-    if (prevViewRef.current !== pos.view) {
-      setSlideClass(newIdx >= prevIdx ? styles.slideFwd : styles.slideBack)
-    }
+    slideClassRef.current = newIdx >= prevIdx ? styles.slideFwd : styles.slideBack
     prevViewRef.current = pos.view
-  }, [pos.view])
+  }
+  const slideClass = slideClassRef.current
 
   async function handleConfirmCheckout(celkemZaplaceno: number) {
     setCheckoutLoading(true)
