@@ -3,6 +3,7 @@
 Jednořádkové záznamy toho, co se stalo/rozhodlo — timeline napříč sessions.
 Otevřené úkoly viz `tasks.md`, hluboký detail/proč viz `memory/` (mimo repo, jen pro Claude).
 
+- [2026-07-17 20:33] Vyřešeny 3 čekající tasky (mimo produkční deploy): case-insensitive fix `assertUniqueKod` (mb_strtoupper), ověřen Apps Script (fire-and-forget, žádná úprava netřeba), dead code cleanup (`backend/index.php`, `getTeas()`). Testy zelené (24 backend + 252 frontend).
 - [2026-07-17 18:24] Založen tenhle log — na začátku session čti posledních ~30 řádků, do hloubky jen na vyžádání.
 - [2026-07-09] Editovatelná zaplacená částka v CajeCheckout (default = dopočtená suma) + fix UTC/lokální datum bugu v CajeHistory, nasazeno na testovaci.
 - [2026-07-09] Minimální délka hesla snížena z 6 na 4 znaky (požadavek majitele), nasazeno.

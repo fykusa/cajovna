@@ -18,6 +18,3 @@ export const getProdukty = (
   const qs = q.toString() ? `?${q}` : ''
   return apiFetch<TeaRow[]>(`/${PRODUKT_ENDPOINTS[typ]}${qs}`)
 }
-
-export const getTeas = (params?: { search?: string; kategorie?: string; aktiv?: string }): Promise<TeaRow[]> =>
-  getProdukty('caje', params)

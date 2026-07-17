@@ -74,5 +74,14 @@ try {
     ok('hláška obsahuje duplicitní kód', strpos($e->getMessage(), '2606-C-BILY-TAWN-01') !== false);
 }
 
+$caseDup = $rows;
+$caseDup[1]['KOD'] = strtolower($rows[0]['KOD']);
+try {
+    assertUniqueKod($caseDup);
+    ok('KOD lišící se jen velikostí písmen hodí výjimku (DB kolace je case-insensitive)', false);
+} catch (RuntimeException $e) {
+    ok('KOD lišící se jen velikostí písmen hodí výjimku (DB kolace je case-insensitive)', true);
+}
+
 echo "\n$PASS passed, $FAIL failed\n";
 exit($FAIL > 0 ? 1 : 0);

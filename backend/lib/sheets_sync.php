@@ -96,10 +96,11 @@ function assertUniqueKod(array $rows): void {
     $seen = [];
     foreach ($rows as $row) {
         $kod = $row['KOD'];
-        if (isset($seen[$kod])) {
+        $kodNormalized = mb_strtoupper($kod);
+        if (isset($seen[$kodNormalized])) {
             throw new RuntimeException('Duplicitní KOD v sheetu: ' . $kod);
         }
-        $seen[$kod] = true;
+        $seen[$kodNormalized] = true;
     }
 }
 
