@@ -1,5 +1,6 @@
 # Log — Cajovna (nejnovější nahoře)
 
+- [2026-07-17 22:35] Storno prodeje v POS historii teď vyžaduje potvrzení (Ano/Zpět), dřív se stornovalo hned po kliknutí na tlačítko.
 - [2026-07-17 22:20] Přehled prodejů v POS historii teď u položky zobrazuje i ceníkovou cenu v závorce (nové pole `cenik_cena` z `CENA1`–`CENA4`, backend `listPolozky`) — vidět rozdíl proti skutečně účtované ceně po editaci v confirm kroku.
 - [2026-07-17 22:10] Drobečková navigace (kategorie — země — čaj) v hlavičce POS teď i na krocích balení, množství a ceny položky (dřív jen na výběru čaje).
 - [2026-07-17 21:45] Zrušen `/pos` a `/pos-desktop`, zůstává jen `/cajovna`. Smazáno 44 souborů, 3 sdílené (`MobileHeader`, `MobileTopBar`, přejmenovaný `CajovnaPOS.module.css`) zachovány. 184/184 testů, tsc čistý.
