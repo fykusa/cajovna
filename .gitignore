@@ -45,3 +45,6 @@ backend/pytliky.csv
 # Zdrojová data s interními poznámkami
 _srcfiles_/__notes__.txt
 _srcfiles_/old/
+
+# Reálný backup stávající produkce (lokální, nepatří do repozitáře)
+_backup_/
