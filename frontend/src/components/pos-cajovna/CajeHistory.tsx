@@ -15,6 +15,7 @@ export default function CajeHistory() {
   const [items, setItems]             = useState<CajePolozkaSale[]>([])
   const [itemsLoading, setItemsLoading] = useState(false)
   const [cancelling, setCancelling]     = useState(false)
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
 
   function loadProdeje() {
     const now = new Date()
@@ -29,6 +30,7 @@ export default function CajeHistory() {
   useEffect(() => { loadProdeje() }, [])
 
   async function toggleSale(id: number) {
+    setConfirmingId(null)
     if (selectedId === id) { setSelectedId(null); setItems([]); return }
     setSelectedId(id)
     setItems([])
@@ -43,6 +45,7 @@ export default function CajeHistory() {
       await cancelCajovnaSale(id)
       setSelectedId(null)
       setItems([])
+      setConfirmingId(null)
       await loadProdeje()
     } finally {
       setCancelling(false)
@@ -97,13 +100,34 @@ export default function CajeHistory() {
                   ))
                 }
                 {!p.cancelled_at && (
-                  <button
-                    className={styles.stornoBtn}
-                    disabled={cancelling}
-                    onClick={(e) => { e.stopPropagation(); handleCancel(p.id) }}
-                  >
-                    {cancelling ? 'Stornuji…' : 'Stornovat tento prodej'}
-                  </button>
+                  confirmingId === p.id ? (
+                    <div className={styles.confirmBox} onClick={(e) => e.stopPropagation()}>
+                      <span className={styles.confirmText}>Opravdu stornovat tento prodej?</span>
+                      <div className={styles.confirmActions}>
+                        <button
+                          className={styles.confirmYesBtn}
+                          disabled={cancelling}
+                          onClick={() => handleCancel(p.id)}
+                        >
+                          {cancelling ? 'Stornuji…' : 'Ano, stornovat'}
+                        </button>
+                        <button
+                          className={styles.confirmNoBtn}
+                          disabled={cancelling}
+                          onClick={() => setConfirmingId(null)}
+                        >
+                          Zpět
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className={styles.stornoBtn}
+                      onClick={(e) => { e.stopPropagation(); setConfirmingId(p.id) }}
+                    >
+                      Stornovat tento prodej
+                    </button>
+                  )
                 )}
               </div>
             )}
