@@ -83,6 +83,8 @@ export default function CajovnaPOS() {
               subtitle={
                 pos.view === 'teas' ? categoryName
                 : pos.view === 'countries' ? pos.selectedCategory ?? undefined
+                : pos.view === 'packaging' || pos.view === 'quantity' || pos.view === 'confirm'
+                  ? (pos.selectedTea ? `${categoryName} — ${pos.selectedTea.NAZEV}` : undefined)
                 : undefined
               }
               cartCount={pos.cart.length}
