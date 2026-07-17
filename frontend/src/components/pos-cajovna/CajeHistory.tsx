@@ -87,6 +87,9 @@ export default function CajeHistory() {
                       <span className={styles.itemQty}>{it.kusu}×</span>
                       <span className={styles.itemName}>
                         {it.nazev ?? it.caje_kod}
+                        {it.cenik_cena !== null && (
+                          <span className={styles.itemCenik}> ({it.cenik_cena.toLocaleString('cs-CZ')} Kč)</span>
+                        )}
                         <span className={styles.itemBaleni}> · {BALENI[it.baleni]}</span>
                       </span>
                       <span className={styles.itemPrice}>{it.celk_cena.toLocaleString('cs-CZ')} Kč</span>

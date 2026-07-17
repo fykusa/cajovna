@@ -167,7 +167,13 @@ function listPolozky(int $prodejId): void {
         'SELECT pp.id, pp.caje_kod, pp.PRODUKT_TYP, pp.baleni, pp.kusu, pp.jedn_cena, pp.celk_cena,
                 COALESCE(c.NAZEV, n.NAZEV, e.NAZEV) as nazev,
                 COALESCE(c.KATEGORIE, n.KATEGORIE, e.KATEGORIE) as kategorie,
-                COALESCE(c.ZEME, n.ZEME, e.ZEME) as zeme
+                COALESCE(c.ZEME, n.ZEME, e.ZEME) as zeme,
+                CASE pp.baleni
+                    WHEN 1 THEN COALESCE(c.CENA1, n.CENA1, e.CENA1)
+                    WHEN 2 THEN COALESCE(c.CENA2, n.CENA2, e.CENA2)
+                    WHEN 3 THEN COALESCE(c.CENA3, n.CENA3, e.CENA3)
+                    WHEN 4 THEN COALESCE(c.CENA4, n.CENA4, e.CENA4)
+                END as cenik_cena
          FROM `00_prodej_polozky` pp
          LEFT JOIN `01_caje` c    ON c.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'caje\'
          LEFT JOIN `02_nadobi` n  ON n.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'nadobi\'

@@ -15,6 +15,7 @@
 .itemQty { color: var(--mob-fg-dim, #888); min-width: 20px; }
 .itemName { flex: 1; }
 .itemBaleni { color: var(--mob-fg-dim, #888); font-size: 12px; }
+.itemCenik { color: var(--mob-fg-dim, #888); font-size: 12px; }
 .itemPrice { white-space: nowrap; font-weight: 600; }
 
 .saleCancelled { opacity: 0.45; }

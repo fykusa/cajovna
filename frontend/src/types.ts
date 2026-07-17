@@ -183,6 +183,7 @@ export interface CajePolozkaSale {
   nazev: string | null
   kategorie: string | null
   zeme: string | null
+  cenik_cena: number | null
 }
 
 export interface CashMovement {
