@@ -166,7 +166,13 @@ export default function Kasa() {
               </div>
             </div>
             <div className={styles.stat}>
-              <div className={styles.statLabel}>Tržby dnes</div>
+              <div className={styles.statLabel}>Dnes prodáno (ceník. ceny)</div>
+              <div className={styles.statValue} data-testid="stat-prodano">
+                {fmtKc(status.dnes_prodano)}
+              </div>
+            </div>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>Potvrzená tržba</div>
               <div className={styles.statValue} data-testid="stat-trzby">
                 {fmtKc(status.trzby_dnes)}
               </div>
@@ -177,16 +183,14 @@ export default function Kasa() {
                 {fmtKc(status.pohyby_dnes)}
               </div>
             </div>
-            {status.today_closing && (
-              <div className={styles.stat}>
-                <div className={styles.statLabel}>Dýžko dnes</div>
-                <div className={styles.statValue} data-testid="stat-dyzko">
-                  {fmtKc(status.today_closing.confirmed_balance - status.today_closing.calculated_balance)}
-                </div>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>Dýžko / Manko</div>
+              <div className={styles.statValue} data-testid="stat-dyzko">
+                {fmtKc(status.trzby_dnes - status.dnes_prodano)}
               </div>
-            )}
+            </div>
             <div className={`${styles.stat} ${styles.statTotal}`}>
-              <div className={styles.statLabel}>Aktuální stav kasy</div>
+              <div className={styles.statLabel}>Očekávaný zůstatek</div>
               <div className={styles.statValue} data-testid="stat-stav">
                 {status.stav_kasy !== null
                   ? fmtKc(status.stav_kasy)
@@ -298,7 +302,6 @@ export default function Kasa() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Uzavření dne</h2>
           <form className={styles.closeForm} onSubmit={handleClose}>
-            <label className={styles.formLabel}>Potvrzený zůstatek (Kč)</label>
             <input
               type="number"
               data-testid="close-balance-input"

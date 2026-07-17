@@ -171,6 +171,7 @@ export interface CajovnaProdej {
   username: string
   user_id: number
   cancelled_at: string | null
+  cenikova_cena: number
 }
 
 export interface CajePolozkaSale {
@@ -199,6 +200,7 @@ export interface CashMovement {
 export interface KasaStatus {
   last_closing: { date: string; confirmed_balance: number } | null
   today_closing: { confirmed_balance: number; calculated_balance: number; note: string | null; created_by_username: string } | null
+  dnes_prodano: number
   trzby_dnes: number
   pohyby_dnes: number
   stav_kasy: number | null

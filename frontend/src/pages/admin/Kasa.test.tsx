@@ -23,6 +23,7 @@ const mockGetClosings  = vi.mocked(getKasaClosings)
 const STATUS: KasaStatus = {
   last_closing: { date: '2026-06-15', confirmed_balance: 1000 },
   today_closing: null,
+  dnes_prodano: 550,
   trzby_dnes: 500,
   pohyby_dnes: -200,
   stav_kasy: 1300,
@@ -42,6 +43,7 @@ const STATUS: KasaStatus = {
 const STATUS_NO_CLOSING: KasaStatus = {
   last_closing: null,
   today_closing: null,
+  dnes_prodano: 300,
   trzby_dnes: 300,
   pohyby_dnes: 0,
   stav_kasy: null,

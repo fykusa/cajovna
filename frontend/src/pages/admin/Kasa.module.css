@@ -157,11 +157,6 @@
   max-width: 400px;
 }
 
-.formLabel {
-  font-size: 0.8rem;
-  color: #888;
-}
-
 /* ── Sdílené inputy ── */
 .input {
   padding: 8px 12px;

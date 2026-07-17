@@ -1,14 +1,13 @@
 import { useEffect, useState, useCallback } from 'react'
 import { getCajovnaProdeje, getCajovnaPolozky, getCajovnaKategorie, cancelCajovnaSale } from '../../api/cajovna'
 import { getUsers } from '../../api/users'
-import { getKasaClosings } from '../../api/kasa'
-import type { CajovnaProdej, CajePolozkaSale, CajeCategory, CashClosing, User } from '../../types'
+import type { CajovnaProdej, CajePolozkaSale, CajeCategory, User } from '../../types'
 import { useToast } from '../../components/toast/useToast'
 import ImportDialog from '../../components/admin/ImportDialog'
 import RevenueChart from '../../components/admin/RevenueChart'
 import { exportDatabase } from '../../api/admin'
 import { bucketRevenue } from './revenueBuckets'
-import { periodRange, PERIODS, type Period } from './periodRange'
+import { periodRange, DASHBOARD_PERIODS, type Period } from './periodRange'
 import styles from './Dashboard.module.css'
 
 const BALENI_LABELS: Record<number, string> = {
@@ -19,10 +18,10 @@ const BALENI_LABELS: Record<number, string> = {
 }
 
 export default function AdminDashboard() {
-  const initRange = periodRange('month')
+  const initRange = periodRange('today')
   const [from, setFrom]                 = useState(initRange.from)
   const [to, setTo]                     = useState(initRange.to)
-  const [activePeriod, setActivePeriod] = useState<Period | null>('month')
+  const [activePeriod, setActivePeriod] = useState<Period | null>('today')
   const [sales, setSales]               = useState<CajovnaProdej[]>([])
   const [loading, setLoading]           = useState(true)
   const [selectedId, setSelectedId]     = useState<number | null>(null)
@@ -35,7 +34,6 @@ export default function AdminDashboard() {
   const [showImport, setShowImport]     = useState(false)
   const [confirmId, setConfirmId]       = useState<number | null>(null)
   const [cancelling, setCancelling]     = useState(false)
-  const [closings, setClosings]         = useState<CashClosing[]>([])
 
   const toast = useToast()
 
@@ -44,16 +42,12 @@ export default function AdminDashboard() {
     setSelectedId(null)
     setItems([])
     try {
-      const [salesData, closingsData] = await Promise.all([
-        getCajovnaProdeje({
-          from: f + ' 00:00:00',
-          to: t + ' 23:59:59',
-          ...(kat ? { kategorie: kat.kategorie, zeme: kat.zeme } : {}),
-        }),
-        getKasaClosings(f, t),
-      ])
+      const salesData = await getCajovnaProdeje({
+        from: f + ' 00:00:00',
+        to: t + ' 23:59:59',
+        ...(kat ? { kategorie: kat.kategorie, zeme: kat.zeme } : {}),
+      })
       setSales(salesData)
-      setClosings(closingsData)
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Chyba načítání')
     } finally {
@@ -135,7 +129,8 @@ export default function AdminDashboard() {
   const activeSales = visibleSales.filter((s) => !s.cancelled_at)
 
   const total = activeSales.reduce((s, sale) => s + sale.total_kc, 0)
-  const dyzko = closings.reduce((s, c) => s + (c.confirmed_balance - c.calculated_balance), 0)
+  const cenikSoucet = activeSales.reduce((s, sale) => s + sale.cenikova_cena, 0)
+  const dyzko = total - cenikSoucet
   const selectedSale = visibleSales.find((s) => s.id === selectedId) ?? null
   const chartData = bucketRevenue(visibleSales, from, to)
 
@@ -198,34 +193,35 @@ export default function AdminDashboard() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Přehled</h1>
-        <div className={styles.periods}>
-          {PERIODS.map(({ key, label }) => (
-            <button
-              key={key}
-              className={`${styles.periodBtn}${activePeriod === key ? ' ' + styles.active : ''}`}
-              onClick={() => selectPeriod(key)}
-            >
-              {label}
-            </button>
-          ))}
+        <div className={styles.filterRow}>
+          <div className={styles.periods}>
+            {DASHBOARD_PERIODS.map(({ key, label }) => (
+              <button
+                key={key}
+                className={`${styles.periodBtn}${activePeriod === key ? ' ' + styles.active : ''}`}
+                onClick={() => selectPeriod(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <form className={styles.rangeForm} onSubmit={handleSubmit}>
+            <input
+              type="date" value={from}
+              onChange={(e) => { setFrom(e.target.value); setActivePeriod(null) }}
+              className={styles.dateInput}
+            />
+            <span className={styles.rangeSep}>–</span>
+            <input
+              type="date" value={to}
+              onChange={(e) => { setTo(e.target.value); setActivePeriod(null) }}
+              className={styles.dateInput}
+            />
+            <button type="submit" className={styles.applyBtn}>Zobrazit</button>
+            <button type="button" className={styles.exportBtn} onClick={handleExport}>Export CSV</button>
+            <button type="button" className={styles.dbBtn} onClick={handleExportDb}>Export DB</button>
+          </form>
         </div>
-        <form className={styles.rangeForm} onSubmit={handleSubmit}>
-          <input
-            type="date" value={from}
-            onChange={(e) => { setFrom(e.target.value); setActivePeriod(null) }}
-            className={styles.dateInput}
-          />
-          <span className={styles.rangeSep}>–</span>
-          <input
-            type="date" value={to}
-            onChange={(e) => { setTo(e.target.value); setActivePeriod(null) }}
-            className={styles.dateInput}
-          />
-          <button type="submit" className={styles.applyBtn}>Zobrazit</button>
-          <button type="button" className={styles.exportBtn} onClick={handleExport}>Export CSV</button>
-          <button type="button" className={styles.dbBtn} onClick={handleExportDb}>Export DB</button>
-          <button type="button" className={styles.dbBtn} onClick={() => setShowImport(true)}>Import DB</button>
-        </form>
       </div>
 
       {users.length > 0 && (
@@ -282,12 +278,10 @@ export default function AdminDashboard() {
               <div className={styles.statLabel}>Prodejů</div>
               <div className={styles.statValue}>{activeSales.length}</div>
             </div>
-            {closings.length > 0 && (
-              <div className={styles.stat}>
-                <div className={styles.statLabel}>Dýžko</div>
-                <div className={styles.statValue}>{Math.round(dyzko).toLocaleString('cs-CZ')} Kč</div>
-              </div>
-            )}
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>Dýžko</div>
+              <div className={styles.statValue}>{Math.round(dyzko).toLocaleString('cs-CZ')} Kč</div>
+            </div>
           </div>
 
           <div className={styles.panels}>

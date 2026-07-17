@@ -140,7 +140,20 @@ function listProdeje(): void {
         }
     }
 
-    $sql = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id, p.cancelled_at
+    $sql = 'SELECT p.id, p.created_at, p.total_kc, u.username, p.user_id, p.cancelled_at,
+                   (SELECT COALESCE(SUM(pp.kusu * (
+                        CASE pp.baleni
+                            WHEN 1 THEN COALESCE(c.CENA1, n.CENA1, e.CENA1)
+                            WHEN 2 THEN COALESCE(c.CENA2, n.CENA2, e.CENA2)
+                            WHEN 3 THEN COALESCE(c.CENA3, n.CENA3, e.CENA3)
+                            WHEN 4 THEN COALESCE(c.CENA4, n.CENA4, e.CENA4)
+                        END
+                    )), 0)
+                    FROM `00_prodej_polozky` pp
+                    LEFT JOIN `01_caje` c     ON c.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'caje\'
+                    LEFT JOIN `02_nadobi` n   ON n.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'nadobi\'
+                    LEFT JOIN `03_etnoshop` e ON e.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'etnoshop\'
+                    WHERE pp.prodej_id = p.id) AS cenikova_cena
             FROM `00_prodej` p
             JOIN users u ON u.id = p.user_id'
          . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
@@ -148,7 +161,11 @@ function listProdeje(): void {
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $rows = array_map(function ($row) {
+        $row['cenikova_cena'] = (float) $row['cenikova_cena'];
+        return $row;
+    }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    echo json_encode($rows);
 }
 
 function listKategorie(): void {

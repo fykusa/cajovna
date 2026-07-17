@@ -1,7 +1,9 @@
 .page { display: flex; flex-direction: column; height: 100%; gap: 20px; }
 
-.header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.header { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .title  { color: #d4a84b; margin: 0; font-size: 1.4rem; }
+
+.filterRow { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 
 .periods { display: flex; gap: 8px; flex-wrap: wrap; }
 

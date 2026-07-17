@@ -71,6 +71,25 @@ function handleStatus(): void {
     $trzbyDnes = (float) $stmt->fetchColumn();
 
     $stmt = $pdo->prepare(
+        'SELECT COALESCE(SUM(pp.kusu * (
+                CASE pp.baleni
+                    WHEN 1 THEN COALESCE(c.CENA1, n.CENA1, e.CENA1)
+                    WHEN 2 THEN COALESCE(c.CENA2, n.CENA2, e.CENA2)
+                    WHEN 3 THEN COALESCE(c.CENA3, n.CENA3, e.CENA3)
+                    WHEN 4 THEN COALESCE(c.CENA4, n.CENA4, e.CENA4)
+                END
+         )), 0)
+         FROM `00_prodej_polozky` pp
+         JOIN `00_prodej` p ON p.id = pp.prodej_id
+         LEFT JOIN `01_caje` c    ON c.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'caje\'
+         LEFT JOIN `02_nadobi` n  ON n.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'nadobi\'
+         LEFT JOIN `03_etnoshop` e ON e.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'etnoshop\'
+         WHERE DATE(p.created_at) = ? AND p.cancelled_at IS NULL'
+    );
+    $stmt->execute([$today]);
+    $dnesProdano = (float) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare(
         'SELECT cm.id, cm.date, cm.amount, cm.note, cm.created_by,
                 u.username AS created_by_username, cm.created_at
          FROM 90_cashflow cm
@@ -94,6 +113,7 @@ function handleStatus(): void {
             ? ['date' => $lastClosing['date'], 'confirmed_balance' => (float) $lastClosing['confirmed_balance']]
             : null,
         'today_closing' => $todayClosing,
+        'dnes_prodano'  => $dnesProdano,
         'trzby_dnes'    => $trzbyDnes,
         'pohyby_dnes'   => $pohybySum,
         'stav_kasy'     => $stavKasy,

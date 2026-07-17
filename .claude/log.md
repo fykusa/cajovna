@@ -1,5 +1,8 @@
 # Log — Cajovna (nejnovější nahoře)
 
+- [2026-07-18 00:25] Admin Kasa + Dashboard přepracovány: sekce „Dnešní stav" má nové dlaždice „Dnes prodáno (ceník. ceny)" a přejmenované „Potvrzená tržba"/„Očekávaný zůstatek", „Dýžko / Manko" teď = Potvrzená tržba − ceníková cena (dřív rozdíl confirmed/calculated balance z uzávěrky), zobrazuje se vždy. Dashboard „Dýžko" sjednoceno se stejnou logikou (nový sloupec `cenikova_cena` v `listProdeje`), zrušena závislost na `getKasaClosings`. Dashboard: nové filtry období Dnes/Tento týden (jen tam, sdílený `PERIODS` pro Tržby nedotčen), výchozí filtr Dnes, titulek Přehled na vlastním řádku, odstraněno tlačítko Import DB (handler zůstal). Kasa: odstraněn titulek „Potvrzený zůstatek (Kč)" u uzávěrky.
+- [2026-07-17 23:10] Oprava problikávání (commit `e2c56ce`) nasazena na /testovaci přes `deploy-testovaci.sh`.
+- [2026-07-17 23:05] Oprava problikávání při přechodu mezi kroky POS (`CajovnaPOS.tsx`) — slide animační třída se počítala v `useEffect` (o krok pozadu za renderem), teď se počítá přímo v render těle přes ref. Commit `e2c56ce`.
 - [2026-07-17 22:35] Storno prodeje v POS historii teď vyžaduje potvrzení (Ano/Zpět), dřív se stornovalo hned po kliknutí na tlačítko.
 - [2026-07-17 22:20] Přehled prodejů v POS historii teď u položky zobrazuje i ceníkovou cenu v závorce (nové pole `cenik_cena` z `CENA1`–`CENA4`, backend `listPolozky`) — vidět rozdíl proti skutečně účtované ceně po editaci v confirm kroku.
 - [2026-07-17 22:10] Drobečková navigace (kategorie — země — čaj) v hlavičce POS teď i na krocích balení, množství a ceny položky (dřív jen na výběru čaje).

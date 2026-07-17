@@ -12,15 +12,15 @@ vi.mock('../../api/cajovna', () => ({
 }))
 
 const SALES = [
-  { id: 1, user_id: 1, username: 'terka', total_kc: 260, created_at: '2026-05-28 10:00:00', cancelled_at: null },
-  { id: 2, user_id: 1, username: 'terka', total_kc: 130, created_at: '2026-05-28 11:00:00', cancelled_at: null },
-  { id: 3, user_id: 2, username: 'boss',  total_kc: 500, created_at: '2026-05-28 12:00:00', cancelled_at: null },
+  { id: 1, user_id: 1, username: 'terka', total_kc: 260, created_at: '2026-05-28 10:00:00', cancelled_at: null, cenikova_cena: 260 },
+  { id: 2, user_id: 1, username: 'terka', total_kc: 130, created_at: '2026-05-28 11:00:00', cancelled_at: null, cenikova_cena: 130 },
+  { id: 3, user_id: 2, username: 'boss',  total_kc: 500, created_at: '2026-05-28 12:00:00', cancelled_at: null, cenikova_cena: 500 },
 ]
 
 const SALES_WITH_CANCELLED = [
-  { id: 1, user_id: 1, username: 'terka', total_kc: 260, created_at: '2026-05-28 10:00:00', cancelled_at: null },
-  { id: 2, user_id: 1, username: 'terka', total_kc: 130, created_at: '2026-05-28 11:00:00', cancelled_at: '2026-05-28 13:00:00' },
-  { id: 3, user_id: 2, username: 'boss',  total_kc: 500, created_at: '2026-05-28 12:00:00', cancelled_at: null },
+  { id: 1, user_id: 1, username: 'terka', total_kc: 260, created_at: '2026-05-28 10:00:00', cancelled_at: null, cenikova_cena: 260 },
+  { id: 2, user_id: 1, username: 'terka', total_kc: 130, created_at: '2026-05-28 11:00:00', cancelled_at: '2026-05-28 13:00:00', cenikova_cena: 130 },
+  { id: 3, user_id: 2, username: 'boss',  total_kc: 500, created_at: '2026-05-28 12:00:00', cancelled_at: null, cenikova_cena: 500 },
 ]
 
 beforeEach(() => {
