@@ -3,10 +3,10 @@ import type { TeaRow, CajeBaleni, CajeCartItem, ProduktTyp } from '../types'
 import { getProdukty } from '../api/teas'
 import { createCajovnaSale } from '../api/cajovna'
 
-export type CajeView = 'home' | 'categories' | 'countries' | 'teas' | 'packaging' | 'quantity' | 'checkout'
+export type CajeView = 'home' | 'categories' | 'countries' | 'teas' | 'packaging' | 'quantity' | 'confirm' | 'checkout'
 
 export const CAJE_VIEW_ORDER: CajeView[] = [
-  'home', 'categories', 'countries', 'teas', 'packaging', 'quantity', 'checkout',
+  'home', 'categories', 'countries', 'teas', 'packaging', 'quantity', 'confirm', 'checkout',
 ]
 
 export function buildBaleni(tea: TeaRow): CajeBaleni[] {
@@ -59,6 +59,7 @@ export function useCajovnaPOS() {
   const [selectedTea, setSelectedTea]       = useState<TeaRow | null>(null)
   const [baleniOptions, setBaleniOptions]   = useState<CajeBaleni[]>([])
   const [selectedBaleni, setSelectedBaleni] = useState<CajeBaleni | null>(null)
+  const [pendingKusu, setPendingKusu]       = useState<number | null>(null)
   const [cart, setCart]                     = useState<CajeCartItem[]>([])
   const [lastTotal, setLastTotal]           = useState(0)
   const [loading, setLoading]               = useState(true)
@@ -141,18 +142,25 @@ export function useCajovnaPOS() {
 
   function selectKusu(n: number) {
     if (!selectedTea || !selectedBaleni) return
+    setPendingKusu(n)
+    setView('confirm')
+  }
+
+  function confirmAddToCart(celkCena: number) {
+    if (!selectedTea || !selectedBaleni || pendingKusu === null) return
     const item: CajeCartItem = {
       localId: `${Date.now()}-${Math.random()}`,
       caj: selectedTea,
       produktTyp,
       baleni: selectedBaleni,
-      kusu: n,
-      celkCena: selectedBaleni.cena * n,
+      kusu: pendingKusu,
+      celkCena,
     }
     setCart((prev) => [...prev, item])
     setSelectedTea(null)
     setSelectedBaleni(null)
     setBaleniOptions([])
+    setPendingKusu(null)
     setView('home')
   }
 
@@ -208,16 +216,17 @@ export function useCajovnaPOS() {
     setSelectedTea(null)
     setSelectedBaleni(null)
     setBaleniOptions([])
+    setPendingKusu(null)
     setSearchQuery('')
     setView('home')
   }
 
   return {
     view, produktTyp, categories, teas, baleniOptions, zemeOptions,
-    selectedCategory, selectedZeme, selectedTea, selectedBaleni,
+    selectedCategory, selectedZeme, selectedTea, selectedBaleni, pendingKusu,
     cart, lastTotal, loading, error, checkoutError,
     searchQuery, searchResults, setSearchQuery,
-    selectCategory, selectZeme, selectTea, selectBaleni, selectKusu,
+    selectCategory, selectZeme, selectTea, selectBaleni, selectKusu, confirmAddToCart,
     removeFromCart, goBack, goToCategories,
     startCheckout, confirmCheckout, newSale,
   }

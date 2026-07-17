@@ -1,5 +1,7 @@
 # Log — Cajovna (nejnovější nahoře)
 
+- [2026-07-17 21:35] Přidán krok potvrzení/editace ceny položky v /cajovna pokladně (nový view 'confirm', `CajeConfirmPrice.tsx`), TDD, 258/258 testů zelených. Rozhodnuto: `/pos` + `/pos-desktop` se v budoucnu zruší, zůstane jen `/cajovna` (samostatný task v tasks.md).
+
 Jednořádkové záznamy toho, co se stalo/rozhodlo — timeline napříč sessions.
 Otevřené úkoly viz `tasks.md`, hluboký detail/proč viz `memory/` (mimo repo, jen pro Claude).
 

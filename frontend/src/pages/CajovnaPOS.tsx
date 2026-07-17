@@ -10,6 +10,7 @@ import CajeZeme from '../components/pos-cajovna/CajeZeme'
 import CajeTeas from '../components/pos-cajovna/CajeTeas'
 import CajePackaging from '../components/pos-cajovna/CajePackaging'
 import CajeQuantity from '../components/pos-cajovna/CajeQuantity'
+import CajeConfirmPrice from '../components/pos-cajovna/CajeConfirmPrice'
 import CajeHome from '../components/pos-cajovna/CajeHome'
 import CajeCheckout from '../components/pos-cajovna/CajeCheckout'
 import CajeHistory from '../components/pos-cajovna/CajeHistory'
@@ -23,6 +24,7 @@ const VIEW_TITLES: Record<CajeView, string> = {
   teas:       'Vyberte čaj',
   packaging:  'Typ balení',
   quantity:   'Množství',
+  confirm:    'Cena položky',
   checkout:   'Přehled prodeje',
 }
 
@@ -125,6 +127,14 @@ export default function CajovnaPOS() {
             )}
             {pos.view === 'quantity' && pos.selectedBaleni && (
               <CajeQuantity baleni={pos.selectedBaleni} onSelect={pos.selectKusu} />
+            )}
+            {pos.view === 'confirm' && pos.selectedBaleni && pos.pendingKusu !== null && (
+              <CajeConfirmPrice
+                teaName={pos.selectedTea?.NAZEV ?? ''}
+                baleni={pos.selectedBaleni}
+                kusu={pos.pendingKusu}
+                onConfirm={pos.confirmAddToCart}
+              />
             )}
             {pos.view === 'checkout' && (
               <CajeCheckout

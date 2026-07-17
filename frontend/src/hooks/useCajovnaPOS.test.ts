@@ -174,7 +174,7 @@ describe('useCajovnaPOS', () => {
     expect(result.current.view).toBe('quantity')
   })
 
-  test('selectKusu → přidá do košíku, vrátí na home, resetuje výběr', async () => {
+  test('selectKusu → přechod na confirm view, uloží pendingKusu, do košíku ještě nic nevloží', async () => {
     const { result } = renderHook(() => useCajovnaPOS())
     await waitFor(() => expect(result.current.loading).toBe(false))
     act(() => result.current.selectCategory('BÍLÝ'))
@@ -182,12 +182,30 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row1))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(2))
+    expect(result.current.view).toBe('confirm')
+    expect(result.current.pendingKusu).toBe(2)
+    expect(result.current.cart).toHaveLength(0)
+    expect(result.current.selectedTea).not.toBeNull()
+    expect(result.current.selectedBaleni).not.toBeNull()
+  })
+
+  test('confirmAddToCart → přidá do košíku se zadanou cenou, vrátí na home, resetuje výběr', async () => {
+    const { result } = renderHook(() => useCajovnaPOS())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.selectCategory('BÍLÝ'))
+    act(() => result.current.selectZeme('Čína'))
+    act(() => result.current.selectTea(row1))
+    act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
+    act(() => result.current.selectKusu(2))
+    act(() => result.current.confirmAddToCart(250)) // upravená cena místo dopočtené 260
     expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(1)
-    expect(result.current.cart[0].celkCena).toBe(260) // 130 * 2
+    expect(result.current.cart[0].celkCena).toBe(250)
     expect(result.current.cart[0].kusu).toBe(2)
+    expect(result.current.cart[0].baleni.cena).toBe(130) // katalogová jednotková cena beze změny
     expect(result.current.selectedTea).toBeNull()
     expect(result.current.selectedBaleni).toBeNull()
+    expect(result.current.pendingKusu).toBeNull()
   })
 
   test('removeFromCart odstraní správnou položku', async () => {
@@ -198,6 +216,7 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row1))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(130))
     const id = result.current.cart[0].localId
     act(() => result.current.removeFromCart(id))
     expect(result.current.cart).toHaveLength(0)
@@ -251,6 +270,7 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row1))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(130))
     act(() => result.current.startCheckout())
     await act(async () => { await result.current.confirmCheckout() })
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledOnce()
@@ -271,6 +291,7 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row1))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(130))
     act(() => result.current.startCheckout())
     await act(async () => { await result.current.confirmCheckout() })
     expect(result.current.view).toBe('checkout')
@@ -285,6 +306,7 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row4))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(180))
     act(() => result.current.newSale())
     expect(result.current.view).toBe('home')
     expect(result.current.cart).toHaveLength(0)
@@ -365,12 +387,14 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row1))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(130))
 
     act(() => result.current.goToCategories('nadobi'))
     act(() => result.current.selectCategory('HRNKY'))
     act(() => result.current.selectTea(nadobiRow))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(2))
+    act(() => result.current.confirmAddToCart(500))
 
     expect(result.current.cart).toHaveLength(2)
     expect(result.current.cart[0].produktTyp).toBe('caje')
@@ -385,6 +409,7 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(nadobiRow))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(250))
     act(() => result.current.startCheckout())
     await act(async () => { await result.current.confirmCheckout() })
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
@@ -400,6 +425,7 @@ describe('useCajovnaPOS', () => {
     act(() => result.current.selectTea(row1))
     act(() => result.current.selectBaleni(result.current.baleniOptions[0]))
     act(() => result.current.selectKusu(1))
+    act(() => result.current.confirmAddToCart(130))
     act(() => result.current.startCheckout())
     await act(async () => { await result.current.confirmCheckout(150) })
     expect(cajovnaApi.createCajovnaSale).toHaveBeenCalledWith([
