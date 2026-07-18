@@ -59,6 +59,7 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
   const showNakup = produktTyp === 'caje'
   const priceBorderStyle = showNakup ? undefined : { borderRight: '2px solid #444' }
   const nakupBorderStyle = { borderRight: '2px solid #444' }
+  const poznamkaStyle = { borderRight: '2px solid #444', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis' } as const
 
   return (
     <div className={styles.page}>
@@ -115,7 +116,7 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
         </div>
       )}
 
-      <div className={styles.tableWrapper}>
+      <div className={styles.tableWrapper} style={{ background: '#1a1a1a' }}>
         {loading ? (
           <div className={styles.loading}>Načítám…</div>
         ) : visible.length === 0 ? (
@@ -138,19 +139,19 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
                 <th>Země</th>
                 <th>Aktiv</th>
                 <th>Název</th>
-                <th style={{ borderRight: '2px solid #444' }}>Poznámka</th>
+                <th style={poznamkaStyle}>Poznámka</th>
                 <th>g</th>
                 <th style={priceBorderStyle}>Kč</th>
-                {showNakup && <th style={nakupBorderStyle}>Kč nákup</th>}
+                {showNakup && <th style={nakupBorderStyle}>Nákup</th>}
                 <th>g</th>
                 <th style={priceBorderStyle}>Kč</th>
-                {showNakup && <th style={nakupBorderStyle}>Kč nákup</th>}
+                {showNakup && <th style={nakupBorderStyle}>Nákup</th>}
                 <th>g</th>
                 <th style={priceBorderStyle}>Kč</th>
-                {showNakup && <th style={nakupBorderStyle}>Kč nákup</th>}
+                {showNakup && <th style={nakupBorderStyle}>Nákup</th>}
                 <th>g</th>
                 <th>Kč</th>
-                {showNakup && <th>Kč nákup</th>}
+                {showNakup && <th>Nákup</th>}
               </tr>
             </thead>
             <tbody>
@@ -161,7 +162,7 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
                   <td>{r.ZEME}</td>
                   <td>{r.AKTIV}</td>
                   <td>{r.NAZEV}</td>
-                  <td style={{ borderRight: '2px solid #444' }}>{r.POZNAMKA}</td>
+                  <td style={poznamkaStyle} title={r.POZNAMKA ?? undefined}>{r.POZNAMKA}</td>
                   <td>{fmt(r.MN1)}</td>
                   <td style={priceBorderStyle}>{fmt(r.CENA1)}</td>
                   {showNakup && <td style={nakupBorderStyle}>{fmt(r.NAKUP1)}</td>}

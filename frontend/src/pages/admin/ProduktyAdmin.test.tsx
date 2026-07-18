@@ -49,7 +49,7 @@ describe('ProduktyAdmin', () => {
     expect(await screen.findByText(/tabulka je prázdná/i)).toBeInTheDocument()
   })
 
-  it('zobrazí sloupec "Kč nákup" a hodnoty NAKUP1-4 jen pro produktTyp="caje"', async () => {
+  it('zobrazí sloupec "Nákup" a hodnoty NAKUP1-4 jen pro produktTyp="caje"', async () => {
     const rowWithNakup: TeaRow = {
       ...ROW,
       NAKUP1: 90, NAKUP2: null, NAKUP3: null, NAKUP4: null,
@@ -57,13 +57,13 @@ describe('ProduktyAdmin', () => {
     vi.mocked(teasApi.getProdukty).mockResolvedValue([rowWithNakup])
     renderWithToast(<ProduktyAdmin produktTyp="caje" nadpis="Čaje" />)
     await screen.findByText('Hrnek modrý')
-    expect(screen.getAllByText('Kč nákup')).toHaveLength(4)
+    expect(screen.getAllByText('Nákup')).toHaveLength(4)
     expect(screen.getByText('90')).toBeInTheDocument()
   })
 
-  it('nezobrazí sloupec "Kč nákup" pro nadobi/etnoshop', async () => {
+  it('nezobrazí sloupec "Nákup" pro nadobi/etnoshop', async () => {
     renderWithToast(<ProduktyAdmin produktTyp="nadobi" nadpis="Nádobí" />)
     await screen.findByText('Hrnek modrý')
-    expect(screen.queryByText('Kč nákup')).not.toBeInTheDocument()
+    expect(screen.queryByText('Nákup')).not.toBeInTheDocument()
   })
 })
