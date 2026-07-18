@@ -11,11 +11,14 @@ function ok(string $msg, bool $cond): void {
     else        { echo "FAIL: $msg\n"; $FAIL++; }
 }
 
-function mkRow(string $kod, string $nazev, string $cena1): array {
-    return ['KATEGORIE' => 'BÍLÝ', 'ZEME' => 'ČÍNA', 'AKTIV' => 'x', 'KOD' => $kod,
-            'NAZEV' => $nazev, 'POZNAMKA' => null, 'MN1' => '30', 'CENA1' => $cena1,
-            'MN2' => null, 'CENA2' => null, 'MN3' => null, 'CENA3' => null,
-            'MN4' => null, 'CENA4' => null];
+function mkRow(string $kod, string $nazev, string $cena1, array $nakup = []): array {
+    return array_merge([
+        'KATEGORIE' => 'BÍLÝ', 'ZEME' => 'ČÍNA', 'AKTIV' => 'x', 'KOD' => $kod,
+        'NAZEV' => $nazev, 'POZNAMKA' => null, 'MN1' => '30', 'CENA1' => $cena1,
+        'MN2' => null, 'CENA2' => null, 'MN3' => null, 'CENA3' => null,
+        'MN4' => null, 'CENA4' => null,
+        'NAKUP1' => null, 'NAKUP2' => null, 'NAKUP3' => null, 'NAKUP4' => null,
+    ], $nakup);
 }
 
 $pdo = getPDO();
@@ -80,6 +83,23 @@ try {
 }
 $cnt = (int) $pdo->query("SELECT COUNT(*) FROM `01_caje` WHERE V_SHEETU = 1")->fetchColumn();
 ok('prázdný sheet nevyřadil žádné položky', $cnt === 2);
+
+// --- 5. nákupní ceny (NAKUP1-4) se uloží a čtou zpět ---
+$pdo->exec('DELETE FROM `01_caje`');
+$res = sheetsUpsertCaje($pdo, [
+    mkRow('2608-C-BILY-TAWN-03', 'Da Bai', '140', [
+        'NAKUP1' => '80', 'NAKUP2' => '400', 'NAKUP3' => '950', 'NAKUP4' => '60',
+    ]),
+]);
+ok('5. sync: synced = 1', $res['synced'] === 1);
+
+$rowNakup = $pdo->query(
+    "SELECT NAKUP1, NAKUP2, NAKUP3, NAKUP4 FROM `01_caje` WHERE KOD = '2608-C-BILY-TAWN-03'"
+)->fetch(PDO::FETCH_ASSOC);
+ok('5. sync: NAKUP1 = 80',  (int) $rowNakup['NAKUP1'] === 80);
+ok('5. sync: NAKUP2 = 400', (int) $rowNakup['NAKUP2'] === 400);
+ok('5. sync: NAKUP3 = 950', (int) $rowNakup['NAKUP3'] === 950);
+ok('5. sync: NAKUP4 = 60',  (int) $rowNakup['NAKUP4'] === 60);
 
 echo "\n$PASS passed, $FAIL failed\n";
 exit($FAIL > 0 ? 1 : 0);

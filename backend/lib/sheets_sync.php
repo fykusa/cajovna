@@ -8,6 +8,26 @@ const SHEETS_COL_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 14, 15, 18, 19];
 const SHEETS_COL_NAMES   = ['KATEGORIE', 'ZEME', 'AKTIV', 'KOD', 'NAZEV', 'POZNAMKA',
                              'MN1', 'CENA1', 'MN2', 'CENA2', 'MN3', 'CENA3', 'MN4', 'CENA4'];
 
+// Nákupní ceny (jen 01_caje) — sloupce W,X,Y,Z. Sloupec V (nákupní množství,
+// index 21) se neukládá; U (index 20) je mezera stejně jako u ostatních bloků.
+const CAJE_EXTRA_COL_INDICES = [22, 23, 24, 25];
+const CAJE_EXTRA_COL_NAMES   = ['NAKUP1', 'NAKUP2', 'NAKUP3', 'NAKUP4'];
+
+/**
+ * Vrátí [colIndices, colNames] pro danou tabulku. Základních 14 sloupců je
+ * shodných napříč 01_caje/02_nadobi/03_etnoshop, nákupní ceny (W-Z) existují
+ * jen ve sloupcích 01_caje.
+ */
+function columnsForTable(string $tableName): array {
+    $indices = SHEETS_COL_INDICES;
+    $names   = SHEETS_COL_NAMES;
+    if ($tableName === '01_caje') {
+        $indices = array_merge($indices, CAJE_EXTRA_COL_INDICES);
+        $names   = array_merge($names, CAJE_EXTRA_COL_NAMES);
+    }
+    return [$indices, $names];
+}
+
 /**
  * Stáhne CSV ze zadané URL. Při chybě hodí RuntimeException.
  */
@@ -34,10 +54,11 @@ function sheetsSyncProdukty(PDO $pdo, string $csvUrl, string $tableName): array 
     $raw = sheetsFetchCsv($csvUrl);
     $utf = dbtToUtf8($raw);
 
-    [$rows] = parseCajeRows($utf);
+    [$colIndices, $colNames] = columnsForTable($tableName);
+    [$rows] = parseCajeRows($utf, $colIndices, $colNames);
     assertUniqueKod($rows);
 
-    return sheetsUpsertProdukty($pdo, $rows, $tableName);
+    return sheetsUpsertProdukty($pdo, $rows, $tableName, $colNames);
 }
 
 /** Zpětně kompatibilní wrapper pro čaje. */
@@ -46,13 +67,14 @@ function sheetsSyncCaje(PDO $pdo, string $csvUrl): array {
 }
 
 /**
- * Parsuje CSV string záložky CAJE.
+ * Parsuje CSV string produktové záložky (CAJE/NADOBI/ETNOSHOP).
  * Řádek 1 = zobrazovací hlavička (přeskočit).
  * Řádek 2 = DB názvy sloupců (přeskočit).
  * Řádky 3+ = data.
- * Vrací [rows] kde každý row je asociativní pole dle SHEETS_COL_NAMES.
+ * $colIndices/$colNames si musí pozičně odpovídat (viz columnsForTable()).
+ * Vrací [rows] kde každý row je asociativní pole dle $colNames.
  */
-function parseCajeRows(string $csvUtf8): array {
+function parseCajeRows(string $csvUtf8, array $colIndices, array $colNames): array {
     $fh = fopen('php://temp', 'r+');
     fwrite($fh, $csvUtf8);
     rewind($fh);
@@ -72,8 +94,8 @@ function parseCajeRows(string $csvUtf8): array {
         if ($line === [null])        continue; // prázdný řádek
 
         $row = [];
-        foreach (SHEETS_COL_INDICES as $i => $colIdx) {
-            $colName = SHEETS_COL_NAMES[$i];
+        foreach ($colIndices as $i => $colIdx) {
+            $colName = $colNames[$i];
             $val     = isset($line[$colIdx]) ? trim($line[$colIdx]) : '';
             $row[$colName] = $val === '' ? null : $val;
         }
@@ -110,7 +132,7 @@ function assertUniqueKod(array $rows): void {
  * Nikdy nemaže.
  * Vrací ['synced' => počet řádků v sheetu, 'vyrazeno' => počet V_SHEETU = 0 po syncu].
  */
-function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName): array {
+function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName, array $colNames): array {
     if (!in_array($tableName, PRODUKT_TABULKY, true)) {
         throw new InvalidArgumentException('Neznámá tabulka pro sync: ' . $tableName);
     }
@@ -122,7 +144,7 @@ function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName): array {
     try {
         $pdo->exec("UPDATE `$tableName` SET V_SHEETU = 0");
 
-        $cols     = SHEETS_COL_NAMES;
+        $cols     = $colNames;
         $dataCols = array_values(array_diff($cols, ['KOD']));
         $sql = "INSERT INTO `$tableName` (`" . implode('`,`', $cols) . '`, `V_SHEETU`)'
              . ' VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ', 1)'
@@ -147,5 +169,5 @@ function sheetsUpsertProdukty(PDO $pdo, array $rows, string $tableName): array {
 
 /** Zpětně kompatibilní wrapper pro čaje. */
 function sheetsUpsertCaje(PDO $pdo, array $rows): array {
-    return sheetsUpsertProdukty($pdo, $rows, '01_caje');
+    return sheetsUpsertProdukty($pdo, $rows, '01_caje', columnsForTable('01_caje')[1]);
 }

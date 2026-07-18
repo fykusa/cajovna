@@ -8,20 +8,21 @@ function ok(string $msg, bool $cond): void {
     else        { echo "FAIL: $msg\n"; $FAIL++; }
 }
 
-// Sloupce A-T (0-based): bereme 0,1,2,3,4,5,6,7,10,11,14,15,18,19
-function makeCsvLine(array $vals, int $totalCols = 20): string {
+// Sloupce A-Z (0-based, 26 sloupců). CAJE bere 0,1,2,3,4,5,6,7,10,11,14,15,18,19
+// + nákupní ceny 22,23,24,25 (W-Z). NADOBI/ETNOSHOP berou jen prvních 14.
+function makeCsvLine(array $vals, int $totalCols = 26): string {
     $padded = array_pad($vals, $totalCols, '');
     return implode(',', array_map(fn($v) => '"' . str_replace('"', '""', $v) . '"', $padded));
 }
 
-$header1 = makeCsvLine(['','','','','','','Standart','','','','Větší','','','','Největší','','','','V čajovně','']);
-$header2 = makeCsvLine(['KATEGORIE','ZEME','AKTIV','KOD','NAZEV','POZNAMKA','MN1','CENA1','','','MN2','CENA2','','','MN3','CENA3','','','MN4','CENA4']);
+$header1 = makeCsvLine(['','','','','','','Standart','','','','Větší','','','','Největší','','','','V čajovně','','','','Nákup std','Nákup větší','Nákup největší','Nákup čajovna']);
+$header2 = makeCsvLine(['KATEGORIE','ZEME','AKTIV','KOD','NAZEV','POZNAMKA','MN1','CENA1','','','MN2','CENA2','','','MN3','CENA3','','','MN4','CENA4','','','NAKUP1','NAKUP2','NAKUP3','NAKUP4']);
 
-// Řádek 3: plný řádek
-$data1 = makeCsvLine(['BÍLÝ','ČÍNA','x','2606-C-BILY-TAWN-01','Show Mee','','30','130','','','200','700','','','500','1680','','','7','98']);
+// Řádek 3: plný řádek, vč. nákupních cen W-Z
+$data1 = makeCsvLine(['BÍLÝ','ČÍNA','x','2606-C-BILY-TAWN-01','Show Mee','','30','130','','','200','700','','','500','1680','','','7','98','','','90','480','1150','65']);
 // Řádek 4: prázdný → přeskočit
 $data2 = makeCsvLine([]);
-// Řádek 5: aktivní=prázdné (neaktivní)
+// Řádek 5: aktivní=prázdné (neaktivní), bez nákupních cen
 $data3 = makeCsvLine(['ZELENÉ','JAPONSKO','','2606-C-ZELE-JAPO-01','Gyokuro','Poznámka test','40','200','','','200','800','','','','','','','20','150']);
 // Řádek 6: bez KATEGORIE → přeskočit
 $data4 = makeCsvLine(['','','x','2606-C-XXXX-XXXX-01','Bez kategorie','','30','130']);
@@ -30,7 +31,20 @@ $data5 = makeCsvLine(['BÍLÝ','ČÍNA','x','','Bez kódu','','30','130']);
 
 $csv = implode("\n", [$header1, $header2, $data1, $data2, $data3, $data4, $data5]);
 
-[$rows] = parseCajeRows($csv);
+// --- columnsForTable ---
+[$colIndices, $colNames] = columnsForTable('01_caje');
+ok('columnsForTable(01_caje) vrací 18 sloupců (14 základních + 4 nákupní)', count($colNames) === 18);
+ok('columnsForTable(01_caje) obsahuje NAKUP1-4 na konci',
+   array_slice($colNames, -4) === ['NAKUP1', 'NAKUP2', 'NAKUP3', 'NAKUP4']);
+ok('columnsForTable(01_caje) indexy W-Z = 22,23,24,25',
+   array_slice($colIndices, -4) === [22, 23, 24, 25]);
+
+[$colIndicesNadobi, $colNamesNadobi] = columnsForTable('02_nadobi');
+ok('columnsForTable(02_nadobi) vrací jen 14 základních sloupců (beze změny)', count($colNamesNadobi) === 14);
+ok('columnsForTable(02_nadobi) neobsahuje NAKUP sloupce', !in_array('NAKUP1', $colNamesNadobi, true));
+
+// --- parseCajeRows s nákupními cenami ---
+[$rows] = parseCajeRows($csv, $colIndices, $colNames);
 
 ok('parsuje 2 řádky (bez NAZEV/KATEGORIE/KOD přeskočeny)', count($rows) === 2);
 
@@ -49,6 +63,10 @@ ok('MN3 = 500 (sloupec O)',            $r1['MN3'] === '500');
 ok('CENA3 = 1680 (sloupec P)',         $r1['CENA3'] === '1680');
 ok('MN4 = 7 (sloupec S)',              $r1['MN4'] === '7');
 ok('CENA4 = 98 (sloupec T)',           $r1['CENA4'] === '98');
+ok('NAKUP1 = 90 (sloupec W)',          $r1['NAKUP1'] === '90');
+ok('NAKUP2 = 480 (sloupec X)',         $r1['NAKUP2'] === '480');
+ok('NAKUP3 = 1150 (sloupec Y)',        $r1['NAKUP3'] === '1150');
+ok('NAKUP4 = 65 (sloupec Z)',          $r1['NAKUP4'] === '65');
 
 $r2 = $rows[1];
 ok('řádek 2 KOD = 2606-C-ZELE-JAPO-01',        $r2['KOD'] === '2606-C-ZELE-JAPO-01');
@@ -56,6 +74,7 @@ ok('řádek 2 NAZEV = Gyokuro',                  $r2['NAZEV'] === 'Gyokuro');
 ok('řádek 2 AKTIV = null (neaktivní)',         $r2['AKTIV'] === null);
 ok('řádek 2 POZNAMKA = Poznámka test',         $r2['POZNAMKA'] === 'Poznámka test');
 ok('řádek 2 MN3 = null (prázdné)',             $r2['MN3'] === null);
+ok('řádek 2 NAKUP1 = null (chybí ve zdroji)',  $r2['NAKUP1'] === null);
 
 // --- assertUniqueKod ---
 try {
