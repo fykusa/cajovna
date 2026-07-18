@@ -49,6 +49,15 @@ ok('fetchCenaRow vrací NAKUP1', $row !== null && (int) $row['NAKUP1'] === 80);
 $missing = fetchCenaRow($pdo, '01_caje', 'NEEXISTUJICI-KOD-XYZ');
 ok('fetchCenaRow vrací null pro neexistující KOD', $missing === null);
 
+// --- fetchCenaRow validation ---
+$invalidTableThrown = false;
+try {
+    fetchCenaRow($pdo, '99_neexistujici', 'TEST-KOD');
+} catch (InvalidArgumentException $e) {
+    $invalidTableThrown = true;
+}
+ok('fetchCenaRow hodí InvalidArgumentException pro neznámou tabulku', $invalidTableThrown);
+
 $pdo->exec("DELETE FROM `01_caje` WHERE KOD = 'TEST-PRODEJ-SNAPSHOT-01'");
 
 echo "\n$PASS passed, $FAIL failed\n";

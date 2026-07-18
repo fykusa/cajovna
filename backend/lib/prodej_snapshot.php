@@ -22,6 +22,9 @@ function cenaColumnsForTable(string $tableName): string {
  * KOD v tabulce neexistuje.
  */
 function fetchCenaRow(PDO $pdo, string $tableName, string $kod): ?array {
+    if (!in_array($tableName, PRODUKT_TABULKY, true)) {
+        throw new InvalidArgumentException('Neznámá tabulka pro ceny: ' . $tableName);
+    }
     $stmt = $pdo->prepare('SELECT ' . cenaColumnsForTable($tableName) . " FROM `$tableName` WHERE KOD = ?");
     $stmt->execute([$kod]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
