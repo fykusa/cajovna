@@ -1,5 +1,6 @@
 # Tasks — Cajovna (čekající)
 
+- [ ] [2026-07-18] **Deploy nákupních cen čaje (NAKUP1-4) na /testovaci**: Spustit `db/migration_2026-07-18_nakupni_ceny_caje.sql` přes phpMyAdmin Import a nahrát nový backend (`backend/lib/sheets_sync.php`) + frontend build. **Pořadí je závazné: migrace MUSÍ proběhnout dřív než nový PHP kód** — jinak první sync čajů po nasazení skončí chybou „Unknown column NAKUP1" a celý sync selže (transakce se rollbackne, 0 řádků synced). Zjištěno ve final review branch `2026-07-18-nakupni-ceny-caje` (subagent-driven-development, 3 tasky, žádný Critical/Important kódový nález).
 - [ ] [2026-07-08] **Skutečné překlopení na ostrou produkci (kořen domény)**: `/testovaci/` se prozatím bere jako produkce. Až přijde na řadu opravdový root `taocajovna.cz`: ověřit `.htaccess` (`CGIPassAuth On`, plochá struktura — viz [[production-deploy]]), zopakovat migrace (`db/migration_2026-07-03_kod_polozky.sql`, `db/migration_2026-07-08_nadobi_etnoshop.sql` — DB je sdílená s testovaci, možná už není potřeba, ověřit), upravit `deploy/deploy-testovaci.sh` (nebo vytvořit `deploy-produkce.sh`) pro produkční FTP cestu, nahrát `config.php`/`config/sheets.php` s produkčními hodnotami.
 
 ## Hotovo

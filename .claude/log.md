@@ -1,5 +1,7 @@
 # Log — Cajovna (nejnovější nahoře)
 
+- [2026-07-18 10:22] Nákupní ceny čaje (NAKUP1-4) hotové na masteru (commity `d5156e7`/`98523b1`/`9503ba8`) — DB migrace, per-tabulková sync struktura (jen 01_caje dostává sloupce W-Z), zobrazení "Kč nákup" v ProduktyAdmin. Subagent-driven-development, final review "Ready to merge: Yes". Deploy na /testovaci zatím neproběhl, viz `tasks.md` (pořadí migrace→kód je závazné).
+- [2026-07-18 00:35] Commit `3da5ae2` pushnut a nasazen na /testovaci (frontend build + backend cajovna.php/kasa.php).
 - [2026-07-18 00:25] Admin Kasa + Dashboard přepracovány: sekce „Dnešní stav" má nové dlaždice „Dnes prodáno (ceník. ceny)" a přejmenované „Potvrzená tržba"/„Očekávaný zůstatek", „Dýžko / Manko" teď = Potvrzená tržba − ceníková cena (dřív rozdíl confirmed/calculated balance z uzávěrky), zobrazuje se vždy. Dashboard „Dýžko" sjednoceno se stejnou logikou (nový sloupec `cenikova_cena` v `listProdeje`), zrušena závislost na `getKasaClosings`. Dashboard: nové filtry období Dnes/Tento týden (jen tam, sdílený `PERIODS` pro Tržby nedotčen), výchozí filtr Dnes, titulek Přehled na vlastním řádku, odstraněno tlačítko Import DB (handler zůstal). Kasa: odstraněn titulek „Potvrzený zůstatek (Kč)" u uzávěrky.
 - [2026-07-17 23:10] Oprava problikávání (commit `e2c56ce`) nasazena na /testovaci přes `deploy-testovaci.sh`.
 - [2026-07-17 23:05] Oprava problikávání při přechodu mezi kroky POS (`CajovnaPOS.tsx`) — slide animační třída se počítala v `useEffect` (o krok pozadu za renderem), teď se počítá přímo v render těle přes ref. Commit `e2c56ce`.
