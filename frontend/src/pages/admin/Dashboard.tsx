@@ -131,6 +131,7 @@ export default function AdminDashboard() {
   const total = activeSales.reduce((s, sale) => s + sale.total_kc, 0)
   const cenikSoucet = activeSales.reduce((s, sale) => s + sale.cenikova_cena, 0)
   const dyzko = total - cenikSoucet
+  const zisk = activeSales.reduce((s, sale) => s + sale.zisk, 0)
   const selectedSale = visibleSales.find((s) => s.id === selectedId) ?? null
   const chartData = bucketRevenue(visibleSales, from, to)
 
@@ -281,6 +282,10 @@ export default function AdminDashboard() {
             <div className={styles.stat}>
               <div className={styles.statLabel}>Dýžko</div>
               <div className={styles.statValue}>{Math.round(dyzko).toLocaleString('cs-CZ')} Kč</div>
+            </div>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>Zisk</div>
+              <div className={styles.statValue}>{Math.round(zisk).toLocaleString('cs-CZ')} Kč</div>
             </div>
           </div>
 

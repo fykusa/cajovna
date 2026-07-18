@@ -60,6 +60,7 @@ export default function Sales() {
   const activeSales = sales.filter((s) => !s.cancelled_at)
 
   const total = activeSales.reduce((s, sale) => s + sale.total_kc, 0)
+  const zisk = activeSales.reduce((s, sale) => s + sale.zisk, 0)
 
   const perUser: Record<string, number> = {}
   activeSales.forEach((s) => {
@@ -158,6 +159,10 @@ export default function Sales() {
             <div className={styles.stat}>
               <div className={styles.statLabel}>Počet prodejů</div>
               <div className={styles.statValue}>{activeSales.length}</div>
+            </div>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>Zisk</div>
+              <div className={styles.statValue}>{fmtKc(zisk)}</div>
             </div>
           </div>
 

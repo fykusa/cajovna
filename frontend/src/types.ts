@@ -177,6 +177,7 @@ export interface CajovnaProdej {
   user_id: number
   cancelled_at: string | null
   cenikova_cena: number
+  zisk: number
 }
 
 export interface CajePolozkaSale {
