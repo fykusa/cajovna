@@ -28,8 +28,10 @@ $data3 = makeCsvLine(['ZELENÉ','JAPONSKO','','2606-C-ZELE-JAPO-01','Gyokuro','P
 $data4 = makeCsvLine(['','','x','2606-C-XXXX-XXXX-01','Bez kategorie','','30','130']);
 // Řádek 7: bez KOD → přeskočit
 $data5 = makeCsvLine(['BÍLÝ','ČÍNA','x','','Bez kódu','','30','130']);
+// Řádek 8: chyba vzorce (#VALUE!/#DIV/0!) v číselných sloupcích → NULL, řádek se NEzahazuje
+$data6 = makeCsvLine(['ČERNÝ','INDIE','x','2608-C-CERN-INDI-01','Assam TGFOP','','30','130','','','200','700','','','500','#DIV/0!','','','7','98','','','50','#VALUE!','#DIV/0!','120']);
 
-$csv = implode("\n", [$header1, $header2, $data1, $data2, $data3, $data4, $data5]);
+$csv = implode("\n", [$header1, $header2, $data1, $data2, $data3, $data4, $data5, $data6]);
 
 // --- columnsForTable ---
 [$colIndices, $colNames] = columnsForTable('01_caje');
@@ -46,7 +48,7 @@ ok('columnsForTable(02_nadobi) neobsahuje NAKUP sloupce', !in_array('NAKUP1', $c
 // --- parseCajeRows s nákupními cenami ---
 [$rows] = parseCajeRows($csv, $colIndices, $colNames);
 
-ok('parsuje 2 řádky (bez NAZEV/KATEGORIE/KOD přeskočeny)', count($rows) === 2);
+ok('parsuje 3 řádky (bez NAZEV/KATEGORIE/KOD přeskočeny, chyba vzorce řádek nezahazuje)', count($rows) === 3);
 
 $r1 = $rows[0];
 ok('KATEGORIE = BÍLÝ',                 $r1['KATEGORIE'] === 'BÍLÝ');
@@ -75,6 +77,15 @@ ok('řádek 2 AKTIV = null (neaktivní)',         $r2['AKTIV'] === null);
 ok('řádek 2 POZNAMKA = Poznámka test',         $r2['POZNAMKA'] === 'Poznámka test');
 ok('řádek 2 MN3 = null (prázdné)',             $r2['MN3'] === null);
 ok('řádek 2 NAKUP1 = null (chybí ve zdroji)',  $r2['NAKUP1'] === null);
+
+$r3 = $rows[2];
+ok('řádek 3 KOD = 2608-C-CERN-INDI-01',         $r3['KOD'] === '2608-C-CERN-INDI-01');
+ok('řádek 3 MN3 = 500 (validní, nedotčeno)',    $r3['MN3'] === '500');
+ok('řádek 3 CENA3 = null (#DIV/0! → NULL)',     $r3['CENA3'] === null);
+ok('řádek 3 NAKUP1 = 50 (validní, nedotčeno)',  $r3['NAKUP1'] === '50');
+ok('řádek 3 NAKUP2 = null (#VALUE! → NULL)',    $r3['NAKUP2'] === null);
+ok('řádek 3 NAKUP3 = null (#DIV/0! → NULL)',    $r3['NAKUP3'] === null);
+ok('řádek 3 NAKUP4 = 120 (validní, nedotčeno)', $r3['NAKUP4'] === '120');
 
 // --- assertUniqueKod ---
 try {

@@ -13,6 +13,13 @@ const SHEETS_COL_NAMES   = ['KATEGORIE', 'ZEME', 'AKTIV', 'KOD', 'NAZEV', 'POZNA
 const CAJE_EXTRA_COL_INDICES = [22, 23, 24, 25];
 const CAJE_EXTRA_COL_NAMES   = ['NAKUP1', 'NAKUP2', 'NAKUP3', 'NAKUP4'];
 
+// Sloupce, které musí obsahovat číslo. Google Sheets vzorce občas vrací
+// chybu (#VALUE!, #DIV/0!) místo hodnoty — bereme to jako chybějící údaj
+// (NULL), ne jako platnou hodnotu (jinak striktní MySQL INT/DECIMAL sloupec
+// shodí celou sync transakci na jediné špatné buňce).
+const NUMERIC_COL_NAMES = ['MN1', 'CENA1', 'MN2', 'CENA2', 'MN3', 'CENA3', 'MN4', 'CENA4',
+                            'NAKUP1', 'NAKUP2', 'NAKUP3', 'NAKUP4'];
+
 /**
  * Vrátí [colIndices, colNames] pro danou tabulku. Základních 14 sloupců je
  * shodných napříč 01_caje/02_nadobi/03_etnoshop, nákupní ceny (W-Z) existují
@@ -97,6 +104,9 @@ function parseCajeRows(string $csvUtf8, array $colIndices, array $colNames): arr
         foreach ($colIndices as $i => $colIdx) {
             $colName = $colNames[$i];
             $val     = isset($line[$colIdx]) ? trim($line[$colIdx]) : '';
+            if ($val !== '' && in_array($colName, NUMERIC_COL_NAMES, true) && !is_numeric($val)) {
+                $val = '';
+            }
             $row[$colName] = $val === '' ? null : $val;
         }
         // Přeskočit řádky bez kategorie nebo bez názvu
