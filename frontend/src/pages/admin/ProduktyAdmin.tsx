@@ -55,7 +55,10 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
     .filter((r) => kategorieFilter === null || r.KATEGORIE === kategorieFilter)
     .filter((r) => nameQuery === '' || (r.NAZEV ?? '').toLowerCase().includes(nameQuery))
 
-  const fmt = (v: number | null) => (v == null ? '' : String(v))
+  const fmt = (v: number | null | undefined) => (v == null ? '' : String(v))
+  const showNakup = produktTyp === 'caje'
+  const priceBorderStyle = showNakup ? undefined : { borderRight: '2px solid #444' }
+  const nakupBorderStyle = { borderRight: '2px solid #444' }
 
   return (
     <div className={styles.page}>
@@ -124,10 +127,10 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
             <thead>
               <tr>
                 <th colSpan={6} style={{ borderRight: '2px solid #444' }}>Základní info</th>
-                <th colSpan={2} style={{ borderRight: '2px solid #444' }}>Standard</th>
-                <th colSpan={2} style={{ borderRight: '2px solid #444' }}>Větší</th>
-                <th colSpan={2} style={{ borderRight: '2px solid #444' }}>Největší</th>
-                <th colSpan={2}>Čajovna</th>
+                <th colSpan={showNakup ? 3 : 2} style={{ borderRight: '2px solid #444' }}>Standard</th>
+                <th colSpan={showNakup ? 3 : 2} style={{ borderRight: '2px solid #444' }}>Větší</th>
+                <th colSpan={showNakup ? 3 : 2} style={{ borderRight: '2px solid #444' }}>Největší</th>
+                <th colSpan={showNakup ? 3 : 2}>Čajovna</th>
               </tr>
               <tr>
                 <th>Kód</th>
@@ -137,13 +140,17 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
                 <th>Název</th>
                 <th style={{ borderRight: '2px solid #444' }}>Poznámka</th>
                 <th>g</th>
-                <th style={{ borderRight: '2px solid #444' }}>Kč</th>
+                <th style={priceBorderStyle}>Kč</th>
+                {showNakup && <th style={nakupBorderStyle}>Kč nákup</th>}
                 <th>g</th>
-                <th style={{ borderRight: '2px solid #444' }}>Kč</th>
+                <th style={priceBorderStyle}>Kč</th>
+                {showNakup && <th style={nakupBorderStyle}>Kč nákup</th>}
                 <th>g</th>
-                <th style={{ borderRight: '2px solid #444' }}>Kč</th>
+                <th style={priceBorderStyle}>Kč</th>
+                {showNakup && <th style={nakupBorderStyle}>Kč nákup</th>}
                 <th>g</th>
                 <th>Kč</th>
+                {showNakup && <th>Kč nákup</th>}
               </tr>
             </thead>
             <tbody>
@@ -156,13 +163,17 @@ export default function ProduktyAdmin({ produktTyp, nadpis }: Props) {
                   <td>{r.NAZEV}</td>
                   <td style={{ borderRight: '2px solid #444' }}>{r.POZNAMKA}</td>
                   <td>{fmt(r.MN1)}</td>
-                  <td style={{ borderRight: '2px solid #444' }}>{fmt(r.CENA1)}</td>
+                  <td style={priceBorderStyle}>{fmt(r.CENA1)}</td>
+                  {showNakup && <td style={nakupBorderStyle}>{fmt(r.NAKUP1)}</td>}
                   <td>{fmt(r.MN2)}</td>
-                  <td style={{ borderRight: '2px solid #444' }}>{fmt(r.CENA2)}</td>
+                  <td style={priceBorderStyle}>{fmt(r.CENA2)}</td>
+                  {showNakup && <td style={nakupBorderStyle}>{fmt(r.NAKUP2)}</td>}
                   <td>{fmt(r.MN3)}</td>
-                  <td style={{ borderRight: '2px solid #444' }}>{fmt(r.CENA3)}</td>
+                  <td style={priceBorderStyle}>{fmt(r.CENA3)}</td>
+                  {showNakup && <td style={nakupBorderStyle}>{fmt(r.NAKUP3)}</td>}
                   <td>{fmt(r.MN4)}</td>
                   <td>{fmt(r.CENA4)}</td>
+                  {showNakup && <td>{fmt(r.NAKUP4)}</td>}
                 </tr>
               ))}
             </tbody>

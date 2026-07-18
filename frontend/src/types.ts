@@ -81,6 +81,11 @@ export interface TeaRow {
   CENA3: number | null
   MN4: number | null
   CENA4: number | null
+  /** Nákupní ceny — jen u řádků z 01_caje, chybí u nadobi/etnoshop. */
+  NAKUP1?: number | null
+  NAKUP2?: number | null
+  NAKUP3?: number | null
+  NAKUP4?: number | null
 }
 
 export type ItemType = 'std' | 'pkg1' | 'pkg2' | 'custom'
