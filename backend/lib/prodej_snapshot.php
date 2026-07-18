@@ -42,3 +42,15 @@ function pickBaleniCeny(array $row, int $baleni): array {
         'nakup' => isset($row["NAKUP$baleni"]) ? (int) $row["NAKUP$baleni"] : null,
     ];
 }
+
+/**
+ * SQL fragment (bez aliasu) počítající zisk jednoho prodeje ze zamrazených
+ * cen položek. Položky s neznámou nákupní cenou (celk_cena_nakup IS NULL —
+ * nádobí/etnoshop, nebo prodeje před nasazením zamrazování) se do součtu
+ * nezapočítávají vůbec, ne jako nulová marže. Očekává alias `p` pro
+ * `00_prodej` v obklopujícím dotazu.
+ */
+const PRODEJ_ZISK_SUBQUERY = "(SELECT COALESCE(SUM(
+        CASE WHEN pp.celk_cena_nakup IS NOT NULL
+             THEN pp.celk_cena_cenik - pp.celk_cena_nakup ELSE 0 END
+    ), 0) FROM `00_prodej_polozky` pp WHERE pp.prodej_id = p.id)";

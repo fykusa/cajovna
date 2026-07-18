@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../middleware.php';
 require_once __DIR__ . '/../lib/produkt_typy.php';
+require_once __DIR__ . '/../lib/prodej_snapshot.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
@@ -52,7 +53,8 @@ function createProdej(array $auth): void {
 
     $pdo = getPDO();
 
-    foreach ($polozky as $p) {
+    $snapshots = [];
+    foreach ($polozky as $i => $p) {
         if (!isset($p['caje_kod'], $p['produkt_typ'], $p['baleni'], $p['kusu'], $p['jedn_cena'], $p['celk_cena'])
             || !is_string($p['caje_kod']) || trim($p['caje_kod']) === ''
             || !is_string($p['produkt_typ']) || !isset(PRODUKT_TABULKY[$p['produkt_typ']])) {
@@ -66,13 +68,18 @@ function createProdej(array $auth): void {
             return;
         }
         $table = PRODUKT_TABULKY[$p['produkt_typ']];
-        $check = $pdo->prepare("SELECT 1 FROM `$table` WHERE KOD = ?");
-        $check->execute([trim($p['caje_kod'])]);
-        if ($check->fetchColumn() === false) {
+        $row   = fetchCenaRow($pdo, $table, trim($p['caje_kod']));
+        if ($row === null) {
             http_response_code(400);
             echo json_encode(['error' => 'Neznámý kód položky.']);
             return;
         }
+        $ceny = pickBaleniCeny($row, (int) $p['baleni']);
+        $kusu = (int) $p['kusu'];
+        $snapshots[$i] = [
+            'cenik' => $ceny['cenik'] !== null ? $ceny['cenik'] * $kusu : null,
+            'nakup' => $ceny['nakup'] !== null ? $ceny['nakup'] * $kusu : null,
+        ];
     }
 
     $total = $celkemZaplaceno !== null ? (int) round((float) $celkemZaplaceno) : (int) array_sum(array_column($polozky, 'celk_cena'));
@@ -83,10 +90,11 @@ function createProdej(array $auth): void {
         $prodejId = (int) $pdo->lastInsertId();
 
         $ins = $pdo->prepare(
-            'INSERT INTO `00_prodej_polozky` (prodej_id, caje_kod, PRODUKT_TYP, baleni, kusu, jedn_cena, celk_cena)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO `00_prodej_polozky`
+                (prodej_id, caje_kod, PRODUKT_TYP, baleni, kusu, jedn_cena, celk_cena, celk_cena_cenik, celk_cena_nakup)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
-        foreach ($polozky as $p) {
+        foreach ($polozky as $i => $p) {
             $ins->execute([
                 $prodejId,
                 trim($p['caje_kod']),
@@ -95,6 +103,8 @@ function createProdej(array $auth): void {
                 (int) $p['kusu'],
                 (int) $p['jedn_cena'],
                 (int) $p['celk_cena'],
+                $snapshots[$i]['cenik'],
+                $snapshots[$i]['nakup'],
             ]);
         }
         $pdo->commit();
@@ -153,7 +163,8 @@ function listProdeje(): void {
                     LEFT JOIN `01_caje` c     ON c.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'caje\'
                     LEFT JOIN `02_nadobi` n   ON n.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'nadobi\'
                     LEFT JOIN `03_etnoshop` e ON e.KOD = pp.caje_kod AND pp.PRODUKT_TYP = \'etnoshop\'
-                    WHERE pp.prodej_id = p.id) AS cenikova_cena
+                    WHERE pp.prodej_id = p.id) AS cenikova_cena,
+                   ' . PRODEJ_ZISK_SUBQUERY . ' AS zisk
             FROM `00_prodej` p
             JOIN users u ON u.id = p.user_id'
          . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
@@ -163,6 +174,7 @@ function listProdeje(): void {
     $stmt->execute($params);
     $rows = array_map(function ($row) {
         $row['cenikova_cena'] = (float) $row['cenikova_cena'];
+        $row['zisk']          = (float) $row['zisk'];
         return $row;
     }, $stmt->fetchAll(PDO::FETCH_ASSOC));
     echo json_encode($rows);
